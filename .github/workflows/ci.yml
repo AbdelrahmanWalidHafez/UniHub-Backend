@@ -32,5 +32,10 @@ jobs:
             ${{ runner.os }}-maven-
 
 
-      - name: Build with Maven and run tests
+      - name: Build Config Server and run tests
+        working-directory: config/config
+        run: mvn clean verify
+
+      - name: Build Eureka Server and run tests
+        working-directory: eureka/eureka
         run: mvn clean verify
