@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APPLICATION_NAME: DummyApp
-      GIT_URI: https://github.com/example/repo.git
+      GIT_URI: https://github.com/AbdelrahmanWalidHafez/UniHub-config.git
       GITHUB_USERNAME: dummyuser
       GITHUB_PASSWORD: dummypass
       RABBIT_HOST: dummyhost
