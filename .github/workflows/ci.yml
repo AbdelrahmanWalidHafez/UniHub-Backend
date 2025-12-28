@@ -1,6 +1,5 @@
 name: CI - Run Tests
 
-
 on:
   pull_request:  
   push:           
@@ -10,9 +9,19 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      APPLICATION_NAME: DummyApp
+      GIT_URI: https://github.com/example/repo.git
+      GITHUB_USERNAME: dummyuser
+      GITHUB_PASSWORD: dummypass
+      RABBIT_HOST: dummyhost
+      RABBIT_PORT: 5672
+      RABBIT_USERNAME: rabbituser
+      RABBIT_PASSWORD: rabbitpass
+      ENCRYPT_KEY: dummykey123
+      SERVER_PORT: 8080
 
     steps:
-      
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -22,7 +31,6 @@ jobs:
           distribution: temurin
           java-version: 21
 
-
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
@@ -30,7 +38,6 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-
 
       - name: Build Config Server and run tests
         working-directory: config/config
