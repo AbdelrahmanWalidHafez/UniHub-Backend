@@ -1,0 +1,48 @@
+name: CI - Run Tests
+
+on:
+  pull_request:  
+  push:           
+    branches:
+      - '**'      
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      APPLICATION_NAME: DummyApp
+      GIT_URI: https://github.com/AbdelrahmanWalidHafez/UniHub-config.git
+      GITHUB_USERNAME: ${{ secrets.U_NAME }}
+      GITHUB_PASSWORD: ${{ secrets.TOKEN }}
+      RABBIT_HOST: dummyhost
+      RABBIT_PORT: 5672
+      RABBIT_USERNAME: rabbituser
+      RABBIT_PASSWORD: rabbitpass
+      ENCRYPT_KEY: dummykey123
+      SERVER_PORT: 8080
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build Config Server and run tests
+        working-directory: config/config
+        run: mvn clean verify
+
+      - name: Build Eureka Server and run tests
+        working-directory: eureka/eureka
+        run: mvn clean verify
