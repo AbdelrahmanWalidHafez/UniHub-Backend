@@ -12,8 +12,8 @@ jobs:
     env:
       APPLICATION_NAME: DummyApp
       GIT_URI: https://github.com/AbdelrahmanWalidHafez/UniHub-config.git
-      GITHUB_USERNAME: dummyuser
-      GITHUB_PASSWORD: dummypass
+      GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
+      GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       RABBIT_HOST: dummyhost
       RABBIT_PORT: 5672
       RABBIT_USERNAME: rabbituser
