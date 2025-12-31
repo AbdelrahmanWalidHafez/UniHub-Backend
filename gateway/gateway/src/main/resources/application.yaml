@@ -18,23 +18,3 @@ spring:
               enabled: false
               lower-case-service-id: true
 
-server:
-  port: 8082
-
-eureka:
-  instance:
-    prefer-ip-address: true
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    serviceURL:
-      defaultZone: http://localhost:8081/eureka
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    gateway:
-      access: unrestricted
