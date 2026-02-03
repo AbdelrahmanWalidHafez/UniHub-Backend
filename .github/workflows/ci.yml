@@ -40,7 +40,9 @@ jobs:
       STRIPEPK: pk_test_dummy_stripe_public_key
       STRIPE_SUCCESS_URL: http://localhost:8080/success
       STRIPE_CANCEL_URL: http://localhost:8080/cancel
-
+      # Redis for tests
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
