@@ -10,16 +10,36 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     env:
+      # Common Configuration
       APPLICATION_NAME: DummyApp
+      SERVER_PORT: 8080
+      
+      # Config Server Configuration
       GIT_URI: https://github.com/AbdelrahmanWalidHafez/UniHub-config.git
       GITHUB_USERNAME: ${{ secrets.U_NAME }}
       GITHUB_PASSWORD: ${{ secrets.TOKEN }}
-      RABBIT_HOST: dummyhost
-      RABBIT_PORT: 5672
-      RABBIT_USERNAME: rabbituser
-      RABBIT_PASSWORD: rabbitpass
       ENCRYPT_KEY: dummykey123
-      SERVER_PORT: 8080
+    
+      # Kafka Configuration
+      KAFKA: localhost:9092
+      
+      # AWS S3 Configuration (dummy values for tests)
+      ACCESS_KEY: test-access-key
+      SECRET_KEY: test-secret-key
+      REGION: us-east-1
+      BUCKET_NAME: test-bucket      
+      # JWT Configuration
+      JWT_SECRET: test-jwt-secret-key-for-ci-only
+      AUTH_HEADER: Authorization
+      
+      # API Key Configuration
+      API_KEY: test-api-key-for-ci-only
+      
+      # Stripe Configuration (dummy values for tests)
+      STRIPESK: sk_test_dummy_stripe_secret_key
+      STRIPEPK: pk_test_dummy_stripe_public_key
+      STRIPE_SUCCESS_URL: http://localhost:8080/success
+      STRIPE_CANCEL_URL: http://localhost:8080/cancel
 
     steps:
       - name: Checkout code
@@ -45,4 +65,24 @@ jobs:
 
       - name: Build Eureka Server and run tests
         working-directory: eureka/eureka
+        run: mvn clean verify
+
+      - name: Build Gateway and run tests
+        working-directory: gateway/gateway
+        run: mvn clean verify
+
+      - name: Build Auth Microservice and run tests
+        working-directory: auth/auth
+        run: mvn clean verify
+
+      - name: Build S3 Microservice and run tests
+        working-directory: s3/s3
+        run: mvn clean verify
+
+      - name: Build Subscription Microservice and run tests
+        working-directory: subscription/subscription
+        run: mvn clean verify
+
+      - name: Build University Management Microservice and run tests
+        working-directory: universitymanagement/universitymanagement
         run: mvn clean verify
