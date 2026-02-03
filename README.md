@@ -73,6 +73,3 @@ The project is built using **Spring Boot** and is organized into the following m
 
 ## NOTICE
 a lot of other featchures comming soon!
-
-git clone https://github.com/yourusername/unihub.git
-cd unihub
