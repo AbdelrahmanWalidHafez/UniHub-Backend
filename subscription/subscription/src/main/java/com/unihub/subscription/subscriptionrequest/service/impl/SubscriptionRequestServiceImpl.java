@@ -1,14 +1,16 @@
 package com.unihub.subscription.subscriptionrequest.service.impl;
 
+import com.unihub.subscription.state.SubscriptionRequestContext;
+import com.unihub.subscription.state.impl.ApprovedState;
+import com.unihub.subscription.state.impl.RejectedState;
 import com.unihub.subscription.subscriptionrequest.client.UniversityFeignClient;
 import com.unihub.subscription.subscriptionrequest.dto.request.DeleteFileRequest;
 import com.unihub.subscription.subscriptionrequest.dto.request.SubscriptionRequestDto;
 import com.unihub.subscription.subscriptionrequest.dto.request.UpdateSubscriptionRequestDto;
 import com.unihub.subscription.subscriptionrequest.dto.request.UploadFileRequest;
 import com.unihub.subscription.subscriptionrequest.dto.response.AfterUpdateResponse;
-import com.unihub.subscription.subscriptionrequest.dto.response.SubscriptionsMetaData;
 import com.unihub.subscription.subscriptionrequest.dto.response.SubscriptionRequestResponseDto;
-import com.unihub.subscription.subscriptionrequest.dto.response.UniversityResponse;
+import com.unihub.subscription.subscriptionrequest.dto.response.SubscriptionsMetaData;
 import com.unihub.subscription.subscriptionrequest.mapper.SubscriptionMapper;
 import com.unihub.subscription.subscriptionrequest.model.Status;
 import com.unihub.subscription.subscriptionrequest.model.SubscriptionRequest;
@@ -16,11 +18,11 @@ import com.unihub.subscription.subscriptionrequest.repository.SubscriptionReques
 import com.unihub.subscription.subscriptionrequest.service.ISubscriptionRequestService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.shaded.com.google.protobuf.StringValue;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -157,53 +159,23 @@ public class SubscriptionRequestServiceImpl implements ISubscriptionRequestServi
     }
 
     private AfterUpdateResponse handleUpdateRequest(SubscriptionRequest subscriptionRequest, UpdateSubscriptionRequestDto updateSubscriptionRequestDto){
-        if(updateSubscriptionRequestDto.getStatus().equalsIgnoreCase("APPROVED")){
-            if(subscriptionRequest.getStatus().equals(Status.APPROVED)){
-                return AfterUpdateResponse
-                        .builder()
-                        .subscriptionRequestResponseDto(subscriptionMapper.toDto(subscriptionRequest))
-                        .warn("Subscription request already approved")
-                        .build();
-            }
-            AfterUpdateResponse response=createUniversity(subscriptionRequest);
-            if(response.getUniversityResponse()==null){
-                subscriptionRequest.setStatus(Status.PENDING);
-                subscriptionRequestRepository.save(subscriptionRequest);
-                response.setWarn("Service might not be available right now or there maybe a university exists with the same data, subscription request will be pending until university is created.");
-                return response;
-            }
-            subscriptionRequest.setStatus(Status.APPROVED);
-            subscriptionRequestRepository.save(subscriptionRequest);
-            return response;
+        SubscriptionRequestContext subscriptionRequestContext=new SubscriptionRequestContext( );
+       if(updateSubscriptionRequestDto.getStatus().equals(Status.APPROVED)){
+           subscriptionRequestContext.setSubscriptionRequestState(new ApprovedState(subscriptionMapper,universityFeignClient));
+       }else {
+           subscriptionRequestContext.setSubscriptionRequestState(new RejectedState());
+       }
+       try {
+           SubscriptionRequest updatedRequest=subscriptionRequestContext.request(subscriptionRequest);
 
-        }else if(updateSubscriptionRequestDto.getStatus().equalsIgnoreCase("REJECTED")){
-            if(subscriptionRequest.getStatus().equals(Status.APPROVED)){
-                return AfterUpdateResponse
-                        .builder()
-                        .subscriptionRequestResponseDto(subscriptionMapper.toDto(subscriptionRequest))
-                        .warn("Subscription request already approved")
-                        .build();
-            }
-            subscriptionRequest.setStatus(Status.REJECTED);
-            subscriptionRequestRepository.save(subscriptionRequest);
-            return AfterUpdateResponse
-                    .builder()
-                    .subscriptionRequestResponseDto(subscriptionMapper.toDto(subscriptionRequest))
-                    .build();
-        }else{
-            return AfterUpdateResponse
-                    .builder()
-                    .subscriptionRequestResponseDto(subscriptionMapper.toDto(subscriptionRequest))
-                    .build();
-        }
-    }
-    private AfterUpdateResponse createUniversity(SubscriptionRequest subscriptionRequest){
-        ResponseEntity<UniversityResponse> universityResponseResponseEntity=universityFeignClient
-                .createUniversity(subscriptionMapper.toUniversityRequestDto(subscriptionRequest));
-        return AfterUpdateResponse.builder()
-                .subscriptionRequestResponseDto(subscriptionMapper.toDto(subscriptionRequest))
-                .universityResponse(universityResponseResponseEntity.getBody())
-                .build();
+           return AfterUpdateResponse.builder()
+                   .subscriptionRequestResponseDto(subscriptionMapper.toDto(subscriptionRequestRepository.save(updatedRequest)))
+                   .build();
+       }catch (Exception e){
+           return  AfterUpdateResponse.builder()
+                   .warn(e.getMessage())
+                   .build();
+       }
     }
 
     private  boolean isInvalidValidContentType(MultipartFile file) {

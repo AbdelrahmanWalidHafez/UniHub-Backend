@@ -7,6 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -130,6 +131,19 @@ public class GlobalExceptionController  {
 
     @ExceptionHandler(PropertyReferenceException.class)
     public ResponseEntity<ErrorResponseDto> handlePropertyReferenceException(IOException ex, HttpServletRequest request) {
+        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
+                .timeStamp(LocalDateTime.now())
+                .httpStatusCode(HttpStatus.BAD_REQUEST)
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .path(request.getRequestURI())
+                .message(ex.getMessage())
+                .errors(List.of(ex.getLocalizedMessage()))
+                .build();
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponseDto> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, HttpServletRequest request) {
         ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
                 .timeStamp(LocalDateTime.now())
                 .httpStatusCode(HttpStatus.BAD_REQUEST)

@@ -1,5 +1,7 @@
 package com.unihub.subscription.subscriptionrequest.dto.request;
 
+import com.unihub.subscription.subscriptionrequest.model.Status;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +11,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class UpdateSubscriptionRequestDto {
-    @Pattern(
-            regexp = "PENDING|APPROVED|REJECTED",
-            message = "Status must be PENDING, APPROVED, or REJECTED"
-    )
-    private String status;
+
+    @NotNull(message = "status cannot be null")
+    private Status status;
 }
