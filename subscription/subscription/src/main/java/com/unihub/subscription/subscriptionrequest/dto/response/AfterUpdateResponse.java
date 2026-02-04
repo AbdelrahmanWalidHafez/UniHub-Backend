@@ -13,12 +13,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AfterUpdateResponse {
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("subscription-request")
     SubscriptionRequestResponseDto subscriptionRequestResponseDto;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonProperty("university")
-    UniversityResponse universityResponse;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("warn")

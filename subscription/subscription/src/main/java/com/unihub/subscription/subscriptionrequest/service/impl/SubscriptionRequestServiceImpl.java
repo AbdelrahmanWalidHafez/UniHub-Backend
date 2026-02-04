@@ -18,7 +18,6 @@ import com.unihub.subscription.subscriptionrequest.repository.SubscriptionReques
 import com.unihub.subscription.subscriptionrequest.service.ISubscriptionRequestService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.shaded.com.google.protobuf.StringValue;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

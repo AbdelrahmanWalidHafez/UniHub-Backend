@@ -51,19 +51,15 @@ public class SubscriptionRequestResponseDto {
     private Status status;
 
     @JsonProperty("created_at")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private LocalDateTime createdAt;
 
     @JsonProperty("created_by")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String createdBy;
 
 
     @JsonProperty("updated_at")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private LocalDateTime updatedAt;
 
     @JsonProperty("updated_by")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String updatedBy;
 }
