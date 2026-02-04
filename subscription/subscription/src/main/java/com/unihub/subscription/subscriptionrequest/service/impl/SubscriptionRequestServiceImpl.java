@@ -162,7 +162,7 @@ public class SubscriptionRequestServiceImpl implements ISubscriptionRequestServi
        if(updateSubscriptionRequestDto.getStatus().equals(Status.APPROVED)){
            subscriptionRequestContext.setSubscriptionRequestState(new ApprovedState(subscriptionMapper,universityFeignClient,streamBridge));
        }else {
-           subscriptionRequestContext.setSubscriptionRequestState(new RejectedState());
+           subscriptionRequestContext.setSubscriptionRequestState(new RejectedState(streamBridge));
        }
        try {
            SubscriptionRequest updatedRequest=subscriptionRequestContext.request(subscriptionRequest);
