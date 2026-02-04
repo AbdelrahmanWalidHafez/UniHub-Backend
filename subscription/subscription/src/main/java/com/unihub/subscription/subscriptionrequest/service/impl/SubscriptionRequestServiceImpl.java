@@ -160,7 +160,7 @@ public class SubscriptionRequestServiceImpl implements ISubscriptionRequestServi
     private AfterUpdateResponse handleUpdateRequest(SubscriptionRequest subscriptionRequest, UpdateSubscriptionRequestDto updateSubscriptionRequestDto){
         SubscriptionRequestContext subscriptionRequestContext=new SubscriptionRequestContext( );
        if(updateSubscriptionRequestDto.getStatus().equals(Status.APPROVED)){
-           subscriptionRequestContext.setSubscriptionRequestState(new ApprovedState(subscriptionMapper,universityFeignClient));
+           subscriptionRequestContext.setSubscriptionRequestState(new ApprovedState(subscriptionMapper,universityFeignClient,streamBridge));
        }else {
            subscriptionRequestContext.setSubscriptionRequestState(new RejectedState());
        }
