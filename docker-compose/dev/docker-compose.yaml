@@ -254,6 +254,27 @@ services:
       start_period: 15s
     networks:
       - unihub
+  mail-server:
+    image: unihub/mail:s2
+    container_name: mail-server
+    ports:
+      - "8087:8087"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    command: sh -c "sleep 5 && java -jar /app/mail.jar"
+    env_file:
+      - ../../mail/.env
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8087/actuator/health/readiness | grep UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - unihub
 
 networks:
   unihub:
