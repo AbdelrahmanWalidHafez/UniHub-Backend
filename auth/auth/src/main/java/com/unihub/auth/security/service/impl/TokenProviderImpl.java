@@ -57,6 +57,27 @@ public class TokenProviderImpl implements ITokenProvider {
 
     private final AuthenticationManager authenticationManager;
 
+    @Operation(
+            summary = "Creates a new Subscription Plan",
+            description = "Enables a Customer service user to create a subscription plan"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Subscription plan created successfully",
+                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = SubscriptionPlanResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "there is an existing subscription plan with the same name",
+                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = ErrorResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "bad request",
+                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = ErrorResponseDto.class))
+            )
+    })
     @Override
     public LoginResponse generateTokens(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
