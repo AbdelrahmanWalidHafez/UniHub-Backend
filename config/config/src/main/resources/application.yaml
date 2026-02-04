@@ -14,12 +14,8 @@ spring:
           force-pull: true
           username: ${GITHUB_USERNAME}
           password: ${GITHUB_PASSWORD}
-  rabbitmq:
-    host: ${RABBIT_HOST}
-    port: ${RABBIT_PORT}
-    username: ${RABBIT_USERNAME}
-    password: ${RABBIT_PASSWORD}
-
+    bus:
+      enabled: false
 management:
   endpoints:
     web:

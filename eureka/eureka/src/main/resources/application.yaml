@@ -3,9 +3,4 @@ spring:
   application:
     name: ${APPLICATION_NAME}
   config:
-    import: ${CONFIG_IMPORT:optional:configserver:http://localhost:8080}
-  rabbitmq:
-    host: ${RABBIT_HOST}
-    port: ${RABBIT_PORT}
-    username: ${RABBIT_USERNAME}
-    password: ${RABBIT_PASSWORD}
+    import: optional:configserver:http://config-server:8080

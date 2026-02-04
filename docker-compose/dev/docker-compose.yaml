@@ -1,79 +1,287 @@
-version: "3.9"
 
 services:
-
-  rabbitmq:
-    image: rabbitmq:3.13-management
-    container_name: rabbitmq
+  kafka:
+    image: apache/kafka:latest
+    container_name: kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3
     ports:
-      - "5672:5672"
-      - "15672:15672"
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 5s
+      - "9092:9092"
+    networks:
+      - unihub
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8090:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    depends_on:
+      - kafka
     networks:
       - unihub
 
   config-server:
-    image: unihub/config:s1
+    image: unihub/config:s2
     container_name: config-server
     ports:
       - "8080:8080"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
+    env_file:
+      - ../../config/.env
     healthcheck:
       test: ["CMD-SHELL", "curl --fail --silent localhost:8080/actuator/health/readiness | grep UP || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 10s
-    env_file:
-      - ../../config/.env
     networks:
       - unihub
 
   eureka-server:
-    image: unihub/eureka:s1
+    image: unihub/eureka:s2
     container_name: eureka-server
     ports:
       - "8081:8081"
     depends_on:
       config-server:
         condition: service_healthy
+    env_file:
+      - ../../eureka/.env
     healthcheck:
       test: ["CMD-SHELL", "curl --fail --silent localhost:8081/actuator/health/readiness | grep UP || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 10s
-    env_file:
-      - ../../eureka/.env
     networks:
       - unihub
 
   gateway-server:
-    image: unihub/gateway:s1
+    image: unihub/gateway:s2
     container_name: gateway-server
     ports:
       - "8082:8082"
     depends_on:
       eureka-server:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - ../../gateway/.env
     healthcheck:
       test: ["CMD-SHELL", "curl --fail --silent localhost:8082/actuator/health/readiness | grep UP || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 10s
+    networks:
+      - unihub
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - redis_data:/data
+    networks:
+      - unihub
+
+  auth-db:
+    image: postgres:16
+    container_name: auth-db
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+    networks:
+      - unihub
+
+  university-db:
+    image: postgres:16
+    container_name: university_db
+    environment:
+      POSTGRES_DB: university_db
+      POSTGRES_USER: university_user
+      POSTGRES_PASSWORD: university_pass
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U university_user -d university_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - university_db_data:/var/lib/postgresql/data
+    networks:
+      - unihub
+
+  subscription-db:
+    image: postgres:16
+    container_name: subscription_db
+    environment:
+      POSTGRES_DB: subscription_db
+      POSTGRES_USER: subscription_user
+      POSTGRES_PASSWORD: subscription_pass
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U subscription_user -d subscription_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - subscription_db_data:/var/lib/postgresql/data
+    networks:
+      - unihub
+
+  auth-server:
+    image: unihub/auth:s2
+    container_name: auth-server
+    ports:
+      - "8083:8083"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      auth-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file:
-      - ../../gateway/.env
+      - ../../auth/.env
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8083/actuator/health/readiness | grep UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - unihub
+
+  subscription-server:
+    image: unihub/subscription:s2
+    container_name: subscription-server
+    ports:
+      - "8084:8084"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      subscription-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    env_file:
+      - ../../subscription/.env
+    command: sh -c "sleep 5 && java -jar /app/subscription.jar"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8084/actuator/health/readiness | grep UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - unihub
+
+  university-server:
+    image: unihub/universitymanagement:s2
+    container_name: university-server
+    ports:
+      - "8085:8085"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      university-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    command: sh -c "sleep 5 && java -jar /app/universitymanagement.jar"
+    env_file:
+      - ../../universitymanagement/.env
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8085/actuator/health/readiness | grep UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - unihub
+
+  s3-server:
+    image: unihub/s3:s2
+    container_name: s3-server
+    ports:
+      - "8086:8086"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    command: sh -c "sleep 5 && java -jar /app/s3.jar"
+    env_file:
+      - ../../s3/.env
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8086/actuator/health/readiness | grep UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - unihub
+  mail-server:
+    image: unihub/mail:s2
+    container_name: mail-server
+    ports:
+      - "8087:8087"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    command: sh -c "sleep 5 && java -jar /app/mail.jar"
+    env_file:
+      - ../../mail/.env
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8087/actuator/health/readiness | grep UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     networks:
       - unihub
 
 networks:
   unihub:
     driver: bridge
+
+volumes:
+  auth_db_data:
+  subscription_db_data:
+  university_db_data:
+  redis_data:

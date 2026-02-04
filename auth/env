@@ -1,0 +1,13 @@
+#App
+APPLICATION_NAME=auth
+
+#Authentication
+JWT_SECRET=
+AUTH_HEADER= Authorization
+
+#Redis
+REDIS_HOST=
+REDIS_PORT=
+
+#Api_Key
+API_KEY=
