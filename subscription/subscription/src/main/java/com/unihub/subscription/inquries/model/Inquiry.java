@@ -1,10 +1,10 @@
 package com.unihub.subscription.inquries.model;
 
 
-import com.unihub.subscription.common.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -13,7 +13,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Inquiry extends BaseEntity {
+public class Inquiry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -26,5 +26,8 @@ public class Inquiry extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     private String content;
+
+    @Column(nullable = false)
+    LocalDateTime createdAt;
 
 }

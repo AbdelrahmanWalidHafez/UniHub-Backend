@@ -74,7 +74,7 @@ public class SubscriptionController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Subscription request fetched successfully",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = SubscriptionPlanResponseDto.class))
+                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = SubscriptionRequestResponseDto.class))
             ),
             @ApiResponse(
                     responseCode = "400",

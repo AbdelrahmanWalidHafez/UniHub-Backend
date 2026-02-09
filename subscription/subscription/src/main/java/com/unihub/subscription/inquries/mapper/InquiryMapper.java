@@ -6,6 +6,8 @@ import com.unihub.subscription.inquries.dto.response.InquiryResponseDto;
 import com.unihub.subscription.inquries.model.Inquiry;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class InquiryMapper {
 
@@ -14,6 +16,7 @@ public class InquiryMapper {
         inquiry.setCustomerEmail(inquiryRequestDto.getCustomerEmail());
         inquiry.setContent(inquiryRequestDto.getContent());
         inquiry.setSubject(inquiryRequestDto.getSubject());
+        inquiry.setCreatedAt(LocalDateTime.now());
         return inquiry;
     }
 
