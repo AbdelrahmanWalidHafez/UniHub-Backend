@@ -2,9 +2,8 @@ package com.unihub.subscription.inquries.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,13 +18,11 @@ public class InquiryRequestDto {
     @JsonProperty("customer_email")
     private String customerEmail;
 
-    @Min(value = 3,message = "content must be at least 3 characters")
-    @Max(value = 300,message = "subject must be at most 30 characters")
     @NotBlank(message = "subject cannot be blank")
+    @Size(min = 3, max = 30, message = "Subject must be between 3 and 30 characters")
     private String subject;
 
     @NotBlank(message="Content cannot be blank")
-    @Min(value = 5,message = "content must be at least 5 characters")
-    @Max(value = 300,message = "content must be at most 300 characters")
+    @Size(min = 5, max = 300, message = "Content must be between 5 and 300 characters")
     private String content;
 }

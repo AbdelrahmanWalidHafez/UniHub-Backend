@@ -8,11 +8,14 @@ import com.unihub.subscription.inquries.model.Inquiry;
 import com.unihub.subscription.inquries.repository.InquiryRepository;
 import com.unihub.subscription.inquries.service.IInquiryService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
@@ -25,9 +28,10 @@ public class IInquiryServiceImpl implements IInquiryService {
     private final InquiryMapper inquiryMapper;
 
     @Override
-    public InquiryResponseDto createInquiry(InquiryRequestDto inquiryRequestDto) {
+    public InquiryResponseDto createInquiry(@Valid @RequestBody InquiryRequestDto inquiryRequestDto) {
         Inquiry inquiry=inquiryMapper.toEntity(inquiryRequestDto);
-        return inquiryMapper.toDto(inquiryRepository.save(inquiry));
+        Inquiry savedInquiry=inquiryRepository.save(inquiry);
+        return inquiryMapper.toDto(savedInquiry);
     }
 
     @Override
@@ -43,7 +47,7 @@ public class IInquiryServiceImpl implements IInquiryService {
     }
 
     @Override
-    public InquiresMetaData getInquires(int pageNum, String sortDir) {
+    public InquiresMetaData getInquires(@RequestParam("page_num") int pageNum, @RequestParam("sort_dir") String sortDir) {
         Pageable pageable=createPageable(pageNum,sortDir);
         return InquiresMetaData.builder()
                 .inquires(

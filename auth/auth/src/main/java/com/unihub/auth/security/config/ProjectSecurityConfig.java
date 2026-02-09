@@ -65,7 +65,7 @@ public class ProjectSecurityConfig {
         CorsConfigurationSource corsConfigurationSource;
         corsConfigurationSource = request -> {
             CorsConfiguration corsConfiguration = new CorsConfiguration();
-            corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:3001"));
+            corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
             corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
             corsConfiguration.setAllowCredentials(true);
             corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));

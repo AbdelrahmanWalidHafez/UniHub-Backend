@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 
 @Component
@@ -36,15 +37,18 @@ public class JwtValidatorFilter implements WebFilter {
     @Value("${jwt.authorizationHeader}")
     private String authHeader;
 
+    private static final List<String> PUBLIC_PATHS = List.of(
+            "/unihub/subscription/api/v1/public/request-subscription",
+            "/unihub/subscription/api/v1/subscription-plans/all",
+            "/unihub/subscription/api/v1/inquiries/public"
+    );
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = exchange.getRequest().getURI().getPath();
-        if (path.equals("/unihub/subscription/api/v1/public/request-subscription")||
-                path.equals("/unihub/subscription/api/v1/subscription-plans/all")) {
+        if (PUBLIC_PATHS.stream().anyMatch(path::startsWith)) {
             return chain.filter(exchange);
         }
-
         try{
             String jwt = extractJwt(request);
             Claims claims=getClaims(jwt);
