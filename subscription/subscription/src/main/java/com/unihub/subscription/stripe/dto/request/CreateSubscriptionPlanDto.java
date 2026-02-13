@@ -16,7 +16,7 @@ public class CreateSubscriptionPlanDto {
     private String planName;
 
     @NotBlank(message = "Plan description must not be empty")
-    @Size(min = 10, max = 1000, message = "Plan description must be between 10 and 1000 characters")
+    @Size(min = 10, max = 200, message = "Plan description must be between 10 and 1000 characters")
     @JsonProperty("subscription_plan_description")
     private String planDescription;
 

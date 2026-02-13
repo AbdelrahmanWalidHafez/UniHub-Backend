@@ -18,6 +18,5 @@ public class AfterUpdateResponse {
     SubscriptionRequestResponseDto subscriptionRequestResponseDto;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonProperty("warn")
     String warn;
 }

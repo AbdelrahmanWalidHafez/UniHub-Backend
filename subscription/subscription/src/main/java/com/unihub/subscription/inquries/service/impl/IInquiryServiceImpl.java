@@ -59,7 +59,7 @@ public class IInquiryServiceImpl implements IInquiryService {
         return inquiryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Inquiry Not Found"));
     }
     private Pageable createPageable(int pageNum, String sortDir){
-        int pageSize=10;
+        int pageSize=5;
         return  PageRequest.of(
                 pageNum-1,
                 pageSize,
