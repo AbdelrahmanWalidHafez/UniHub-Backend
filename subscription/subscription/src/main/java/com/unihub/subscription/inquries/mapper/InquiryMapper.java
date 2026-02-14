@@ -30,6 +30,7 @@ public class InquiryMapper {
 
     public InquiryMetaData toMetaData(Inquiry inquiry){
         InquiryMetaData inquiryMetaData=new InquiryMetaData();
+        inquiryMetaData.setId(inquiry.getId());
         inquiryMetaData.setCustomerEmail(inquiry.getCustomerEmail());
         inquiryMetaData.setSubject(inquiry.getSubject());
         inquiryMetaData.setCreatedAt(inquiry.getCreatedAt());

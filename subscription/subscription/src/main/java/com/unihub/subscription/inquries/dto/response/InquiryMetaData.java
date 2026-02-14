@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -12,6 +13,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class InquiryMetaData {
 
+    private UUID id;
+
+    @JsonProperty("customer_email")
     private String customerEmail;
 
     private String subject;
