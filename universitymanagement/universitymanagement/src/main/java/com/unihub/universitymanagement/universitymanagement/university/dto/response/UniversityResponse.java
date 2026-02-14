@@ -6,6 +6,7 @@ import com.unihub.universitymanagement.universitymanagement.internal.dto.respons
 import com.unihub.universitymanagement.universitymanagement.subscription.dto.response.UniversitySubscriptionPlanResponse;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -52,4 +53,16 @@ public class UniversityResponse {
     @JsonProperty("system_admin")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     SystemAdminResponse systemAdmin;
+
+    @JsonProperty("created_at")
+    private LocalDateTime createdAt;
+
+    @JsonProperty("updated_at")
+    private LocalDateTime updatedAt;
+
+    @JsonProperty("created_by")
+    private String createdBy;
+
+    @JsonProperty("updated_by")
+    private String updatedBy;
 }

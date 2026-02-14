@@ -50,6 +50,10 @@ public class UniversityMapper {
         if (university.getSubscriptionPlan() != null) {
             universityResponse.setSubscriptionPlan(universitySubscriptionPlanMapper.toDto(university.getSubscriptionPlan()));
         }
+        universityResponse.setCreatedAt(university.getCreatedAt());
+        universityResponse.setUpdatedAt(university.getUpdatedAt());
+        universityResponse.setCreatedBy(university.getCreatedBy());
+        universityResponse.setUpdatedBy(university.getUpdatedBy());
         return universityResponse;
     }
 
