@@ -13,6 +13,7 @@ public class CreateSubscriptionPlanDto {
     @NotBlank(message = "Plan name must not be empty")
     @Size(min = 3, max = 50, message = "Plan name must be between 3 and 50 characters")
     @JsonProperty("subscription_plan_name")
+    @Pattern(regexp = "^[A-Za-z ]+$", message = "Plan name must contain letters only and no numbers")
     private String planName;
 
     @NotBlank(message = "Plan description must not be empty")
