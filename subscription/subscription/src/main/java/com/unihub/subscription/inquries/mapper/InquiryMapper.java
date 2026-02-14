@@ -25,6 +25,7 @@ public class InquiryMapper {
         inquiryResponseDto.setCustomerEmail(inquiry.getCustomerEmail());
         inquiryResponseDto.setContent(inquiry.getContent());
         inquiryResponseDto.setSubject(inquiry.getSubject());
+        inquiryResponseDto.setCreatedAt(inquiry.getCreatedAt());
         return inquiryResponseDto;
     }
 
