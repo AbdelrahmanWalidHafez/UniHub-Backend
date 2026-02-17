@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -38,12 +39,16 @@ public class ProjectUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
     }
 
-    public UserDto getUserInfo(Authentication authentication) {
-        return userMapper.toDto(fetchUser(authentication));
+    public boolean isExist(String email) {
+        return Optional.ofNullable(userRepository.findByEmail(email)).isPresent();
     }
 
-    private User fetchUser(Authentication authentication) {
-        return userRepository.findByEmail(authentication.getName())
+    public UserDto getUserInfo(Authentication authentication) {
+        return userMapper.toDto(fetchUser(authentication.getName()));
+    }
+
+    private User fetchUser(String email) {
+        return userRepository.findByEmail(email)
                 .orElseThrow(()->new EntityNotFoundException("user not found"));
     }
 

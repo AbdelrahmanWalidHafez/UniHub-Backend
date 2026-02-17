@@ -7,12 +7,23 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+  cloud:
+    stream:
+      bindings:
+        sendVerificationCode-out-0:
+          destination: send-verification-code-topic
+          content-type: application/json
+      kafka:
+        binder:
+          brokers: ${KAFKA}
 jwt:
   secret: ${JWT_SECRET}
   expirationTime: 3600000
   authorizationHeader: ${AUTH_HEADER}
   refreshToken:
     expirationTime: 259200000
-
+verification:
+  codeTTL: 180
+  tokenTTL: 120
 api:
   key: ${API_KEY}

@@ -1,10 +1,10 @@
 package com.unihub.auth.security.controller;
 
 import com.unihub.auth.common.exception.dto.ErrorResponseDto;
-import com.unihub.auth.security.dto.request.LoginRequest;
-import com.unihub.auth.security.dto.request.RefreshTokenDto;
+import com.unihub.auth.security.dto.request.*;
 import com.unihub.auth.security.dto.response.LoginResponse;
 import com.unihub.auth.security.dto.response.UserDto;
+import com.unihub.auth.security.dto.response.VerificationResponse;
 import com.unihub.auth.security.service.ITokenProvider;
 import com.unihub.auth.security.service.impl.ProjectUserDetailsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -134,4 +134,25 @@ public class AuthController {
         return ResponseEntity.ok(userDetailsService.getUserInfo(authentication));
     }
 
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request){
+        tokenProvider.generateForgotPasswordVerificationCode(request.getEmail());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/verify-forgot-password-token")
+    public ResponseEntity<VerificationResponse> verifyForgotPassword(@Valid @RequestBody VerificationRequest verificationRequest) {
+        return ResponseEntity
+                .ok(VerificationResponse
+                        .builder()
+                        .verificationOpaqueToken(tokenProvider.verifyForgotPasswordVerificationCode(verificationRequest))
+                        .build());
+    }
+
+    @PatchMapping("/change-forgot-password")
+    public ResponseEntity<?> changeForgotPassword(@Valid @RequestBody ChangeForgotPasswordRequest changeForgotPasswordRequest, Authentication authentication) {
+        tokenProvider.changeForgotPassword(changeForgotPasswordRequest, authentication);
+        return ResponseEntity.noContent().build();
+    }
 }
