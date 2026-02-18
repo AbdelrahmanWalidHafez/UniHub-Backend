@@ -151,8 +151,8 @@ public class AuthController {
     }
 
     @PatchMapping("/change-forgot-password")
-    public ResponseEntity<?> changeForgotPassword(@Valid @RequestBody ChangeForgotPasswordRequest changeForgotPasswordRequest, Authentication authentication) {
-        tokenProvider.changeForgotPassword(changeForgotPasswordRequest, authentication);
+    public ResponseEntity<?> changeForgotPassword(@Valid @RequestBody ChangeForgotPasswordRequest changeForgotPasswordRequest, Authentication authentication, HttpServletRequest request) {
+        tokenProvider.changeForgotPassword(changeForgotPasswordRequest, authentication,request);
         return ResponseEntity.noContent().build();
     }
 }

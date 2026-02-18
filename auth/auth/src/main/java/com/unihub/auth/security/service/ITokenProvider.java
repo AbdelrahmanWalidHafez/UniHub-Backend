@@ -22,5 +22,5 @@ public interface ITokenProvider {
 
     VerificationOpaqueToken verifyForgotPasswordVerificationCode(VerificationRequest verificationRequest);
 
-    void changeForgotPassword(@Valid ChangeForgotPasswordRequest changeForgotPasswordRequest, Authentication authentication);
+    void changeForgotPassword(@Valid ChangeForgotPasswordRequest changeForgotPasswordRequest, Authentication authentication,HttpServletRequest request);
 }

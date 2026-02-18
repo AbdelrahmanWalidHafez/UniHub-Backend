@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -108,6 +109,9 @@ public class TokenProviderImpl implements ITokenProvider {
 
     @Override
     public void generateForgotPasswordVerificationCode(String email) {
+        if(redisService.exists("verification:"+email)){
+            redisService.deleteKey(email);
+        }
         if (userDetailsService.isExist(email)) {
          generateAndSendVerificationCode(email);
         }
@@ -115,16 +119,19 @@ public class TokenProviderImpl implements ITokenProvider {
 
     @Override
     public VerificationOpaqueToken verifyForgotPasswordVerificationCode(VerificationRequest verificationRequest){
-        Optional<String>email=validateAndGetEmail("verification_code:"+verificationRequest.getVerificationCode());
-        if (email.isEmpty()) {
+        Optional<String>code=validateAndGetVerificationCode("verification:"+verificationRequest.getEmail());
+        if (code.isEmpty()) {
+            throw new BadCredentialsException("invalid verification code");
+        }
+        if (!code.get().equals(verificationRequest.getVerificationCode())) {
             throw new IllegalArgumentException("invalid verification code");
         }
-        redisService.deleteKey("verification_code:"+verificationRequest.getVerificationCode());
-        return generateVerificationOpaqueToken(email.get());
+        redisService.deleteKey("verification:"+verificationRequest.getEmail());
+        return generateVerificationOpaqueToken(verificationRequest.getEmail());
     }
 
     @Override
-    public void changeForgotPassword(ChangeForgotPasswordRequest changeForgotPasswordRequest, Authentication authentication) {
+    public void changeForgotPassword(ChangeForgotPasswordRequest changeForgotPasswordRequest, Authentication authentication,HttpServletRequest request) {
         validatePasswordConfirmation(changeForgotPasswordRequest.getPassword(), changeForgotPasswordRequest.getConfirmPassword());
         User user = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new EntityNotFoundException("Resource doesn't exist"));
@@ -133,6 +140,7 @@ public class TokenProviderImpl implements ITokenProvider {
         }
         user.setPassword(passwordEncoder.encode(changeForgotPasswordRequest.getPassword()));
         userRepository.save(user);
+        deleteVerificationToken(request);
     }
 
     private AccessToken generateAccessToken(SecretKey key, Authentication authentication) {
@@ -211,8 +219,7 @@ public class TokenProviderImpl implements ITokenProvider {
         for (int i = 0; i <6 ; i++) {
             stringBuilder.append(random.nextInt(10));
         }
-        redisService.setValue("verification_code:"+stringBuilder,email, Duration.ofSeconds(verificationCodeTTL));
-
+        redisService.setValue("verification:"+email,stringBuilder.toString(), Duration.ofSeconds(verificationCodeTTL));
         streamBridge.send("sendVerificationCode-out-0", SendVerificationCode
                 .builder()
                 .verificationCode(stringBuilder.toString())
@@ -236,6 +243,15 @@ public class TokenProviderImpl implements ITokenProvider {
         if (!password.equals(confirmPassword)) {
             throw new IllegalArgumentException("passwords do not match");
         }
+    }
+
+    private Optional<String> validateAndGetVerificationCode(String key){
+        return Optional.ofNullable(redisService.getValue(key));
+    }
+
+    private void deleteVerificationToken(HttpServletRequest request){
+        String verification_token=request.getHeader(jwtProperties.authorizationHeader()).substring(7);
+        redisService.deleteKey("verification_token:"+verification_token);
     }
 }
 

@@ -62,7 +62,6 @@ public class VerificationFilter extends OncePerRequestFilter {
         if (email.isEmpty()) {
             throw new EntityNotFoundException("no email found");
         }
-        redisService.deleteKey("verification_token:" + verificationToken);
         return email.get();
     }
 

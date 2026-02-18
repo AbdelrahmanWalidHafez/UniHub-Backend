@@ -86,6 +86,20 @@ public class GlobalExceptionController  {
 
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(Exception ex, HttpServletRequest request) {
+        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
+                .timeStamp(LocalDateTime.now())
+                .httpStatusCode(HttpStatus.BAD_REQUEST)
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .path(request.getRequestURI())
+                .message(ex.getMessage())
+                .errors(List.of(ex.getLocalizedMessage()))
+                .build();
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponseDto> handleDataIntegrityViolationException(
             DataIntegrityViolationException ex,
