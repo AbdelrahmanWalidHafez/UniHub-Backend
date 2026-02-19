@@ -25,10 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
-@Tag(
-        name = "auth API",
-        description = "APIs for managing a user's login,logout,refresh and fetching a user specific data"
-)
+
 public class AuthController {
 
     private final ITokenProvider tokenProvider;
