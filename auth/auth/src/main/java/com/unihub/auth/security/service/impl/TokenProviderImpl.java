@@ -110,7 +110,7 @@ public class TokenProviderImpl implements ITokenProvider {
     @Override
     public void generateForgotPasswordVerificationCode(String email) {
         if(redisService.exists("verification:"+email)){
-            redisService.deleteKey(email);
+            redisService.deleteKey("verification"+email);
         }
         if (userDetailsService.isExist(email)) {
          generateAndSendVerificationCode(email);

@@ -40,7 +40,7 @@ public class ProjectUserDetailsService implements UserDetailsService {
     }
 
     public boolean isExist(String email) {
-        return Optional.ofNullable(userRepository.findByEmail(email)).isPresent();
+        return userRepository.existsByEmail(email);
     }
 
     public UserDto getUserInfo(Authentication authentication) {
