@@ -35,53 +35,11 @@ public class AuthController {
 
     private final ProjectUserDetailsService userDetailsService;
 
-    @Operation(
-            summary = "login",
-            description = "Enables a  user to login into a system"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "user is logged in successfully",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = LoginResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "unauthorized",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = ErrorResponseDto.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "bad request",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = ErrorResponseDto.class))
-            )
-    })
     @PostMapping(value = "/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(tokenProvider.generateTokens(loginRequest));
     }
 
-    @Operation(
-            summary = "refresh",
-            description = "Enables a  user to refresh his/her tokens"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "user is refreshed ",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = LoginResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "unauthorized/invalid token",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = ErrorResponseDto.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "bad request",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = ErrorResponseDto.class))
-            )
-    })
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenDto refreshRequest) {
         return ResponseEntity.ok(tokenProvider.refresh(refreshRequest.getRefreshToken()));
@@ -91,46 +49,15 @@ public class AuthController {
             summary = "logout",
             description = "revokes user jwt tokens"
     )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "user tokens revoked successfully"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "unauthorized",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = ErrorResponseDto.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "bad request",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = ErrorResponseDto.class))
-            )
-    })
+
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@Valid @RequestBody  RefreshTokenDto logoutRequest, HttpServletRequest request) {
         tokenProvider.revokeTokens(request, logoutRequest.getRefreshToken());
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(
-            summary = "fetch user data",
-            description = "Enables a  user to fetch his data system"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "user data fetched successfully",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = UserDto.class))
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "unauthorized",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = ErrorResponseDto.class))
-            ),
-    })
     @GetMapping("/user-info")
-    public ResponseEntity<UserDto>  getUserInfo(Authentication authentication) {
+    public ResponseEntity<UserDto>getUserInfo(Authentication authentication) {
         return ResponseEntity.ok(userDetailsService.getUserInfo(authentication));
     }
 
