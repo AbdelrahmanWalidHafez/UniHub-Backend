@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
-public class GlobalExceptionController  {
+public class GlobalExceptionController {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -39,19 +39,6 @@ public class GlobalExceptionController  {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Object> handleIllegalArgumentException(Exception ex, HttpServletRequest request) {
-        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
-                .timeStamp(LocalDateTime.now())
-                .httpStatusCode(HttpStatus.CONFLICT)
-                .error(HttpStatus.CONFLICT.getReasonPhrase())
-                .path(request.getRequestURI())
-                .message(ex.getMessage())
-                .errors(List.of(ex.getLocalizedMessage()))
-                .build();
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.CONFLICT);
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleExceptionInternal(Exception ex, HttpServletRequest request) {
         ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
@@ -67,29 +54,37 @@ public class GlobalExceptionController  {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponseDto> handleDataIntegrityViolationException(
-            DataIntegrityViolationException ex,
-            HttpServletRequest request) {
-
+    public ResponseEntity<ErrorResponseDto> handleDataIntegrityViolationException(DataIntegrityViolationException ex, HttpServletRequest request) {
+        String message = "Data integrity violation";
         HttpStatus status = HttpStatus.BAD_REQUEST;
-        String message = "Invalid request data";
-
-        if (isDuplicateKey(ex)) {
-            status = HttpStatus.CONFLICT;
+        if (ex.getCause() != null && ex.getCause().getMessage().contains("Duplicate entry")) {
             message = "resource already exists";
+            status = HttpStatus.CONFLICT;
         }
-
-        ErrorResponseDto errorResponse = ErrorResponseDto.builder()
+        ErrorResponseDto ErrorResponseDTO = ErrorResponseDto.builder()
                 .timeStamp(LocalDateTime.now())
                 .httpStatusCode(status)
                 .error(status.getReasonPhrase())
                 .path(request.getRequestURI())
                 .message(message)
+                .errors(List.of(ex.getLocalizedMessage()))
                 .build();
-
-        return ResponseEntity.status(status).body(errorResponse);
+        return new ResponseEntity<>(ErrorResponseDTO, status);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(Exception ex, HttpServletRequest request) {
+        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
+                .timeStamp(LocalDateTime.now())
+                .httpStatusCode(HttpStatus.BAD_REQUEST)
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .path(request.getRequestURI())
+                .message(ex.getMessage())
+                .errors(List.of(ex.getLocalizedMessage()))
+                .build();
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+
+    }
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleEntityNotFoundException(EntityNotFoundException ex, HttpServletRequest request) {
         ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
@@ -116,19 +111,6 @@ public class GlobalExceptionController  {
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(IOException.class)
-    public ResponseEntity<ErrorResponseDto> handleIOException(IOException ex, HttpServletRequest request) {
-        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
-                .timeStamp(LocalDateTime.now())
-                .httpStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)
-                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .path(request.getRequestURI())
-                .message(ex.getMessage())
-                .errors(List.of(ex.getLocalizedMessage()))
-                .build();
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
     @ExceptionHandler(PropertyReferenceException.class)
     public ResponseEntity<ErrorResponseDto> handlePropertyReferenceException(IOException ex, HttpServletRequest request) {
         ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
@@ -140,29 +122,5 @@ public class GlobalExceptionController  {
                 .errors(List.of(ex.getLocalizedMessage()))
                 .build();
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponseDto> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, HttpServletRequest request) {
-        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
-                .timeStamp(LocalDateTime.now())
-                .httpStatusCode(HttpStatus.BAD_REQUEST)
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .path(request.getRequestURI())
-                .message(ex.getMessage())
-                .errors(List.of(ex.getLocalizedMessage()))
-                .build();
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    private boolean isDuplicateKey(DataIntegrityViolationException ex) {
-        Throwable cause = ex.getCause();
-        while (cause != null) {
-            if (cause instanceof org.hibernate.exception.ConstraintViolationException) {
-                return true;
-            }
-            cause = cause.getCause();
-        }
-        return false;
     }
 }
