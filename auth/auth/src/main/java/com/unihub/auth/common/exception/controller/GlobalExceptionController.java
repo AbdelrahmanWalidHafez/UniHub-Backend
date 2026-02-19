@@ -183,22 +183,6 @@ public class GlobalExceptionController  {
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ErrorResponseDto> handleMethodNotAllowedException(
-            HttpRequestMethodNotSupportedException ex,
-            HttpServletRequest request
-    ) {
-        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
-                .timeStamp(LocalDateTime.now())
-                .httpStatusCode(HttpStatusCode.valueOf(HttpStatus.METHOD_NOT_ALLOWED.value()))
-                .error(HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase())
-                .path(request.getRequestURI())
-                .message("Request method '" + ex.getMethod() + "' not allowed for this endpoint")
-                .errors(List.of(ex.getLocalizedMessage()))
-                .build();
-
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.METHOD_NOT_ALLOWED);
-    }v
 
     private boolean isDuplicateKey(DataIntegrityViolationException ex) {
         Throwable cause = ex.getCause();
