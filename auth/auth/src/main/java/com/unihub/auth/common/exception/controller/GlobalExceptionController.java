@@ -6,10 +6,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -163,6 +165,40 @@ public class GlobalExceptionController  {
                 .build();
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponseDto> handleMethodNotAllowedException(
+            HttpRequestMethodNotSupportedException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
+                .timeStamp(LocalDateTime.now())
+                .httpStatusCode(HttpStatusCode.valueOf(HttpStatus.METHOD_NOT_ALLOWED.value()))
+                .error(HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase())
+                .path(request.getRequestURI())
+                .message("Request method '" + ex.getMethod() + "' not allowed for this endpoint")
+                .errors(List.of(ex.getLocalizedMessage()))
+                .build();
+
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponseDto> handleMethodNotAllowedException(
+            HttpRequestMethodNotSupportedException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
+                .timeStamp(LocalDateTime.now())
+                .httpStatusCode(HttpStatusCode.valueOf(HttpStatus.METHOD_NOT_ALLOWED.value()))
+                .error(HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase())
+                .path(request.getRequestURI())
+                .message("Request method '" + ex.getMethod() + "' not allowed for this endpoint")
+                .errors(List.of(ex.getLocalizedMessage()))
+                .build();
+
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.METHOD_NOT_ALLOWED);
+    }v
 
     private boolean isDuplicateKey(DataIntegrityViolationException ex) {
         Throwable cause = ex.getCause();
