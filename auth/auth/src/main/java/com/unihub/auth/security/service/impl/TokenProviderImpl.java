@@ -14,6 +14,7 @@ import com.unihub.auth.security.model.UniversityMetadata;
 import com.unihub.auth.security.model.User;
 import com.unihub.auth.security.repository.UserRepository;
 import com.unihub.auth.security.service.ITokenProvider;
+import com.unihub.auth.security.strategy.context.JwtGenerationContext;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,7 +28,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,6 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +63,8 @@ public class TokenProviderImpl implements ITokenProvider {
     private final ProjectUserDetailsService userDetailsService;
 
     private final AuthenticationManager authenticationManager;
+
+    private final JwtGenerationContext jwtGenerationContext;
 
 
     @Override
@@ -145,18 +146,7 @@ public class TokenProviderImpl implements ITokenProvider {
 
     private AccessToken generateAccessToken(SecretKey key, Authentication authentication) {
        UniversityMetadata userUniversityMetadata = getUniMetaData(authentication);
-        String jwt = Jwts.builder()
-                .setId(UUID.randomUUID().toString())
-                .setIssuer("uniHub")
-                .setSubject("access-token")
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + jwtProperties.expirationTime()))
-                .claim("email", authentication.getName())
-                .claim("authorities", authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")))
-                .claim("university_id",
-                        (userUniversityMetadata != null ?
-                         userUniversityMetadata.getTid() : "N/A"))
-                .signWith(key).compact();
+        String jwt = jwtGenerationContext.performJwtGeneration(authentication,userUniversityMetadata,key);
         return AccessToken
                 .builder()
                 .tokenType("Bearer")
