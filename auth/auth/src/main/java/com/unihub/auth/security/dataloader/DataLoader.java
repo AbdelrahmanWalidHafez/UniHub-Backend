@@ -37,5 +37,18 @@ public class DataLoader implements CommandLineRunner {
                     .build();
             userRepository.save(user);
         }
+        if(userRepository.findByEmail("walidlrahmn5@gmail.com").isEmpty()){
+            var user= User.builder()
+                    .firstName("firstName")
+                    .lastName("lastName")
+                    .password("{noop}password")
+                    .email("walidlrahmn5@gmail.com")
+                    .dob(LocalDate.of(2003, 11, 11))
+                    .gender(Gender.MALE)
+                    .isAccountNonLocked(true)
+                    .role(role1)
+                    .build();
+            userRepository.save(user);
+        }
     }
 }

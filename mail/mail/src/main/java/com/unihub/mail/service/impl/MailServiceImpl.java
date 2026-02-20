@@ -1,5 +1,6 @@
 package com.unihub.mail.service.impl;
 
+import com.unihub.mail.dto.SendVerificationCode;
 import com.unihub.mail.dto.SystemAdminResponse;
 import com.unihub.mail.service.IMailService;
 import jakarta.mail.Message;
@@ -40,12 +41,28 @@ public class MailServiceImpl implements IMailService {
         mailSender.send(message);
     }
 
+    @Async
+    @Override
+    public void sendVerificationCode(SendVerificationCode sendVerificationCode) throws IOException, MessagingException {
+        MimeMessage message = createMimeMessage(sendVerificationCode.getTo()," Forgot Password OTP");
+        message.setContent(populateTemplate(sendVerificationCode),"text/html");
+        mailSender.send(message);
+    }
+
     private MimeMessage createMimeMessage(String to,String subject) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         message.setFrom(new InternetAddress(from));
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
         message.setSubject(subject);
         return message;
+    }
+
+
+    private String populateTemplate(SendVerificationCode sendVerificationCode) throws IOException {
+        String htmlTemplate= fetchTemplate("OTP.html");
+        return htmlTemplate.replace("{{OTP}}",sendVerificationCode.getVerificationCode())
+                           .replace("{{ExpirationMinutes}}", Long.valueOf(sendVerificationCode.getExpirationTime() / 60).toString());
+
     }
 
     private String populateTemplate(SystemAdminResponse adminResponse) throws IOException {

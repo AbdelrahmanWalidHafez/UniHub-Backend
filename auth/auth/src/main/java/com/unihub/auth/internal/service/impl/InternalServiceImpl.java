@@ -11,6 +11,7 @@ import com.unihub.auth.security.model.User;
 import com.unihub.auth.security.repository.RoleRepository;
 import com.unihub.auth.security.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ InternalServiceImpl implements IInternalService {
     private final SystemAdminMapper systemAdminMapper;
 
     @Override
+    @Transactional
     public SystemAdminResponse createSystemAdmin(SystemAdminRequest request) {
         User user = createUser(request);
         String rawPassword = user.getPassword();

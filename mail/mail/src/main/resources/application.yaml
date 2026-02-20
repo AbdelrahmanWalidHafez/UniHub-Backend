@@ -5,7 +5,7 @@ spring:
     name: ${APPLICATION_NAME}
   cloud:
     function:
-      definition: sendAcceptanceMail;sendRejectionMail
+      definition: sendAcceptanceMail;sendRejectionMail;sendVerificationCode
     stream:
       defaultBinder: kafka
       bindings:
@@ -15,6 +15,10 @@ spring:
           group: ${spring.application.name}
         sendRejectionMail-in-0:
           destination: send-email-rejection-topic
+          content-type: application/json
+          group: ${spring.application.name}
+        sendVerificationCode-in-0:
+          destination: send-verification-code-topic
           content-type: application/json
           group: ${spring.application.name}
       kafka:

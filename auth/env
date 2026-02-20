@@ -11,3 +11,5 @@ REDIS_PORT=
 
 #Api_Key
 API_KEY=
+#
+KAFKA=

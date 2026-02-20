@@ -15,5 +15,5 @@ public class AccessToken {
     private String tokenType;
 
     @JsonProperty("expires_in")
-    private int expiresIn;
+    private long expiresIn;
 }
