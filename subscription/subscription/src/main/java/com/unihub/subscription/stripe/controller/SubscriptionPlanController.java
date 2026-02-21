@@ -1,17 +1,10 @@
 package com.unihub.subscription.stripe.controller;
 
-import com.unihub.subscription.common.exception.dto.ErrorResponseDto;
 import com.unihub.subscription.stripe.dto.request.CreateSubscriptionPlanDto;
 import com.unihub.subscription.stripe.dto.response.SubscriptionPlanResponseDto;
 import com.unihub.subscription.stripe.dto.response.SubscriptionPlanResponses;
 import com.unihub.subscription.stripe.mapper.SubscriptionPlanMapper;
 import com.unihub.subscription.stripe.service.ISubscriptionPlanService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +30,7 @@ public class SubscriptionPlanController {
         return ResponseEntity.status(HttpStatus.SC_CREATED).body(subscriptionPlanService.createSubscriptionPlan(createSubscriptionPlanDto));
     }
 
-    @GetMapping("/customer-service/{id}")
+    @GetMapping("/admin/{id}")
     public ResponseEntity<SubscriptionPlanResponseDto> getSubscriptionPlan(@PathVariable UUID id){
         return ResponseEntity.ok(mapper.toDto(subscriptionPlanService.getPlan(id)));
     }

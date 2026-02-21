@@ -33,7 +33,7 @@ public class ApprovedState implements SubscriptionRequestState {
         return subscriptionRequest;
     }
 
-    private UniversityResponse createUniversity(SubscriptionRequest subscriptionRequest){
+    private UniversityResponse  createUniversity(SubscriptionRequest subscriptionRequest){
         ResponseEntity<UniversityResponse> universityResponse=universityFeignClient.createUniversity(subscriptionMapper.toUniversityRequestDto(subscriptionRequest));
         return universityResponse.getBody();
     }

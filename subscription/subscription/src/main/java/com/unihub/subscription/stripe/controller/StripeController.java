@@ -1,15 +1,7 @@
 package com.unihub.subscription.stripe.controller;
 
-import com.unihub.subscription.common.exception.dto.ErrorResponseDto;
 import com.unihub.subscription.stripe.dto.response.StripeResponse;
-import com.unihub.subscription.stripe.dto.response.SubscriptionPlanResponseDto;
 import com.unihub.subscription.stripe.service.IStripeService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpStatus;

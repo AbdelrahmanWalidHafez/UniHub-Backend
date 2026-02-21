@@ -1,7 +1,5 @@
 package com.unihub.subscription.subscriptionrequest.controller;
 
-import com.unihub.subscription.common.exception.dto.ErrorResponseDto;
-import com.unihub.subscription.stripe.dto.response.SubscriptionPlanResponseDto;
 import com.unihub.subscription.subscriptionrequest.dto.request.SubscriptionRequestDto;
 import com.unihub.subscription.subscriptionrequest.dto.request.UpdateSubscriptionRequestDto;
 import com.unihub.subscription.subscriptionrequest.dto.response.AfterUpdateResponse;
@@ -9,12 +7,6 @@ import com.unihub.subscription.subscriptionrequest.dto.response.SubscriptionRequ
 import com.unihub.subscription.subscriptionrequest.dto.response.SubscriptionRequestResponses;
 import com.unihub.subscription.subscriptionrequest.model.Status;
 import com.unihub.subscription.subscriptionrequest.service.ISubscriptionRequestService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpStatus;
@@ -45,6 +37,11 @@ public class SubscriptionController {
         return ResponseEntity
                 .status(HttpStatus.SC_CREATED)
                 .body(subscriptionRequestService.createSubscriptionRequest(subscriptionRequestDto,accreditation,logo));
+    }
+
+    @GetMapping("/customer-service/get-request/{id}")
+    public ResponseEntity<SubscriptionRequestResponseDto> getSubscriptionRequest(@PathVariable UUID id){
+        return ResponseEntity.ok(subscriptionRequestService.getSubscription(id));
     }
 
     @GetMapping("/customer-service/get-requests")
