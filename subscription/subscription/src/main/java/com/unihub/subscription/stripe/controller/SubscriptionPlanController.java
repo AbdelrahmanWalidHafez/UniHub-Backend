@@ -189,4 +189,9 @@ public class SubscriptionPlanController {
         return ResponseEntity.ok(subscriptionPlanService.setUniversityPlan(request,id));
     }
 
+    @PutMapping("/system-admin/upgrade-university-subscription/{id}")
+    public ResponseEntity<Void> upgradeSubscriptionPlan(HttpServletRequest request, @PathVariable UUID id){
+        return ResponseEntity.ok(subscriptionPlanService.upgradeUniversityPlan(request,id));
+    }
+
 }

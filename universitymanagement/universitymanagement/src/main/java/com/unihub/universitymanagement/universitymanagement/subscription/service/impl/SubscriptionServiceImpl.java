@@ -6,6 +6,7 @@ import com.unihub.universitymanagement.universitymanagement.subscription.service
 import com.unihub.universitymanagement.universitymanagement.university.model.University;
 import com.unihub.universitymanagement.universitymanagement.university.repository.UniversityRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +18,20 @@ public class SubscriptionServiceImpl implements ISubscriptionService {
     private final UniversityRepository universityRepository;
 
     @Override
-    public void update(SubscriptionPlan request) {
+    @Transactional
+    public void setPlan(SubscriptionPlan request) {
         University university=fetchUniversity(request.getUniversityID());
         UniversitySubscriptionPlan universitySubscriptionPlan=generatePlan(request);
-        universitySubscriptionPlan.setUniversity(university);
         university.setSubscriptionPlan(universitySubscriptionPlan);
+        universityRepository.save(university);
+    }
+
+    @Override
+    @Transactional
+    public void upgradePlan(SubscriptionPlan request){
+        University university=fetchUniversity(request.getUniversityID());
+        UniversitySubscriptionPlan universitySubscriptionPlan=university.getSubscriptionPlan();
+        upgradePlan(universitySubscriptionPlan,request);
         universityRepository.save(university);
     }
 
@@ -36,5 +46,14 @@ public class SubscriptionServiceImpl implements ISubscriptionService {
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .build();
+    }
+
+    private void  upgradePlan(UniversitySubscriptionPlan universitySubscriptionPlan,SubscriptionPlan subscriptionPlan ){
+        if(universitySubscriptionPlan==null){
+            throw new EntityNotFoundException("No subscription plan found");
+        }
+        universitySubscriptionPlan.setPid(universitySubscriptionPlan.getPid());
+        universitySubscriptionPlan.setStartDate(universitySubscriptionPlan.getStartDate());
+        universitySubscriptionPlan.setEndDate(universitySubscriptionPlan.getEndDate());
     }
 }

@@ -18,6 +18,9 @@ spring:
         setUniversitySubscriptionPlan-out-0:
           destination: set-plan-topic
           content-type: application/json
+        upgradeUniversitySubscriptionPlan-out-0:
+          destination: ugrade-plan-topic
+          content-type: application/json
         sendAcceptanceMail-out-0:
           destination: send-email-acceptance-topic
           content-type: application/json
