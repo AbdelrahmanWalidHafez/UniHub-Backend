@@ -2,6 +2,8 @@ package com.unihub.auth.security.repository;
 
 import com.unihub.auth.security.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -13,4 +15,10 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+
+    @Query("SELECT COUNT(u) FROM User u " +
+            "JOIN u.universityMetadata um " +
+            "WHERE um.tid = :tid")
+    long countByUniversityTid(@Param("tid") UUID tid);
 }

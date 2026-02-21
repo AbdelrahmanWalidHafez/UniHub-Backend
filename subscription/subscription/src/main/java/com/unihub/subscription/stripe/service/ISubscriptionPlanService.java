@@ -20,5 +20,8 @@ public interface ISubscriptionPlanService {
 
     Void setUniversityPlan(HttpServletRequest request, UUID subscriptionPlanId);
 
+    Void upgradeUniversityPlan(HttpServletRequest request, UUID subscriptionPlanId);
+
     void deleteSubscription(UUID id);
+
 }

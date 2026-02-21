@@ -49,8 +49,7 @@ public class University extends BaseEntity {
     @OneToOne(
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            fetch = FetchType.EAGER,
-            optional = true
+            fetch = FetchType.LAZY
     )
     @JoinColumn(name = "subscription_plan_id")
     private UniversitySubscriptionPlan subscriptionPlan;

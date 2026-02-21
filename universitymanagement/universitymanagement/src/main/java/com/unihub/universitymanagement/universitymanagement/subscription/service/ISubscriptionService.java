@@ -4,6 +4,8 @@ import com.unihub.universitymanagement.universitymanagement.subscription.dto.req
 
 public interface ISubscriptionService {
 
-     void update(SubscriptionPlan request) ;
+     void setPlan(SubscriptionPlan request) ;
+
+     void upgradePlan(SubscriptionPlan request);
 
 }

@@ -43,7 +43,6 @@ InternalServiceImpl implements IInternalService {
         userRepository.save(user);
         SystemAdminResponse systemAdminResponse = systemAdminMapper.toDto(user);
         systemAdminResponse.setPassword(rawPassword);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return systemAdminResponse;
     }
 
