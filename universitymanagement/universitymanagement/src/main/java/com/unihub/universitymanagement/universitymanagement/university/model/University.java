@@ -46,12 +46,7 @@ public class University extends BaseEntity {
     @Column(nullable = false)
     private String accreditationKey;
 
-    @OneToOne(
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
-    @JoinColumn(name = "subscription_plan_id")
+    @OneToOne(mappedBy = "university", fetch = FetchType.EAGER,cascade = CascadeType.ALL,orphanRemoval = true)
     private UniversitySubscriptionPlan subscriptionPlan;
 
 }

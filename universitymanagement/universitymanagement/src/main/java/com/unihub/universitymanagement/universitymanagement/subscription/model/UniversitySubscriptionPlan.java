@@ -28,7 +28,8 @@ public class UniversitySubscriptionPlan {
     @Column(updatable = false)
     private LocalDate endDate;
 
-    @OneToOne(mappedBy = "subscriptionPlan",fetch = FetchType.EAGER)
+    @OneToOne()
+    @JoinColumn(name = "university_id")
     private University university;
 
 }

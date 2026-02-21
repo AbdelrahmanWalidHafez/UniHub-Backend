@@ -7,6 +7,11 @@ spring:
     openfeign:
       circuitbreaker:
         enabled: true
+      client:
+        config:
+          default:
+            connect-timeout: 4000
+            read-timeout: 4000
     stream:
       bindings:
         uploadFile-out-0:
@@ -19,7 +24,7 @@ spring:
           destination: set-plan-topic
           content-type: application/json
         upgradeUniversitySubscriptionPlan-out-0:
-          destination: ugrade-plan-topic
+          destination: upgrade-plan-topic
           content-type: application/json
         sendAcceptanceMail-out-0:
           destination: send-email-acceptance-topic
