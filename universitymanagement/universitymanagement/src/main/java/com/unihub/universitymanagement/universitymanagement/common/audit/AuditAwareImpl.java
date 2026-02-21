@@ -17,9 +17,9 @@ public class AuditAwareImpl implements AuditorAware<String> {
     public Optional<String> getCurrentAuditor() {
         try {
             String email = request.getHeader("X-User-Email");
-            return Optional.of(email != null ? email : "Anonymous");
+            return Optional.of(email != null ? email : "System");
         } catch (IllegalStateException e) {
-            return Optional.of("system");
+            return Optional.of("System");
         }
     }
 }

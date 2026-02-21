@@ -2,6 +2,7 @@ package com.unihub.auth.security.config;
 
 import com.unihub.auth.security.filter.InternalApiKeyFilter;
 import com.unihub.auth.security.filter.JwtValidatorFilter;
+import com.unihub.auth.security.filter.VerificationFilter;
 import com.unihub.auth.security.provider.ProjectAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +28,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectSecurityConfig {
 
+    private final VerificationFilter verificationFilter;
+
     private final JwtValidatorFilter  jwtValidatorFilter;
 
     private final InternalApiKeyFilter internalApiKeyFilter;
@@ -38,13 +41,17 @@ public class ProjectSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/v1/auth/login","/api/v1/auth/refresh").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/api/v1/auth/login",
+                                "/api/v1/auth/refresh",
+                                "/actuator/**",
+                                "/api/v1/auth/forgot-password",
+                                "/api/v1/auth/verify-forgot-password-token").permitAll()
                         .anyRequest()
                         .authenticated())
                 .cors((corsConfig) -> corsConfig.configurationSource(corsConfigurationSource()))
                 .addFilterBefore(internalApiKeyFilter,UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(jwtValidatorFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterAfter(jwtValidatorFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(verificationFilter, InternalApiKeyFilter.class);
         return httpSecurity.build();
     }
 

@@ -12,6 +12,11 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(
+        indexes = {
+                @Index(name = "idx_tid", columnList = "tid")
+        }
+)
 public class UniversityMetadata extends BaseEntity {
 
     @Id
