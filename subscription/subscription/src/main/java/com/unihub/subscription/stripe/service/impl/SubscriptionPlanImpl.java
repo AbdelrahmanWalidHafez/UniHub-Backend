@@ -82,6 +82,14 @@ public class SubscriptionPlanImpl implements ISubscriptionPlanService {
     }
 
     @Override
+    public Void upgradeUniversityPlan(HttpServletRequest request, UUID subscriptionPlanId) {
+        UUID universityId=UUID.fromString(request.getHeader("X-User-University-Id"));
+        SubscriptionPlanRequest subscriptionPlanRequest=generateSubscriptionPlanRequest(universityId,subscriptionPlanId);
+        streamBridge.send("upgradeUniversitySubscriptionPlan-out-0",subscriptionPlanRequest);
+        return null;
+    }
+
+    @Override
     public void deleteSubscription(UUID id) {
         validatePlanCount(id);
         repository.deleteById(id);

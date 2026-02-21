@@ -16,6 +16,12 @@ public class UniversitySubscriptionPlanFunctions {
 
     @Bean
     public Consumer<SubscriptionPlan> setUniversitySubscriptionPlan() {
-        return subscriptionService::update;
+        return subscriptionService::setPlan;
+    }
+
+
+    @Bean
+    public Consumer<SubscriptionPlan> upgradeUniversitySubscriptionPlan() {
+        return subscriptionService::upgradePlan;
     }
 }
