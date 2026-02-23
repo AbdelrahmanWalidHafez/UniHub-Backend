@@ -38,6 +38,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
+    @Transient
+    private String confirmPassword;
+
     boolean isAccountNonLocked;
 
     @ManyToOne(fetch = FetchType.EAGER)
