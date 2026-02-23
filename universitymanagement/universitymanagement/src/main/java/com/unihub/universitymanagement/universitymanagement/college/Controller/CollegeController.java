@@ -65,4 +65,13 @@ public class CollegeController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/search-college")
+    public ResponseEntity<CollegeMetadataResponses> searchCollege(@RequestParam("search_text")String searchText,HttpServletRequest request){
+        return ResponseEntity.ok(
+                CollegeMetadataResponses.builder()
+                        .colleges(collegeService.searchColleges(searchText,request))
+                        .build()
+        ) ;
+    }
+
 }

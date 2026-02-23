@@ -20,4 +20,6 @@ public interface ICollegeService {
 
     void deleteCollege(HttpServletRequest request,UUID uuid);
 
+    List<CollegeMetadata> searchColleges(String searchText,HttpServletRequest request);
+
 }

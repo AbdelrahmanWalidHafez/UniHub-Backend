@@ -63,10 +63,20 @@ public class CollegeServiceImpl implements ICollegeService {
         return collegeMapper.toDto(collegeRepository.save(college));
     }
 
+    //TODO call auth microservice to see whether there are users associated with this college or not
     @Transactional
     public void deleteCollege(HttpServletRequest request, UUID uuid){
         College college=fetchCollege(uuid,request);
         collegeRepository.delete(college);
+    }
+
+    @Override
+    public List<CollegeMetadata> searchColleges(String searchText,HttpServletRequest request){
+        return collegeRepository
+                .searchByUniversity(fetchUniHeader(request),searchText)
+                .stream()
+                .map(collegeMapper::toMetaData)
+                .toList();
     }
 
     private College fetchCollege(UUID uuid,HttpServletRequest request){
