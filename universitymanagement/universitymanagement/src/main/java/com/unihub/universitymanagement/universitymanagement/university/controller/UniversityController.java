@@ -19,7 +19,6 @@ public class UniversityController {
 
     private final IUniversityService universityService;
 
-
     @GetMapping("/customer-service/get-universities")
     public ResponseEntity<UniversityMetadataResponses> searchUniversity(
             @RequestParam(name = "page_num", defaultValue = "1") int pageNum,
