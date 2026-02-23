@@ -195,18 +195,6 @@ public class GlobalExceptionController  {
         }
         return false;
     }
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Object> handleIllegalArgumentException(Exception ex, HttpServletRequest request) {
-        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
-                .timeStamp(LocalDateTime.now())
-                .httpStatusCode(HttpStatus.BAD_REQUEST)
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .path(request.getRequestURI())
-                .message(ex.getMessage())
-                .errors(List.of(ex.getLocalizedMessage()))
-                .build();
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
-    }
 
     @ExceptionHandler(OptimisticLockException.class)
     public ResponseEntity<ErrorResponseDto> handleOptimisticLockingException(OptimisticLockException ex, HttpServletRequest request) {

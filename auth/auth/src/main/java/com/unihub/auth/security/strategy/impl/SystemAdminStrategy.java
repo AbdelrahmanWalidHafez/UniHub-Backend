@@ -43,8 +43,8 @@ public class SystemAdminStrategy implements JwtGenerationStrategy {
                 .setSubject("access-token")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + expiration))
-                .claim("add_users",true)
-                .claim("active",true)
+                .claim("CAN_ADD_USERS",true)
+                .claim("IS_ACTIVE",true)
                 .claim("email", authentication.getName())
                 .claim("authorities", authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")))
                 .claim("university_id",
@@ -54,10 +54,10 @@ public class SystemAdminStrategy implements JwtGenerationStrategy {
         try{
           handleRequest(universityMetadata);
         }catch (SubscriptionException e){
-            jwt.claim("add_users",false);
-            jwt.claim("active",false);
+            jwt.claim("CAN_ADD_USERS",false);
+            jwt.claim("IS_ACTIVE",false);
         }catch (MaxUserAmountExceededException e){
-            jwt.claim("active",false);
+            jwt.claim("IS_ACTIVE",false);
         }
         return jwt.compact();
     }

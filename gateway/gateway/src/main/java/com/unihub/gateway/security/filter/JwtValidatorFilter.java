@@ -22,7 +22,9 @@ import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 @Component
@@ -97,11 +99,21 @@ public class JwtValidatorFilter implements WebFilter {
     private Authentication generateUsernamePasswordAuthenticationToken(Claims claims) {
         try {
             String email = String.valueOf(claims.get("email"));
-            String authorities = String.valueOf(claims.get("authorities"));
-            return new UsernamePasswordAuthenticationToken(email, null, AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
+            List<String> authorities =getAuthorities(claims);
+            return new UsernamePasswordAuthenticationToken(email, null,AuthorityUtils.createAuthorityList(authorities));
         } catch (Exception e) {
             throw new BadCredentialsException("invalid token received");
         }
+    }
+    private List<String> getAuthorities(Claims claims) {
+        String authorities = String.valueOf(claims.get("authorities"));
+        List<String> authoritiesList = new ArrayList<>(claims.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof Boolean)
+                .filter(entry -> Boolean.TRUE.equals(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .toList());
+        authoritiesList.add(authorities);
+        return authoritiesList;
     }
 
     private Mono<Void> unauthorized(ServerWebExchange exchange, Exception ex) {
