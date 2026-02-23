@@ -20,25 +20,12 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
-@Tag(
-        name = "University API",
-        description = "APIs for fetching universities"
-)
+
 public class UniversityController {
 
     private final IUniversityService universityService;
 
-    @Operation(
-            summary = "fetch universities metadata",
-            description = "Enables a Customer service user to fetch universities metadata"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "universities fetched successfully",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = UniversityMetadataResponses.class))
-            ),
-    })
+
     @GetMapping("/customer-service/get-universities")
     public ResponseEntity<UniversityMetadataResponses> searchUniversity(
             @RequestParam(name = "page_num", defaultValue = "1") int pageNum,
@@ -50,33 +37,11 @@ public class UniversityController {
                 .build());
     }
 
-    @Operation(
-            summary = "fetch a university by its id",
-            description = "Enables a Customer service user to fetch universities by its id"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "university fetched successfully",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = UniversityResponse.class))
-            )
-    })
     @GetMapping("/get-university/{id}")
     public ResponseEntity<UniversityResponse> searchUniversity(@PathVariable UUID id){
         return ResponseEntity.ok(universityService.getUniversity(id));
     }
 
-    @Operation(
-            summary = "searches a university ",
-            description = "Enables a Customer service user to search for a university"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "universities with similar name fetched successfully",
-                    content = @Content(mediaType = "application/json",schema = @Schema(implementation = UniversityResponse.class))
-            ),
-    })
     @GetMapping("/customer-service/search-university")
     public ResponseEntity<UniversityMetadataResponses> searchUniversity(@RequestParam("search_text") String searchText){
         return ResponseEntity.ok(universityService.searchUniversity(searchText));

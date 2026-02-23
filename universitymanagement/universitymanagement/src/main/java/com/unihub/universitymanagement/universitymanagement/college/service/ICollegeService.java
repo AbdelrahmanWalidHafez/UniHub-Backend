@@ -2,11 +2,19 @@ package com.unihub.universitymanagement.universitymanagement.college.service;
 
 import com.unihub.universitymanagement.universitymanagement.college.dto.request.CreateCollegeRequest;
 import com.unihub.universitymanagement.universitymanagement.college.dto.response.CollegeDto;
+import com.unihub.universitymanagement.universitymanagement.college.dto.response.CollegeMetadata;
+import jakarta.servlet.http.HttpServletRequest;
 
+import java.net.http.HttpRequest;
+import java.util.List;
 import java.util.UUID;
 
 public interface ICollegeService {
-    CollegeDto createCollege(CreateCollegeRequest collegeRequest);
+
+    CollegeDto createCollege(CreateCollegeRequest collegeRequest, HttpServletRequest request);
+
+    List<CollegeMetadata> getAllColleges(HttpServletRequest request, int pageNum, String sortDir, String sortField);
+
     CollegeDto getCollege(UUID uuid);
 
 }

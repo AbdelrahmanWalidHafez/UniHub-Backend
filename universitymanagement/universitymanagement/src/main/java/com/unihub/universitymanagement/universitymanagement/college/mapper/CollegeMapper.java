@@ -2,6 +2,7 @@ package com.unihub.universitymanagement.universitymanagement.college.mapper;
 
 import com.unihub.universitymanagement.universitymanagement.college.dto.request.CreateCollegeRequest;
 import com.unihub.universitymanagement.universitymanagement.college.dto.response.CollegeDto;
+import com.unihub.universitymanagement.universitymanagement.college.dto.response.CollegeMetadata;
 import com.unihub.universitymanagement.universitymanagement.college.model.College;
 import com.unihub.universitymanagement.universitymanagement.subscription.mapper.UniversitySubscriptionPlanMapper;
 import com.unihub.universitymanagement.universitymanagement.university.dto.request.CreateUniversityRequest;
@@ -28,5 +29,15 @@ public class CollegeMapper {
         collegeDto.setCreatedBy(college.getCreatedBy());
         collegeDto.setCreatedAt(college.getCreatedAt());
         return collegeDto;
+    }
+
+    public CollegeMetadata toMetaData(College college) {
+        CollegeMetadata collegeMetadata= new CollegeMetadata();
+        collegeMetadata.setId(college.getId());
+        collegeMetadata.setCollegeName(college.getCollegeName());
+        collegeMetadata.setCampus(college.getCampus());
+        collegeMetadata.setCreatedAt(college.getCreatedAt());
+        collegeMetadata.setCreatedBy(college.getCreatedBy());
+        return collegeMetadata;
     }
 }
