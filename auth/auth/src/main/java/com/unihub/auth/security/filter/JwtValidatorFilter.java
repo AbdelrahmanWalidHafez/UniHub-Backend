@@ -2,6 +2,7 @@ package com.unihub.auth.security.filter;
 
 
 import com.unihub.auth.common.redis.service.IRedisService;
+import com.unihub.auth.security.config.JwtConfigurationProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -10,7 +11,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -28,11 +28,7 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
 
     private final IRedisService redisService;
 
-    @Value("${jwt.secret}")
-    String secret;
-
-    @Value("${jwt.authorizationHeader}")
-    private String authHeader;
+    private final JwtConfigurationProperties jwtConfigurationProperties;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -53,11 +49,14 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
         return  path.equals("/api/v1/auth/login") ||
                 path.startsWith("/actuator") ||
                 path.equals("/api/v1/auth/refresh")||
+                path.equals("/api/v1/auth/forgot-password")||
+                path.equals("/api/v1/auth/change-forgot-password")||
+                path.equals("/api/v1/auth/verify-forgot-password-token")||
                 path.startsWith("/api/v1/internal");
     }
 
     private String extractJwt(HttpServletRequest request) {
-        String authHeaderValue = request.getHeader(authHeader);
+        String authHeaderValue = request.getHeader(jwtConfigurationProperties.authorizationHeader());
         if(authHeaderValue == null||!authHeaderValue.startsWith("Bearer ")) {
             throw new BadCredentialsException("invalid token received");
         }
@@ -86,7 +85,7 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
     }
 
     private SecretKey getSecretKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(jwtConfigurationProperties.secret().getBytes(StandardCharsets.UTF_8));
     }
 
     private void checkBlackListedToken(Claims claims) {

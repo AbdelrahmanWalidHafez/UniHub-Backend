@@ -7,6 +7,11 @@ spring:
     openfeign:
       circuitbreaker:
         enabled: true
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 8000
     function:
       definition: setUniversitySubscriptionPlan;upgradeUniversitySubscriptionPlan
     stream:

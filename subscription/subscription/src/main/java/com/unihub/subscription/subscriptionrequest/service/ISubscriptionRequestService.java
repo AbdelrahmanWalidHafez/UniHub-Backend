@@ -18,7 +18,7 @@ import java.util.UUID;
 public interface ISubscriptionRequestService {
     SubscriptionRequestResponseDto createSubscriptionRequest(SubscriptionRequestDto subscriptionRequestDto, MultipartFile accreditation, MultipartFile logo) throws IOException;
 
-    SubscriptionRequestResponseDto getSubscription(UUID id) throws IOException;
+    SubscriptionRequestResponseDto getSubscription(UUID id) ;
 
     List<SubscriptionsMetaData> getSubscriptionRequests(int pageNum, String sortDir, String sortFiled, Status status);
 

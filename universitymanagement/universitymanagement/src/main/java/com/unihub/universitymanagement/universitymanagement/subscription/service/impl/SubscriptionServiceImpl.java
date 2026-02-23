@@ -22,6 +22,7 @@ public class SubscriptionServiceImpl implements ISubscriptionService {
     public void setPlan(SubscriptionPlan request) {
         University university=fetchUniversity(request.getUniversityID());
         UniversitySubscriptionPlan universitySubscriptionPlan=generatePlan(request);
+        universitySubscriptionPlan.setUniversity(university);
         university.setSubscriptionPlan(universitySubscriptionPlan);
         universityRepository.save(university);
     }
@@ -31,7 +32,7 @@ public class SubscriptionServiceImpl implements ISubscriptionService {
     public void upgradePlan(SubscriptionPlan request){
         University university=fetchUniversity(request.getUniversityID());
         UniversitySubscriptionPlan universitySubscriptionPlan=university.getSubscriptionPlan();
-        upgradePlan(universitySubscriptionPlan,request);
+        upgradePlan(universitySubscriptionPlan,request,university);
         universityRepository.save(university);
     }
 
@@ -48,12 +49,13 @@ public class SubscriptionServiceImpl implements ISubscriptionService {
                 .build();
     }
 
-    private void  upgradePlan(UniversitySubscriptionPlan universitySubscriptionPlan,SubscriptionPlan subscriptionPlan ){
+    private void  upgradePlan(UniversitySubscriptionPlan universitySubscriptionPlan,SubscriptionPlan subscriptionPlan,University university ){
         if(universitySubscriptionPlan==null){
             throw new EntityNotFoundException("No subscription plan found");
         }
-        universitySubscriptionPlan.setPid(universitySubscriptionPlan.getPid());
-        universitySubscriptionPlan.setStartDate(universitySubscriptionPlan.getStartDate());
-        universitySubscriptionPlan.setEndDate(universitySubscriptionPlan.getEndDate());
+        universitySubscriptionPlan.setPid(subscriptionPlan.getPid());
+        universitySubscriptionPlan.setStartDate(subscriptionPlan.getStartDate());
+        universitySubscriptionPlan.setEndDate(subscriptionPlan.getEndDate());
+        universitySubscriptionPlan.setUniversity(university);
     }
 }

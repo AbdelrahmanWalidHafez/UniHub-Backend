@@ -31,7 +31,7 @@ public class UniversityController {
     }
 
     @GetMapping("/get-university/{id}")
-    public ResponseEntity<UniversityResponse> searchUniversity(@PathVariable UUID id){
+    public ResponseEntity<UniversityResponse> fetchUniversity(@PathVariable UUID id){
         return ResponseEntity.ok(universityService.getUniversity(id));
     }
 

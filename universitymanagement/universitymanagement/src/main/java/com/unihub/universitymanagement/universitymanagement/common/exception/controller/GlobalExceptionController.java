@@ -6,16 +6,15 @@ import jakarta.persistence.OptimisticLockException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.core.PropertyReferenceException;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.io.IOException;
@@ -27,8 +26,9 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionController {
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+            MethodArgumentNotValidException ex) {
         Map<String, String> validationErrors = new HashMap<>();
         List<ObjectError> validationErrorList = ex.getBindingResult().getAllErrors();
         validationErrorList.forEach((error) -> {
@@ -37,6 +37,19 @@ public class GlobalExceptionController {
             validationErrors.put(fieldName, validationMsg);
         });
         return new ResponseEntity<>(validationErrors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgumentException(Exception ex, HttpServletRequest request) {
+        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
+                .timeStamp(LocalDateTime.now())
+                .httpStatusCode(HttpStatus.CONFLICT)
+                .error(HttpStatus.CONFLICT.getReasonPhrase())
+                .path(request.getRequestURI())
+                .message(ex.getMessage())
+                .errors(List.of(ex.getLocalizedMessage()))
+                .build();
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(Exception.class)
@@ -50,19 +63,6 @@ public class GlobalExceptionController {
                 .errors(List.of(ex.getLocalizedMessage()))
                 .build();
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Object> handleIllegalArgumentException(Exception ex, HttpServletRequest request) {
-        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
-                .timeStamp(LocalDateTime.now())
-                .httpStatusCode(HttpStatus.BAD_REQUEST)
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .path(request.getRequestURI())
-                .message(ex.getMessage())
-                .errors(List.of(ex.getLocalizedMessage()))
-                .build();
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -136,4 +136,23 @@ public class GlobalExceptionController {
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.CONFLICT);
 
     }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponseDto> handleMethodNotAllowedException(
+            HttpRequestMethodNotSupportedException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
+                .timeStamp(LocalDateTime.now())
+                .httpStatusCode(HttpStatusCode.valueOf(HttpStatus.METHOD_NOT_ALLOWED.value()))
+                .error(HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase())
+                .path(request.getRequestURI())
+                .message("Request method '" + ex.getMethod() + "' not allowed for this endpoint")
+                .errors(List.of(ex.getLocalizedMessage()))
+                .build();
+
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    //TODO implement MethodArgumentTypeMismatchException
 }

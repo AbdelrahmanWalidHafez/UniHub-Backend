@@ -28,6 +28,7 @@ public class SecurityConfig {
             exchange.pathMatchers("/unihub/subscription/api/v1/public/request-subscription").permitAll();
             exchange.pathMatchers("/unihub/subscription/api/v1/customer-service/**").hasRole("CUSTOMER_SERVICE");
             exchange.pathMatchers("/unihub/subscription/api/v1/system-admin/**").hasRole("SYSTEM_ADMIN");
+            exchange.pathMatchers("/unihub/subscription/api/v1/admin/**").hasAnyRole("SYSTEM_ADMIN","CUSTOMER_SERVICE");
             exchange.pathMatchers("/unihub/subscription/api/v1/subscription-plans/customer-service/**").hasRole("CUSTOMER_SERVICE");
             exchange.pathMatchers("/unihub/subscription/api/v1/subscription-plans/system-admin/**").hasRole("SYSTEM_ADMIN");
             exchange.pathMatchers("/unihub/subscription/api/v1/subscription-plans/all").permitAll();
