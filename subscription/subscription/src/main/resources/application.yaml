@@ -10,8 +10,8 @@ spring:
       client:
         config:
           default:
-            connect-timeout: 4000
-            read-timeout: 4000
+            connect-timeout: 10000
+            read-timeout: 16000
     stream:
       bindings:
         uploadFile-out-0:
