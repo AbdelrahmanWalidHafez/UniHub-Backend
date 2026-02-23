@@ -10,13 +10,11 @@ import com.unihub.universitymanagement.universitymanagement.college.service.ICol
 import com.unihub.universitymanagement.universitymanagement.university.model.University;
 import com.unihub.universitymanagement.universitymanagement.university.service.IUniversityService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.LockModeType;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
