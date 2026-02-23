@@ -54,4 +54,7 @@ public class CollegeController {
         ) ;
     }
 
+    @PutMapping ("/update-college/{id}")
+
+
 }

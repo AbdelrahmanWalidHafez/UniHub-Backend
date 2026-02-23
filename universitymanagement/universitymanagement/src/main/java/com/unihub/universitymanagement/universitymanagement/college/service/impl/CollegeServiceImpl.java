@@ -41,8 +41,7 @@ public class CollegeServiceImpl implements ICollegeService {
     @Override
     public List<CollegeMetadata> getAllColleges(HttpServletRequest request, int pageNum, String sortDir,String sortField) {
         Pageable pageable=createPageable(pageNum,sortDir,sortField);
-        University university=universityService.fetchUniversity(fetchUniHeader(request));
-        return collegeRepository.findAllByUniversity(pageable,university)
+        return collegeRepository.findAllByUniversity_UniId(pageable,fetchUniHeader(request))
                 .stream()
                 .map(collegeMapper::toMetaData)
                 .toList();
