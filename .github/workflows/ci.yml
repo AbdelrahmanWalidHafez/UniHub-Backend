@@ -23,7 +23,7 @@ jobs:
       SPRING_CLOUD_CONFIG_URI: http://localhost:8080
 
       # Kafka Configuration
-      KAFKA: localhost:9092
+      KAFKA: kafka:9092
 
       # AWS S3 Configuration (dummy values for tests)
       ACCESS_KEY: test-access-key
