@@ -5,7 +5,6 @@ import com.unihub.universitymanagement.universitymanagement.college.dto.response
 import com.unihub.universitymanagement.universitymanagement.college.dto.response.CollegeMetadata;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.net.http.HttpRequest;
 import java.util.List;
 import java.util.UUID;
 

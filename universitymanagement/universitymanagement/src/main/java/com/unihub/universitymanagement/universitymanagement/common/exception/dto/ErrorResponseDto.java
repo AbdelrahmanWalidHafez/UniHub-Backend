@@ -2,7 +2,6 @@ package com.unihub.universitymanagement.universitymanagement.common.exception.dt
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import org.springframework.http.HttpStatusCode;
 

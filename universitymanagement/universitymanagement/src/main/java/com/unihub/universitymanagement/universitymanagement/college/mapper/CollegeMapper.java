@@ -4,10 +4,6 @@ import com.unihub.universitymanagement.universitymanagement.college.dto.request.
 import com.unihub.universitymanagement.universitymanagement.college.dto.response.CollegeDto;
 import com.unihub.universitymanagement.universitymanagement.college.dto.response.CollegeMetadata;
 import com.unihub.universitymanagement.universitymanagement.college.model.College;
-import com.unihub.universitymanagement.universitymanagement.subscription.mapper.UniversitySubscriptionPlanMapper;
-import com.unihub.universitymanagement.universitymanagement.university.dto.request.CreateUniversityRequest;
-import com.unihub.universitymanagement.universitymanagement.university.model.University;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 @Component
 public class CollegeMapper {

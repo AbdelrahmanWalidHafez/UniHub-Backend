@@ -3,12 +3,6 @@ package com.unihub.universitymanagement.universitymanagement.university.controll
 import com.unihub.universitymanagement.universitymanagement.university.dto.response.UniversityMetadataResponses;
 import com.unihub.universitymanagement.universitymanagement.university.dto.response.UniversityResponse;
 import com.unihub.universitymanagement.universitymanagement.university.service.IUniversityService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
