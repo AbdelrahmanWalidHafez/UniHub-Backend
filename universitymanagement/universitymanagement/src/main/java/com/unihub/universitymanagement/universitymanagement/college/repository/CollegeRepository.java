@@ -12,5 +12,6 @@ import java.util.UUID;
 public interface CollegeRepository extends JpaRepository<College,UUID> {
 
     List<College> findAllByUniversity_UniId(Pageable pageable, UUID universityId);
+
     Optional<College> findByIdAndUniversity_UniId(UUID id, UUID universityId);
 }

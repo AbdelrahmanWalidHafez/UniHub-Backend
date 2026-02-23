@@ -58,7 +58,6 @@ public class CollegeServiceImpl implements ICollegeService {
 
 
     @Transactional
-    @Lock(LockModeType.OPTIMISTIC)
     public CollegeDto updateCollege(HttpServletRequest request,UUID uuid,CreateCollegeRequest createCollegeRequest){
         College college=fetchCollege(uuid,request);
         college.setCollegeName(createCollegeRequest.getCollegeName());
@@ -67,7 +66,6 @@ public class CollegeServiceImpl implements ICollegeService {
     }
 
     @Transactional
-    @Lock(LockModeType.OPTIMISTIC)
     public void deleteCollege(HttpServletRequest request, UUID uuid){
         College college=fetchCollege(uuid,request);
         collegeRepository.delete(college);

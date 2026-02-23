@@ -24,6 +24,9 @@ public class College extends BaseEntity {
 
     @Column(nullable = false)
     private String campus;
+
+    @Version
+    private Long version;
     // MANY colleges belong to ONE university
     @ManyToOne(fetch = FetchType.LAZY,optional = false)
     @JoinColumn(name = "university_id",updatable = false) // foreign key column

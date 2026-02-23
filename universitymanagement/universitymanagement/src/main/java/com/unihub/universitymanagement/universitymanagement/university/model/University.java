@@ -36,16 +36,16 @@ public class University extends BaseEntity {
     @Column(unique = true,nullable = false)
     private String contactNumber;
 
-    @Column(nullable = false)
+    @Column(nullable = false,unique = true)
     private String universityWebsiteUrl;
 
     @Column(nullable = false,unique = true)
     private String universityDomain;
 
-    @Column(nullable = false)
+    @Column(nullable = false,unique = true)
     private String universityLogoKey;
 
-    @Column(nullable = false)
+    @Column(nullable = false,unique = true)
     private String accreditationKey;
 
     @OneToOne(

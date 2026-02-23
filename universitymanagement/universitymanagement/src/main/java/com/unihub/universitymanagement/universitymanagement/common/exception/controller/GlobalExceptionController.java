@@ -2,6 +2,7 @@ package com.unihub.universitymanagement.universitymanagement.common.exception.co
 
 import com.unihub.universitymanagement.universitymanagement.common.exception.dto.ErrorResponseDto;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.core.PropertyReferenceException;
@@ -49,13 +50,25 @@ public class GlobalExceptionController {
                 .errors(List.of(ex.getLocalizedMessage()))
                 .build();
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgumentException(Exception ex, HttpServletRequest request) {
+        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
+                .timeStamp(LocalDateTime.now())
+                .httpStatusCode(HttpStatus.BAD_REQUEST)
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .path(request.getRequestURI())
+                .message(ex.getMessage())
+                .errors(List.of(ex.getLocalizedMessage()))
+                .build();
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponseDto> handleDataIntegrityViolationException(DataIntegrityViolationException ex, HttpServletRequest request) {
         String message = "Data integrity violation";
-        HttpStatus status = HttpStatus.BAD_REQUEST;
+        HttpStatus status = HttpStatus.CONFLICT;
         if (ex.getCause() != null && ex.getCause().getMessage().contains("Duplicate entry")) {
             message = "resource already exists";
             status = HttpStatus.CONFLICT;
@@ -75,8 +88,8 @@ public class GlobalExceptionController {
     public ResponseEntity<ErrorResponseDto> handleEntityNotFoundException(EntityNotFoundException ex, HttpServletRequest request) {
         ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
                 .timeStamp(LocalDateTime.now())
-                .httpStatusCode(HttpStatus.BAD_REQUEST)
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .httpStatusCode(HttpStatus.NOT_FOUND)
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
                 .path(request.getRequestURI())
                 .message(ex.getMessage())
                 .errors(List.of(ex.getLocalizedMessage()))
@@ -107,6 +120,20 @@ public class GlobalExceptionController {
                 .message(ex.getMessage())
                 .errors(List.of(ex.getLocalizedMessage()))
                 .build();
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OptimisticLockException.class)
+    public ResponseEntity<ErrorResponseDto> handleOptimisticLockingException(OptimisticLockException ex, HttpServletRequest request) {
+        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
+                .timeStamp(LocalDateTime.now())
+                .httpStatusCode(HttpStatus.CONFLICT)
+                .error(HttpStatus.CONFLICT.getReasonPhrase())
+                .path(request.getRequestURI())
+                .message(ex.getMessage())
+                .errors(List.of(ex.getLocalizedMessage()))
+                .build();
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.CONFLICT);
+
     }
 }
