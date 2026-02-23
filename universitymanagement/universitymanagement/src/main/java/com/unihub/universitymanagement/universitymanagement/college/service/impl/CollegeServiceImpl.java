@@ -10,12 +10,15 @@ import com.unihub.universitymanagement.universitymanagement.college.service.ICol
 import com.unihub.universitymanagement.universitymanagement.university.model.University;
 import com.unihub.universitymanagement.universitymanagement.university.service.IUniversityService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.LockModeType;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,11 +34,17 @@ public class CollegeServiceImpl implements ICollegeService {
     private final IUniversityService universityService;
 
     @Override
+    @Transactional()
     public CollegeDto createCollege(CreateCollegeRequest collegeRequest, HttpServletRequest request) {
         College college=collegeMapper.toEntity(collegeRequest);
         University university=universityService.fetchUniversity(fetchUniHeader(request));
         college.setUniversity(university);
         return collegeMapper.toDto(collegeRepository.save(college));
+    }
+
+    @Override
+    public CollegeDto getCollege(UUID uuid,HttpServletRequest request) {
+        return collegeMapper.toDto(fetchCollege(uuid,request));
     }
 
     @Override
@@ -48,13 +57,24 @@ public class CollegeServiceImpl implements ICollegeService {
     }
 
 
-    @Override
-    public CollegeDto getCollege(UUID uuid) {
-        return collegeMapper.toDto(fetchCollege(uuid));
+    @Transactional
+    @Lock(LockModeType.OPTIMISTIC)
+    public CollegeDto updateCollege(HttpServletRequest request,UUID uuid,CreateCollegeRequest createCollegeRequest){
+        College college=fetchCollege(uuid,request);
+        college.setCollegeName(createCollegeRequest.getCollegeName());
+        college.setCampus(createCollegeRequest.getCollegeCampus());
+        return collegeMapper.toDto(collegeRepository.save(college));
     }
 
-    private College fetchCollege(UUID uuid){
-        return collegeRepository.findById(uuid)
+    @Transactional
+    @Lock(LockModeType.OPTIMISTIC)
+    public void deleteCollege(HttpServletRequest request, UUID uuid){
+        College college=fetchCollege(uuid,request);
+        collegeRepository.delete(college);
+    }
+
+    private College fetchCollege(UUID uuid,HttpServletRequest request){
+        return collegeRepository.findByIdAndUniversity_UniId(uuid,fetchUniHeader(request))
                 .orElseThrow(()->new EntityNotFoundException("college with id "+uuid+" not found"));
     }
 

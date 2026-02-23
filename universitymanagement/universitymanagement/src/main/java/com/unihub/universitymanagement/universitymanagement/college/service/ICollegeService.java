@@ -15,6 +15,10 @@ public interface ICollegeService {
 
     List<CollegeMetadata> getAllColleges(HttpServletRequest request, int pageNum, String sortDir, String sortField);
 
-    CollegeDto getCollege(UUID uuid);
+    CollegeDto getCollege(UUID uuid,HttpServletRequest request);
+
+    CollegeDto updateCollege(HttpServletRequest request,UUID uuid,CreateCollegeRequest createCollegeRequest);
+
+    void deleteCollege(HttpServletRequest request,UUID uuid);
 
 }
