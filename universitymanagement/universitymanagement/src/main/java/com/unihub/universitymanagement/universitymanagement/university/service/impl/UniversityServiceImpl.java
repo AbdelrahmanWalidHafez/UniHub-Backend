@@ -47,6 +47,12 @@ public class UniversityServiceImpl implements IUniversityService {
                 ).build();
     }
 
+    @Override
+    public University fetchUniversity(UUID universityId){
+        return universityRepository.findById(universityId)
+                .orElseThrow(()->new EntityNotFoundException("University with id "+universityId+" not found"));
+    }
+
     private Pageable createPageable(int pageNum, String sortDir, String sortField){
 
         int pageSize=10;
@@ -57,8 +63,4 @@ public class UniversityServiceImpl implements IUniversityService {
         );
     }
 
-    private University fetchUniversity(UUID universityId){
-        return universityRepository.findById(universityId)
-                .orElseThrow(()->new EntityNotFoundException("University with id "+universityId+" not found"));
-    }
 }

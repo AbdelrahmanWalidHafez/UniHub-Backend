@@ -1,24 +1,19 @@
 package com.unihub.auth.security.controller;
 
-import com.unihub.auth.common.exception.dto.ErrorResponseDto;
 import com.unihub.auth.security.dto.request.*;
 import com.unihub.auth.security.dto.response.LoginResponse;
 import com.unihub.auth.security.dto.response.UserDto;
 import com.unihub.auth.security.dto.response.VerificationResponse;
 import com.unihub.auth.security.service.ITokenProvider;
 import com.unihub.auth.security.service.impl.ProjectUserDetailsService;
-import io.github.resilience4j.retry.annotation.Retry;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @Validated
 @RestController

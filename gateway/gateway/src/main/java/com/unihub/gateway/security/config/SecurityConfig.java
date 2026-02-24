@@ -4,9 +4,12 @@ import com.unihub.gateway.security.filter.JwtValidatorFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
@@ -36,6 +39,12 @@ public class SecurityConfig {
             exchange.pathMatchers("/unihub/subscription/api/v1/inquiries/customer-service/**").hasRole("CUSTOMER_SERVICE");
             //university management microservice
             exchange.pathMatchers("/unihub/universitymanagement/api/v1/customer-service/**").hasRole("CUSTOMER_SERVICE");
+            exchange.pathMatchers("/unihub/universitymanagement/api/v1/colleges/**")
+                    .access((mono, context) -> mono
+                            .map(auth -> new AuthorizationDecision(
+                                    hasRequiredAuthorities(auth, "ROLE_SYSTEM_ADMIN", "IS_ACTIVE")
+                            ))
+                    );
             exchange.pathMatchers("/unihub/universitymanagement/api/v1/get-university/**").authenticated();
             exchange.pathMatchers("/unihub/universitymanagement/api/v1/internal/**").denyAll();
             //S3 microservice
@@ -46,6 +55,20 @@ public class SecurityConfig {
                 .cors(corsSpec -> corsSpec.configurationSource(corsConfigurationSource()))
                 .addFilterAt(jwtValidatorFilter, SecurityWebFiltersOrder.AUTHENTICATION);
         return http.build();
+    }
+
+    private boolean hasRequiredAuthorities(Authentication auth, String... requiredAuthorities) {
+        List<String> authorities = auth.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
+        for (String required : requiredAuthorities) {
+            if (!authorities.contains(required)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private CorsConfigurationSource corsConfigurationSource() {
