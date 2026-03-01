@@ -18,7 +18,7 @@ public class JobResultResponse {
     @JsonProperty("total_read")
     private long totalRead;
 
-
+    @JsonProperty("write_count")
     private long writeCount;
 
     private long failed;
