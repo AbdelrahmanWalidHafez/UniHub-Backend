@@ -111,7 +111,7 @@ public class CollegeServiceImpl implements ICollegeService {
         Long usersCount= authFeignClient.countUsers(id,apiKey).getBody();
 
         if (usersCount>0){
-            throw  new IllegalArgumentException("this college has "+usersCount+"users associated with it.");
+            throw  new IllegalArgumentException("this college has "+usersCount+" users associated with it.");
         }
     }
 }

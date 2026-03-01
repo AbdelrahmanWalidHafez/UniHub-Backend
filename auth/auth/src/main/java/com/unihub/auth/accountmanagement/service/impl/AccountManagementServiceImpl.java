@@ -35,7 +35,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -81,17 +80,19 @@ public class AccountManagementServiceImpl implements IAccountManagementService {
     public JobResultResponse insertFromCsv(MultipartFile file, Authentication authentication) throws Exception{
         UUID tid=UUID.fromString(Objects.requireNonNull(authentication.getDetails()).toString());
         long currentPlanMaxUserAmount=handleRequest(tid);
-        long currentUserCount= Math.toIntExact(userRepository.countByUniversityTid(tid));
+        long currentUserCount= userRepository.countByUniversityTid(tid);
         long allowedUsersToInsert=currentPlanMaxUserAmount-currentUserCount;
         if(allowedUsersToInsert<=0) {
             throw new AccessDeniedException("You have exceeded the maximum allowed users amount,please upgrade your plan to proceed this operation");
         }
+        Path path=validatedAndSaveFile(file,allowedUsersToInsert).toAbsolutePath();
         JobParameters jobParameters=new JobParametersBuilder()
                 .addLong("StartAt",System.currentTimeMillis())
-                .addString("csvFilePath",validatedAndSaveFile(file,allowedUsersToInsert).toAbsolutePath().toString())
+                .addString("csvFilePath",path.toString())
                 .addString("tid", Objects.requireNonNull(authentication.getDetails()).toString())
                 .toJobParameters();
         JobExecution jobExecution=operator.start(job,jobParameters);
+        Files.deleteIfExists(path);
         return getJobResult(jobExecution);
     }
 
@@ -166,14 +167,14 @@ public class AccountManagementServiceImpl implements IAccountManagementService {
         if (!"text/csv".equals(contentType) && !"application/vnd.ms-excel".equals(contentType)) {
             throw new IllegalArgumentException("Invalid file type. Only CSV is allowed.");
         }
-         countCsvRowsUpToLimit(file,maxRows);
         Path tempFile = Files.createTempFile("users-"+UUID.randomUUID(), ".csv");
         file.transferTo(tempFile.toFile());
+        countCsvRowsUpToLimit(tempFile,maxRows);
         return tempFile;
     }
 
-    private void countCsvRowsUpToLimit(MultipartFile file, long maxRows) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+    private void countCsvRowsUpToLimit(Path file, long maxRows) throws IOException {
+        try (BufferedReader reader = Files.newBufferedReader(file)) {
             long count = 0;
             reader.readLine();
             while (reader.readLine() != null) {
@@ -219,7 +220,7 @@ public class AccountManagementServiceImpl implements IAccountManagementService {
         user.setLastName(userRequest.getLastName());
         user.setGender(userRequest.getGender());
         user.setDob(userRequest.getDob());
-        if(!user.getRole().getName().equals("SYSTEM_ADMIN")&&userRequest.getCid()!=null){
+        if(!user.getRole().getName().equals("ROLE_SYSTEM_ADMIN")&&userRequest.getCid()!=null){
             user.getUniversityMetadata().setCid(userRequest.getCid());
         }
     }

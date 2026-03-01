@@ -1,7 +1,6 @@
 package com.unihub.auth.accountmanagement.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.unihub.auth.accountmanagement.strategy.UserRoles;
 import lombok.*;
 
 import java.time.LocalDateTime;

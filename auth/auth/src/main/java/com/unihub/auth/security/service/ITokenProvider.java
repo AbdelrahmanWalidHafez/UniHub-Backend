@@ -10,8 +10,6 @@ import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
-import java.nio.file.AccessDeniedException;
-
 public interface ITokenProvider {
 
     LoginResponse generateTokens(LoginRequest loginRequest) ;

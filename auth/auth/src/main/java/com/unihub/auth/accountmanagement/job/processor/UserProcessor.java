@@ -8,7 +8,6 @@ import com.unihub.auth.security.model.User;
 import com.unihub.auth.security.repository.RoleRepository;
 import org.jspecify.annotations.Nullable;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
-import org.springframework.security.access.AccessDeniedException;
 
 import java.util.Map;
 import java.util.UUID;

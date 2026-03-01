@@ -4,7 +4,6 @@ import com.unihub.auth.security.model.UniversityMetadata;
 import com.unihub.auth.security.strategy.JwtGenerationStrategy;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,6 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CustomerServiceStrategy implements JwtGenerationStrategy {

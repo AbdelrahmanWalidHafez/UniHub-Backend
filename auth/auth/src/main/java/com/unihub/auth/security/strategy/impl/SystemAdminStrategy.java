@@ -7,7 +7,7 @@ import com.unihub.auth.security.model.UniversityMetadata;
 import com.unihub.auth.security.strategy.JwtGenerationStrategy;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -20,10 +20,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class SystemAdminStrategy implements JwtGenerationStrategy {
 
-    @Autowired
-    private UniversityFeignClient universityFeignClient;
+    private final UniversityFeignClient universityFeignClient;
 
     @Override
     public String generateJwt(Authentication authentication, UniversityMetadata universityMetadata, SecretKey key, long expiration) {

@@ -3,7 +3,6 @@ package com.unihub.auth.security.model;
 import com.unihub.auth.common.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Formula;
 
 import java.time.LocalDate;
 import java.util.UUID;

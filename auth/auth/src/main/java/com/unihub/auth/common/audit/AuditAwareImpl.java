@@ -5,7 +5,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
-import java.util.Objects;
 import java.util.Optional;
 
 @Component("auditAwareImpl")
