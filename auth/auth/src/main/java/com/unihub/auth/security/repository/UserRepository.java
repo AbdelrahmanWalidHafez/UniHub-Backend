@@ -65,11 +65,13 @@ public interface UserRepository extends JpaRepository<User, UUID> , JpaSpecifica
     JOIN u.universityMetadata m
     WHERE m.tid = :tid
     AND u.email <> :currentEmail
-      AND (
+    AND (
             LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
          OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
          OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-      )
+         OR LOWER(CONCAT(u.firstName, ' ', u.lastName))
+                LIKE LOWER(CONCAT('%', :keyword, '%'))
+    )
 """)
     List<User> searchUsers(@Param("keyword") String keyword,
                            @Param("tid") UUID tid,
