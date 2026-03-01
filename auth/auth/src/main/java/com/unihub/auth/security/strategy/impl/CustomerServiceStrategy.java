@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class GeneralStrategy implements JwtGenerationStrategy {
+public class CustomerServiceStrategy implements JwtGenerationStrategy {
 
     @Override
     public String generateJwt(Authentication authentication, UniversityMetadata universityMetadata, SecretKey key, long expiration) {

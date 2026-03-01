@@ -13,7 +13,11 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_user_email", columnList = "email"),
+        @Index(name = "idx_user_first_name", columnList = "first_name"),
+        @Index(name = "idx_user_last_name", columnList = "last_name")
+})
 public class User extends BaseEntity {
 
     @Id
@@ -35,9 +39,13 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String password;
 
+    @Version
+    private long version;
+
+    @Column(nullable = false)
     boolean isAccountNonLocked;
 
     @ManyToOne(fetch = FetchType.EAGER)

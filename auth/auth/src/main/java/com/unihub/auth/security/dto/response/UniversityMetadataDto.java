@@ -16,4 +16,6 @@ public class UniversityMetadataDto {
     private UUID tid;
 
     private UUID cid;
+
+    private Double gpa;
 }

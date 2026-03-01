@@ -68,7 +68,7 @@ public class TokenProviderImpl implements ITokenProvider {
 
 
     @Override
-    public LoginResponse generateTokens(LoginRequest loginRequest) {
+    public LoginResponse generateTokens(LoginRequest loginRequest){
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         return LoginResponse
                 .builder()
@@ -144,7 +144,7 @@ public class TokenProviderImpl implements ITokenProvider {
         deleteVerificationToken(request);
     }
 
-    private AccessToken generateAccessToken(SecretKey key, Authentication authentication) {
+    private AccessToken generateAccessToken(SecretKey key, Authentication authentication)  {
        UniversityMetadata userUniversityMetadata = getUniMetaData(authentication);
         String jwt = jwtGenerationContext.performJwtGeneration(authentication,userUniversityMetadata,key);
         return AccessToken

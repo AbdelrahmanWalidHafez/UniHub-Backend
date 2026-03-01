@@ -12,7 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 
 public interface ITokenProvider {
 
-    LoginResponse generateTokens(LoginRequest loginRequest);
+    LoginResponse generateTokens(LoginRequest loginRequest) ;
 
     LoginResponse refresh(String oldRefreshToken) throws AuthenticationException;
 

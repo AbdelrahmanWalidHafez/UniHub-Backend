@@ -6,7 +6,6 @@ import com.unihub.auth.security.dto.response.UserDto;
 import com.unihub.auth.security.dto.response.VerificationResponse;
 import com.unihub.auth.security.service.ITokenProvider;
 import com.unihub.auth.security.service.impl.ProjectUserDetailsService;
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,14 +31,9 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenDto refreshRequest) {
+    public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenDto refreshRequest)  {
         return ResponseEntity.ok(tokenProvider.refresh(refreshRequest.getRefreshToken()));
     }
-
-    @Operation(
-            summary = "logout",
-            description = "revokes user jwt tokens"
-    )
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@Valid @RequestBody  RefreshTokenDto logoutRequest, HttpServletRequest request) {

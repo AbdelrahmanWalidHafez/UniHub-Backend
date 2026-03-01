@@ -13,7 +13,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -21,6 +23,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -68,9 +72,15 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
 
             String email = String.valueOf(claims.get("email"));
             String authorities = String.valueOf(claims.get("authorities"));
-            SecurityContextHolder
-                    .getContext()
-                    .setAuthentication(new UsernamePasswordAuthenticationToken(email, null, AuthorityUtils.commaSeparatedStringToAuthorityList(authorities)));
+            Boolean isActive = claims.get("IS_ACTIVE", Boolean.class);
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>(AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
+            if (Boolean.TRUE.equals(isActive)) {
+                grantedAuthorities.add(new SimpleGrantedAuthority("IS_ACTIVE"));
+            }
+            UsernamePasswordAuthenticationToken authentication= new UsernamePasswordAuthenticationToken(email, null, grantedAuthorities);
+            String universityId=fetchUniversityId(claims);
+            authentication.setDetails(universityId);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception e) {
             throw new BadCredentialsException("invalid token received");
         }
@@ -93,6 +103,10 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
         if (redisService.exists("blacklist:access:" + jti)) {
             throw new BadCredentialsException("invalid token received");
         }
+    }
+
+    private String fetchUniversityId(Claims claims){
+        return claims.get("university_id", String.class);
     }
 
 }
