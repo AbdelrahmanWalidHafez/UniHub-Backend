@@ -1,5 +1,7 @@
 package com.unihub.auth.security.mapper;
 
+import com.unihub.auth.accountmanagement.dto.request.BaseUserRequest;
+import com.unihub.auth.accountmanagement.dto.response.UserMetaDataResponse;
 import com.unihub.auth.internal.mapper.UniversityMetaDataMapper;
 import com.unihub.auth.security.dto.response.UserDto;
 import com.unihub.auth.security.model.User;
@@ -31,4 +33,23 @@ public class UserMapper {
         userDto.setCreatedAt(user.getCreatedAt());
         return userDto;
     }
+
+    public User toEntity(BaseUserRequest userRequest){
+        User user=new User();
+        user.setEmail(userRequest.getEmail());
+        user.setFirstName(userRequest.getFirstName());
+        user.setLastName(userRequest.getLastName());
+        user.setDob(userRequest.getDob());
+        user.setGender(userRequest.getGender());
+        user.setAccountNonLocked(false);
+        return  user;
+    }
+
+    public UserMetaDataResponse toMetadata(User user){
+        UserMetaDataResponse metaDataResponse=new UserMetaDataResponse();
+        metaDataResponse.setUid(user.getUid());
+        metaDataResponse.setEmail(user.getEmail());
+        return metaDataResponse;
+    }
+
 }

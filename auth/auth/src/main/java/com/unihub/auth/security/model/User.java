@@ -3,6 +3,7 @@ package com.unihub.auth.security.model;
 import com.unihub.auth.common.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -13,7 +14,11 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_user_email", columnList = "email"),
+        @Index(name = "idx_user_first_name", columnList = "first_name"),
+        @Index(name = "idx_user_last_name", columnList = "last_name")
+})
 public class User extends BaseEntity {
 
     @Id
@@ -35,9 +40,13 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String password;
 
+    @Version
+    private long version;
+
+    @Column(nullable = false)
     boolean isAccountNonLocked;
 
     @ManyToOne(fetch = FetchType.EAGER)

@@ -24,6 +24,9 @@ public class DataLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
         var role1 = roleRepository.findByName("ROLE_CUSTOMER_SERVICE").orElseGet(()->roleRepository.save(Role.builder().name("ROLE_CUSTOMER_SERVICE").build()));
         var role2 = roleRepository.findByName("ROLE_SYSTEM_ADMIN").orElseGet(()->roleRepository.save(Role.builder().name("ROLE_SYSTEM_ADMIN").build()));
+        var role3 = roleRepository.findByName("ROLE_INSTRUCTOR").orElseGet(()->roleRepository.save(Role.builder().name("ROLE_INSTRUCTOR").build()));
+        var role4 = roleRepository.findByName("ROLE_STUDENT").orElseGet(()->roleRepository.save(Role.builder().name("ROLE_STUDENT").build()));
+        var role5 = roleRepository.findByName("ROLE_SECRETARY").orElseGet(()->roleRepository.save(Role.builder().name("ROLE_SECRETARY").build()));
         if(userRepository.findByEmail("customer_service@example.com").isEmpty()){
             var user= User.builder()
                     .firstName("firstName")
@@ -32,19 +35,6 @@ public class DataLoader implements CommandLineRunner {
                     .email("customer_service@example.com")
                     .dob(LocalDate.of(1990, 1, 1))
                     .gender(Gender.OTHER)
-                    .isAccountNonLocked(true)
-                    .role(role1)
-                    .build();
-            userRepository.save(user);
-        }
-        if(userRepository.findByEmail("walidlrahmn5@gmail.com").isEmpty()){
-            var user= User.builder()
-                    .firstName("firstName")
-                    .lastName("lastName")
-                    .password("{noop}password")
-                    .email("walidlrahmn5@gmail.com")
-                    .dob(LocalDate.of(2003, 11, 11))
-                    .gender(Gender.MALE)
                     .isAccountNonLocked(true)
                     .role(role1)
                     .build();

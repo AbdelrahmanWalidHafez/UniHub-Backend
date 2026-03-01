@@ -68,9 +68,10 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
 
             String email = String.valueOf(claims.get("email"));
             String authorities = String.valueOf(claims.get("authorities"));
-            SecurityContextHolder
-                    .getContext()
-                    .setAuthentication(new UsernamePasswordAuthenticationToken(email, null, AuthorityUtils.commaSeparatedStringToAuthorityList(authorities)));
+            UsernamePasswordAuthenticationToken authentication= new UsernamePasswordAuthenticationToken(email, null, AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
+            String universityId=fetchUniversityId(claims);
+            authentication.setDetails(universityId);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception e) {
             throw new BadCredentialsException("invalid token received");
         }
@@ -93,6 +94,10 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
         if (redisService.exists("blacklist:access:" + jti)) {
             throw new BadCredentialsException("invalid token received");
         }
+    }
+
+    private String fetchUniversityId(Claims claims){
+        return claims.get("university_id", String.class);
     }
 
 }

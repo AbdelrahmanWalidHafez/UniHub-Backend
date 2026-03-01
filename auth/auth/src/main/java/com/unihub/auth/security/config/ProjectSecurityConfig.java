@@ -46,6 +46,10 @@ public class ProjectSecurityConfig {
                                 "/actuator/**",
                                 "/api/v1/auth/forgot-password",
                                 "/api/v1/auth/verify-forgot-password-token").permitAll()
+                        .requestMatchers(
+                                "/api/v1/account-management/**",
+                                "/api/v1/roles/**"
+                        ).hasRole("SYSTEM_ADMIN")
                         .anyRequest()
                         .authenticated())
                 .cors((corsConfig) -> corsConfig.configurationSource(corsConfigurationSource()))

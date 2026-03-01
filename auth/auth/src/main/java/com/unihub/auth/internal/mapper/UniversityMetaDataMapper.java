@@ -11,6 +11,7 @@ public class UniversityMetaDataMapper {
         universityMetadataDto.setUid(universityMetadata.getUid());
         universityMetadataDto.setTid(universityMetadata.getTid());
         universityMetadataDto.setCid(universityMetadata.getCid());
+        universityMetadataDto.setGpa(universityMetadata.getGpa());
         return universityMetadataDto;
     }
 }

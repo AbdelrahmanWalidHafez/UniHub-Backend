@@ -9,7 +9,6 @@ spring:
       port: ${REDIS_PORT}
   cloud:
     openfeign:
-
       circuitbreaker:
         enabled: true
     stream:
@@ -20,6 +19,20 @@ spring:
       kafka:
         binder:
           brokers: ${KAFKA}
+  batch:
+    initialize-schema: always
+    job:
+      enabled: false
+  jpa:
+    properties:
+      hibernate:
+        search:
+          backend:
+            directory:
+              type: local-filesystem
+              root: ./data/index
+          schema_management:
+            strategy: create-or-validate
 jwt:
   secret: ${JWT_SECRET}
   expirationTime: 3600000

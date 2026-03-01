@@ -88,7 +88,6 @@ public class CollegeServiceImpl implements ICollegeService {
         return  UUID.fromString(request.getHeader("X-User-University-Id"));
     }
 
-    //TODO put it in common package across  the project
     private Pageable createPageable(int pageNum, String sortDir, String sortField){
         int pageSize=5;
         return  PageRequest.of(

@@ -8,6 +8,7 @@ import com.unihub.auth.security.strategy.JwtGenerationStrategy;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -20,10 +21,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
-public class SystemAdminStrategy implements JwtGenerationStrategy {
+public class UserStrategy implements JwtGenerationStrategy {
 
     @Autowired
     private UniversityFeignClient universityFeignClient;
+
 
     @Override
     public String generateJwt(Authentication authentication, UniversityMetadata universityMetadata, SecretKey key, long expiration) {
@@ -41,9 +43,9 @@ public class SystemAdminStrategy implements JwtGenerationStrategy {
                                 universityMetadata.getTid() : "N/A"))
                 .signWith(key);
         try{
-          handleRequest(universityMetadata);
-        }catch (SubscriptionException e){
-            jwt.claim("IS_ACTIVE",false);
+            handleRequest(universityMetadata);
+        }catch (SubscriptionException e) {
+            throw new AccessDeniedException("There is no Current Active Subscription Contact Your Administrator.");
         }
         return jwt.compact();
     }
@@ -51,12 +53,11 @@ public class SystemAdminStrategy implements JwtGenerationStrategy {
     private void handleRequest(UniversityMetadata universityMetadata) {
         UniversityResponse university = fetchUniversityResponse(universityMetadata)
                 .orElseThrow(() -> new SubscriptionException("University has no subscription"));
-
         if (university.getSubscriptionPlan() == null) {
             throw new SubscriptionException("No subscription plan assigned");
         }
         if (!university.getSubscriptionPlan().getEndDate().isAfter(LocalDate.now())) {
-                throw new SubscriptionException("Subscription Date Exceeded or there is no current Subscription Plan");
+            throw new SubscriptionException("Subscription Date Exceeded or there is no current Subscription Plan");
         }
     }
 

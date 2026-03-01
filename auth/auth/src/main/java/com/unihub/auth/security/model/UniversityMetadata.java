@@ -28,6 +28,8 @@ public class UniversityMetadata extends BaseEntity {
 
     UUID cid;
 
+    private Double gpa;
+
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
