@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -21,5 +23,10 @@ public class InternalController {
     @PostMapping("/create")
     public ResponseEntity<SystemAdminResponse> createSystemAdmin(@Valid @RequestBody SystemAdminRequest request){
         return ResponseEntity.status(HttpStatus.CREATED).body(internalService.createSystemAdmin(request));
+    }
+
+    @GetMapping("/get-users-count/{cid}")
+    public ResponseEntity<Long> countUsers(@PathVariable UUID cid){
+        return ResponseEntity.ok(internalService.countUsers(cid));
     }
 }

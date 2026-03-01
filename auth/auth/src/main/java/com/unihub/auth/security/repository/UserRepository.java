@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -27,6 +28,11 @@ public interface UserRepository extends JpaRepository<User, UUID> , JpaSpecifica
             "JOIN u.universityMetadata um " +
             "WHERE um.tid = :tid")
     long countByUniversityTid(@Param("tid") UUID tid);
+
+    @Query("SELECT COUNT(u) FROM User u " +
+            "JOIN u.universityMetadata um " +
+            "WHERE um.cid = :cid")
+    long countByUniversityCid(@Param("cid") UUID cid);
 
 
     @Query("""
@@ -54,14 +60,20 @@ public interface UserRepository extends JpaRepository<User, UUID> , JpaSpecifica
             Pageable pageable
     );
 
-    @Query(value = """
-        SELECT *
-        FROM users
-        WHERE LOWER(email) LIKE LOWER(CONCAT('%', :keyword, '%'))
-           OR LOWER(first_name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-           OR LOWER(last_name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-        LIMIT 5
-    """, nativeQuery = true)
-    List<User> searchUsers(@Param("keyword") String keyword);
-
+    @Query("""
+    SELECT u
+    FROM User u
+    JOIN u.universityMetadata m
+    WHERE m.tid = :tid
+    AND u.email <> :currentEmail
+      AND (
+            LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
+         OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+         OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      )
+""")
+    List<User> searchUsers(@Param("keyword") String keyword,
+                           @Param("tid") UUID tid,
+                           @Param("currentEmail") String currentEmail,
+                           Pageable pageable);
 }

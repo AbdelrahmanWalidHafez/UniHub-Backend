@@ -113,8 +113,11 @@ public class AccountManagementServiceImpl implements IAccountManagementService {
     }
 
     @Override
-    public List<UserMetaDataResponse> searchUser(String searchText) {
-        return userRepository.searchUsers(searchText)
+    public List<UserMetaDataResponse> searchUser(String searchText,Authentication authentication) {
+        return userRepository.searchUsers(searchText,
+                        UUID.fromString(Objects.requireNonNull(authentication.getDetails()).toString()),
+                        authentication.getName(),
+                        PageRequest.of(0,5))
                 .stream()
                 .map(userMapper::toMetadata).toList();
     }
@@ -172,8 +175,8 @@ public class AccountManagementServiceImpl implements IAccountManagementService {
     private void countCsvRowsUpToLimit(MultipartFile file, long maxRows) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             long count = 0;
-            String line = reader.readLine();
-            while ((line = reader.readLine()) != null) {
+            reader.readLine();
+            while (reader.readLine() != null) {
                 count++;
                 if (count > maxRows) {
                     throw new AccessDeniedException("Csv rows count exceeds the maximum allowed number of users:"+maxRows);
@@ -187,7 +190,7 @@ public class AccountManagementServiceImpl implements IAccountManagementService {
         return JobResultResponse.builder()
                 .status(jobExecution.getStatus().toString())
                 .totalRead(step.getReadCount())
-                .inserted(step.getWriteCount())
+                .writeCount(step.getWriteCount())
                 .failed(step.getSkipCount())
                 .processFailures(step.getProcessSkipCount())
                 .writeFailures(step.getWriteSkipCount())

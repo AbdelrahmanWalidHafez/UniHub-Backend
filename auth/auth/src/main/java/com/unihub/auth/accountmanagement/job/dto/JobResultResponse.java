@@ -19,7 +19,7 @@ public class JobResultResponse {
     private long totalRead;
 
 
-    private long inserted;
+    private long writeCount;
 
     private long failed;
 

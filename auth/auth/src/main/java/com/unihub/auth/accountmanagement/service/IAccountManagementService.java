@@ -26,7 +26,7 @@ public interface IAccountManagementService {
                                        UserRoles roleName,
                                        UUID uuid ,
                                        Authentication authentication);
-    List<UserMetaDataResponse> searchUser(String searchText);
+    List<UserMetaDataResponse> searchUser(String searchText,Authentication authentication);
 
     UserDto updateUser(UUID id, UpdateUserRequest userRequest, Authentication authentication);
 

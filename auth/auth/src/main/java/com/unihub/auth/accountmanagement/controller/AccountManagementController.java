@@ -59,8 +59,8 @@ public class AccountManagementController {
     }
 
     @GetMapping("/search-user")
-    public ResponseEntity<UserMetaDataResponses> searchUser(@RequestParam("search_text")String searchText){
-        return ResponseEntity.ok(UserMetaDataResponses.builder().usersList(service.searchUser(searchText)).build());
+    public ResponseEntity<UserMetaDataResponses> searchUser(@RequestParam("search_text")String searchText,Authentication authentication){
+        return ResponseEntity.ok(UserMetaDataResponses.builder().usersList(service.searchUser(searchText,authentication)).build());
     }
 
     @PatchMapping("/update-user-gpa/{id}")

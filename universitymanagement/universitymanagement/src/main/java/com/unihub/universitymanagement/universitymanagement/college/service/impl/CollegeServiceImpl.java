@@ -7,11 +7,13 @@ import com.unihub.universitymanagement.universitymanagement.college.mapper.Colle
 import com.unihub.universitymanagement.universitymanagement.college.model.College;
 import com.unihub.universitymanagement.universitymanagement.college.repository.CollegeRepository;
 import com.unihub.universitymanagement.universitymanagement.college.service.ICollegeService;
+import com.unihub.universitymanagement.universitymanagement.internal.client.AuthFeignClient;
 import com.unihub.universitymanagement.universitymanagement.university.model.University;
 import com.unihub.universitymanagement.universitymanagement.university.service.IUniversityService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,11 +27,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CollegeServiceImpl implements ICollegeService {
 
+
+
+    @Value("${api.key}")
+    private String apiKey;
+
     private final CollegeMapper collegeMapper;
+
+    private final AuthFeignClient authFeignClient;
 
     private final CollegeRepository collegeRepository;
 
     private final IUniversityService universityService;
+
 
     @Override
     @Transactional()
@@ -63,9 +73,9 @@ public class CollegeServiceImpl implements ICollegeService {
         return collegeMapper.toDto(collegeRepository.save(college));
     }
 
-    //TODO call auth microservice to see whether there are users associated with this college or not
     @Transactional
     public void deleteCollege(HttpServletRequest request, UUID uuid){
+        validateUsersCount(uuid);
         College college=fetchCollege(uuid,request);
         collegeRepository.delete(college);
     }
@@ -97,6 +107,13 @@ public class CollegeServiceImpl implements ICollegeService {
         );
     }
 
+    private void validateUsersCount(UUID id){
+        Long usersCount= authFeignClient.countUsers(id,apiKey).getBody();
+
+        if (usersCount>0){
+            throw  new IllegalArgumentException("this college has "+usersCount+"users associated with it.");
+        }
+    }
 }
 
 

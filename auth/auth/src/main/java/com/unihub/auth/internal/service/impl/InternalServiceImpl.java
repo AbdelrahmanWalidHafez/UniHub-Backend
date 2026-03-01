@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.Random;
+import java.util.UUID;
 
 
 @Service
@@ -44,6 +45,11 @@ InternalServiceImpl implements IInternalService {
         SystemAdminResponse systemAdminResponse = systemAdminMapper.toDto(user);
         systemAdminResponse.setPassword(rawPassword);
         return systemAdminResponse;
+    }
+
+    @Override
+    public Long countUsers(UUID cid) {
+        return userRepository.countByUniversityCid(cid);
     }
 
     private User createUser(SystemAdminRequest request) {
