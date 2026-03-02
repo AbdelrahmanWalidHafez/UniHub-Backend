@@ -10,7 +10,4 @@ public class LoginResponse {
 
     @JsonProperty("access_token")
     private AccessToken accessToken;
-
-    @JsonProperty("refresh_token")
-    private RefreshToken refreshToken;
 }

@@ -7,6 +7,7 @@ import com.unihub.auth.security.dto.response.VerificationResponse;
 import com.unihub.auth.security.service.ITokenProvider;
 import com.unihub.auth.security.service.impl.ProjectUserDetailsService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,18 +27,18 @@ public class AuthController {
     private final ProjectUserDetailsService userDetailsService;
 
     @PostMapping(value = "/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.ok(tokenProvider.generateTokens(loginRequest));
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+        return ResponseEntity.ok(tokenProvider.generateTokens(loginRequest,response));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenDto refreshRequest)  {
-        return ResponseEntity.ok(tokenProvider.refresh(refreshRequest.getRefreshToken()));
+    public ResponseEntity<LoginResponse> refresh(HttpServletRequest request,HttpServletResponse response)  {
+        return ResponseEntity.ok(tokenProvider.refresh(request,response));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@Valid @RequestBody  RefreshTokenDto logoutRequest, HttpServletRequest request) {
-        tokenProvider.revokeTokens(request, logoutRequest.getRefreshToken());
+    public ResponseEntity<?> logout(HttpServletRequest request,HttpServletResponse response) {
+        tokenProvider.revokeTokens(request,response);
         return ResponseEntity.noContent().build();
     }
 

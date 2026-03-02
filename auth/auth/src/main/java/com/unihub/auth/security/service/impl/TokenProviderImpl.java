@@ -18,7 +18,9 @@ import com.unihub.auth.security.strategy.context.JwtGenerationContext;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,9 +46,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TokenProviderImpl implements ITokenProvider {
 
-    private final IRedisService redisService;
-
     private final StreamBridge streamBridge;
+
+    private final IRedisService redisService;
 
     private final UserRepository userRepository;
 
@@ -68,17 +70,18 @@ public class TokenProviderImpl implements ITokenProvider {
 
 
     @Override
-    public LoginResponse generateTokens(LoginRequest loginRequest){
+    public LoginResponse generateTokens(LoginRequest loginRequest, HttpServletResponse response){
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        setCookie(generateRefreshToken(authentication.getName()),response);
         return LoginResponse
                 .builder()
                 .accessToken(generateAccessToken(getSecretKey(jwtProperties.secret()), authentication))
-                .refreshToken(generateRefreshToken(authentication.getName()))
                 .build();
     }
 
     @Override
-    public LoginResponse refresh(String oldRefreshToken) throws AuthenticationException {
+    public LoginResponse refresh(HttpServletRequest request,HttpServletResponse response) throws AuthenticationException {
+        String oldRefreshToken=getRefreshTokenFromCookie(request);
         Optional<String> username = validateAndGetEmail("refresh:" + oldRefreshToken);
         if (username.isEmpty()) {
             throw new AuthenticationException("invalid refresh token received") {
@@ -91,21 +94,22 @@ public class TokenProviderImpl implements ITokenProvider {
         }
         UserDetails userDetails = userDetailsService.loadUserByUsername(username.get());
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        setCookie(rotateRefreshToken(oldRefreshToken,authentication.getName()),response);
         return LoginResponse
                 .builder()
                 .accessToken(generateAccessToken(getSecretKey(jwtProperties.secret()), authentication))
-                .refreshToken(rotateRefreshToken(oldRefreshToken, authentication.getName()))
                 .build();
     }
 
     @Override
-    public void revokeTokens(HttpServletRequest request, String refreshToken) {
+    public void revokeTokens(HttpServletRequest request, HttpServletResponse response) {
         String jwt = request.getHeader(jwtProperties.authorizationHeader()).substring(7);
         Duration ttl = Duration.ofMillis(getExpirationDate(jwt, getSecretKey(jwtProperties.secret())).getTime() - System.currentTimeMillis());
         if (!ttl.isNegative() && !ttl.isZero()) {
             blackListToken(jwt, ttl);
         }
-        revokeRefreshToken(refreshToken);
+        deleteCookie(response);
+        revokeRefreshToken(getRefreshTokenFromCookie(request));
     }
 
     @Override
@@ -242,6 +246,39 @@ public class TokenProviderImpl implements ITokenProvider {
     private void deleteVerificationToken(HttpServletRequest request){
         String verification_token=request.getHeader(jwtProperties.authorizationHeader()).substring(7);
         redisService.deleteKey("verification_token:"+verification_token);
+    }
+
+    private void setCookie(RefreshToken token,HttpServletResponse response){
+        Cookie cookie=new Cookie("refreshToken",token.getRefreshToken());
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/api/v1/auth/refresh");
+        cookie.setMaxAge((int)token.getExpiresIn());
+        cookie.setAttribute("SameSite", "Strict");
+        response.addCookie(cookie);
+    }
+
+    private String getRefreshTokenFromCookie(HttpServletRequest request){
+        String oldRefreshToken = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("refreshToken".equals(cookie.getName())) {
+                    oldRefreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        return oldRefreshToken;
+    }
+
+    private void deleteCookie(HttpServletResponse response){
+        Cookie cookie=new Cookie("refreshToken",null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/api/auth/v1/refresh");
+        cookie.setMaxAge((0));
+        cookie.setAttribute("SameSite", "Strict");
+        response.addCookie(cookie);
     }
 }
 
