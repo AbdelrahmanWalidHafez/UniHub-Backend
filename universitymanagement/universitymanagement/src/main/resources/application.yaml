@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: ${APPLICATION_NAME}
+  config:
+    import: optional:configserver:http://config-server:8080
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 8000
+    function:
+      definition: setUniversitySubscriptionPlan;upgradeUniversitySubscriptionPlan
+    stream:
+      defaultBinder: kafka
+      bindings:
+        setUniversitySubscriptionPlan-in-0:
+          destination: set-plan-topic
+          content-type: application/json
+          group: ${spring.application.name}
+        upgradeUniversitySubscriptionPlan-in-0:
+          destination: upgrade-plan-topic
+          content-type: application/json
+          group: ${spring.application.name}
+      kafka:
+        binder:
+          brokers: ${KAFKA}
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        permitted-number-of-calls-in-half-open-state: 2
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10000
+api:
+  key: ${API_KEY}
+

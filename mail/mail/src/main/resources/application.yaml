@@ -1,0 +1,38 @@
+spring:
+  config:
+    import: optional:configserver:http://config-server:8080
+  application:
+    name: ${APPLICATION_NAME}
+  cloud:
+    function:
+      definition: sendAcceptanceMail;sendRejectionMail;sendVerificationCode
+    stream:
+      defaultBinder: kafka
+      bindings:
+        sendAcceptanceMail-in-0:
+          destination: send-email-acceptance-topic
+          content-type: application/json
+          group: ${spring.application.name}
+        sendRejectionMail-in-0:
+          destination: send-email-rejection-topic
+          content-type: application/json
+          group: ${spring.application.name}
+        sendVerificationCode-in-0:
+          destination: send-verification-code-topic
+          content-type: application/json
+          group: ${spring.application.name}
+      kafka:
+        binder:
+          brokers: ${KAFKA}
+  mail:
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enabled: true
+            required: true
