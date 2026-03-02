@@ -45,6 +45,7 @@ public class SecurityConfig {
                                     hasRequiredAuthorities(auth, "ROLE_SYSTEM_ADMIN", "IS_ACTIVE")
                             ))
                     );
+            exchange.pathMatchers("/unihub/usage/api/v1/usage").hasRole("SYSTEM_ADMIN");
             exchange.pathMatchers("/unihub/universitymanagement/api/v1/get-university/**").authenticated();
             exchange.pathMatchers("/unihub/universitymanagement/api/v1/internal/**").denyAll();
             //S3 microservice

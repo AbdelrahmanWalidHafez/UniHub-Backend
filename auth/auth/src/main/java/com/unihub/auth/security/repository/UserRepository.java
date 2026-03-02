@@ -77,4 +77,14 @@ public interface UserRepository extends JpaRepository<User, UUID> , JpaSpecifica
                            @Param("tid") UUID tid,
                            @Param("currentEmail") String currentEmail,
                            Pageable pageable);
+
+    @Query("SELECT r.name, COUNT(u) FROM User u JOIN u.role r JOIN u.universityMetadata um WHERE um.tid = :tid GROUP BY r.name")
+    List<Object[]> countUsersByRole(@Param("tid") UUID tid);
+
+    @Query("SELECT u.gender, COUNT(u) FROM User u JOIN u.universityMetadata um WHERE um.tid = :tid GROUP BY u.gender")
+    List<Object[]> countUsersByGender(@Param("tid") UUID tid);
+
+    @Query("SELECT um.cid, COUNT(u) FROM User u JOIN u.universityMetadata um WHERE um.tid = :tid GROUP BY um.cid")
+    List<Object[]> countUsersByCollege(@Param("tid") UUID tid);
+
 }
