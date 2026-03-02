@@ -16,6 +16,7 @@ public class UniversityFallBack  implements UniversityFeignClient {
     @Override
     public ResponseEntity<List<CollegeDashboardDTO>> getCollegeAnalysis(UUID tid) {
         log.error("Feign client fallback triggered: University service is unavailable.");
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        List<CollegeDashboardDTO>emptyDto=List.of();
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(emptyDto);
     }
 }
