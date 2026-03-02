@@ -2,8 +2,8 @@ package com.unihub.subscription.subscriptionrequest.mapper;
 
 import com.unihub.subscription.subscriptionrequest.dto.request.CreateUniversityRequest;
 import com.unihub.subscription.subscriptionrequest.dto.request.SubscriptionRequestDto;
-import com.unihub.subscription.subscriptionrequest.dto.response.SubscriptionsMetaData;
 import com.unihub.subscription.subscriptionrequest.dto.response.SubscriptionRequestResponseDto;
+import com.unihub.subscription.subscriptionrequest.dto.response.SubscriptionsMetaData;
 import com.unihub.subscription.subscriptionrequest.model.Status;
 import com.unihub.subscription.subscriptionrequest.model.SubscriptionRequest;
 import org.springframework.stereotype.Component;

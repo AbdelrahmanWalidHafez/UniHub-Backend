@@ -1,6 +1,5 @@
 package com.unihub.usage.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.unihub.usage.client.AuthFeignClient;
 import com.unihub.usage.client.UniversityFeignClient;
 import com.unihub.usage.dto.response.CollegeDashboardDTO;
