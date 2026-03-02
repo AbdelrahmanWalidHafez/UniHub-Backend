@@ -41,6 +41,9 @@ public class UserStrategy implements JwtGenerationStrategy {
                 .claim("university_id",
                         (universityMetadata != null ?
                                 universityMetadata.getTid() : "N/A"))
+                .claim("college_id",
+                        (universityMetadata != null ?
+                                universityMetadata.getCid() : "N/A"))
                 .signWith(key);
         try{
             handleRequest(universityMetadata);
