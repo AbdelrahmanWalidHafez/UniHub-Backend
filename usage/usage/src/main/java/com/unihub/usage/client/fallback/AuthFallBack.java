@@ -16,6 +16,6 @@ public class AuthFallBack implements AuthFeignClient {
     @Override
     public ResponseEntity<DashBoardAggregatesDto> getUserAnalysis(UUID tid, String apiKey) {
         log.error("Feign client fallback triggered: Auth service is unavailable.");
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(emptyDto);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
     }
 }
