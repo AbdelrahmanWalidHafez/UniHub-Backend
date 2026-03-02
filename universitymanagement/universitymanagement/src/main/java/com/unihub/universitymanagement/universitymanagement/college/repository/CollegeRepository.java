@@ -1,6 +1,7 @@
 package com.unihub.universitymanagement.universitymanagement.college.repository;
 
 import com.unihub.universitymanagement.universitymanagement.college.model.College;
+import com.unihub.universitymanagement.universitymanagement.internal.dto.response.CollegeDashboardDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +28,15 @@ public interface CollegeRepository extends JpaRepository<College,UUID> {
       )
 """)
     List<College> searchByUniversity(@Param("universityId") UUID universityId, @Param("keyword") String keyword);
+
+    @Query("""
+        SELECT new com.unihub.universitymanagement.universitymanagement.internal.dto.response.CollegeDashboardDTO(
+            COUNT(c.id), c.id, c.collegeName
+        )
+        FROM College c
+        WHERE c.university.id = :universityId
+        GROUP BY c.id, c.collegeName
+    """)
+    List<CollegeDashboardDTO> getCollegeDashboardData(@Param("universityId") UUID universityId);
 }
+

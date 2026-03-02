@@ -1,7 +1,9 @@
 package com.unihub.universitymanagement.universitymanagement.internal.service.impl;
 
+import com.unihub.universitymanagement.universitymanagement.college.repository.CollegeRepository;
 import com.unihub.universitymanagement.universitymanagement.internal.client.AuthFeignClient;
 import com.unihub.universitymanagement.universitymanagement.internal.dto.request.SystemAdminRequest;
+import com.unihub.universitymanagement.universitymanagement.internal.dto.response.CollegeDashboardDTO;
 import com.unihub.universitymanagement.universitymanagement.internal.dto.response.SystemAdminResponse;
 import com.unihub.universitymanagement.universitymanagement.internal.service.IInternalService;
 import com.unihub.universitymanagement.universitymanagement.university.dto.request.CreateUniversityRequest;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -29,6 +32,8 @@ public class InternalServiceImpl implements IInternalService {
     private final UniversityMapper universityMapper;
 
     private final AuthFeignClient authFeignClient;
+
+    private final CollegeRepository collegeRepository;
 
     private final UniversityRepository universityRepository;
 
@@ -44,6 +49,12 @@ public class InternalServiceImpl implements IInternalService {
     @Override
     public Long findUniversitiesBySubscriptionPlanId(UUID subscriptionPlanId) {
         return universityRepository.countBySubscriptionPlan_Pid(subscriptionPlanId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CollegeDashboardDTO> getCollegeDashBoard(UUID tid) {
+        return collegeRepository.getCollegeDashboardData(tid);
     }
 
     private SystemAdminResponse createSystemAdmin(University university) {

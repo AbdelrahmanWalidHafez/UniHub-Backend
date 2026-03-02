@@ -1,5 +1,6 @@
 package com.unihub.universitymanagement.universitymanagement.internal.client;
 
+import com.unihub.universitymanagement.universitymanagement.internal.client.fallback.AuthFeignClientFallBack;
 import com.unihub.universitymanagement.universitymanagement.internal.dto.request.SystemAdminRequest;
 import com.unihub.universitymanagement.universitymanagement.internal.dto.response.SystemAdminResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@FeignClient(name = "auth")
+@FeignClient(name = "auth",fallback = AuthFeignClientFallBack.class)
 public interface AuthFeignClient {
 
     @PostMapping(value = "/api/v1/internal/user/create", consumes = "application/json")
