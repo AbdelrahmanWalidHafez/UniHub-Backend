@@ -34,10 +34,8 @@ services:
       - unihub
 
   config-server:
-    image: unihub/config:s2
+    image: unihub/config:s3
     container_name: config-server
-    ports:
-      - "8080:8080"
     env_file:
       - ../../config/.env
     healthcheck:
@@ -50,10 +48,8 @@ services:
       - unihub
 
   eureka-server:
-    image: unihub/eureka:s2
+    image: unihub/eureka:s3
     container_name: eureka-server
-    ports:
-      - "8081:8081"
     depends_on:
       config-server:
         condition: service_healthy
@@ -69,7 +65,7 @@ services:
       - unihub
 
   gateway-server:
-    image: unihub/gateway:s2
+    image: unihub/gateway:s3
     container_name: gateway-server
     ports:
       - "8082:8082"
@@ -162,7 +158,7 @@ services:
       - unihub
 
   auth-server:
-    image: unihub/auth:s2
+    image: unihub/auth:s3
     container_name: auth-server
     ports:
       - "8083:8083"
@@ -185,10 +181,8 @@ services:
       - unihub
 
   subscription-server:
-    image: unihub/subscription:s2
+    image: unihub/subscription:s3
     container_name: subscription-server
-    ports:
-      - "8084:8084"
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -209,10 +203,8 @@ services:
       - unihub
 
   university-server:
-    image: unihub/universitymanagement:s2
+    image: unihub/universitymanagement:s3
     container_name: university-server
-    ports:
-      - "8085:8085"
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -233,10 +225,8 @@ services:
       - unihub
 
   s3-server:
-    image: unihub/s3:s2
+    image: unihub/s3:s3
     container_name: s3-server
-    ports:
-      - "8086:8086"
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -254,10 +244,8 @@ services:
     networks:
       - unihub
   mail-server:
-    image: unihub/mail:s2
+    image: unihub/mail:s3
     container_name: mail-server
-    ports:
-      - "8087:8087"
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -275,10 +263,8 @@ services:
     networks:
       - unihub
   usage-server:
-    image: unihub/usage:s2
+    image: unihub/usage:s3
     container_name: usage-server
-    ports:
-      - "8088:8088"
     depends_on:
       eureka-server:
         condition: service_healthy

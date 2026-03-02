@@ -43,11 +43,6 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator-test</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -73,7 +68,7 @@
 				<version>3.5.1</version>
 				<configuration>
 					<to>
-						<image>unihub/${project.artifactId}:s2</image>
+						<image>unihub/${project.artifactId}:s3</image>
 					</to>
 				</configuration>
 			</plugin>
