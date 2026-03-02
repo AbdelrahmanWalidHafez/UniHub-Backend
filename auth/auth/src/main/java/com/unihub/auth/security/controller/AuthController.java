@@ -56,6 +56,15 @@ public class AuthController {
                     content = @Content(mediaType = "application/json",schema = @Schema(implementation = ErrorResponseDto.class))
             )
     })
+    /**
+     *
+     * @deprecated : not secured
+     *
+     */
+    @Deprecated(
+            forRemoval = true,
+            since = "1.2.1"
+    )
     @PostMapping(value = "/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(tokenProvider.generateTokens(loginRequest));
@@ -82,6 +91,15 @@ public class AuthController {
                     content = @Content(mediaType = "application/json",schema = @Schema(implementation = ErrorResponseDto.class))
             )
     })
+    /**
+     *
+     * @deprecated : not secured
+     *
+     */
+    @Deprecated(
+            forRemoval = true,
+            since = "1.2.1"
+    )
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenDto refreshRequest) {
         return ResponseEntity.ok(tokenProvider.refresh(refreshRequest.getRefreshToken()));
@@ -107,6 +125,15 @@ public class AuthController {
                     content = @Content(mediaType = "application/json",schema = @Schema(implementation = ErrorResponseDto.class))
             )
     })
+    /**
+     *
+     * @deprecated : not secured
+     *
+     */
+    @Deprecated(
+            forRemoval = true,
+            since = "1.2.1"
+    )
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@Valid @RequestBody  RefreshTokenDto logoutRequest, HttpServletRequest request) {
         tokenProvider.revokeTokens(request, logoutRequest.getRefreshToken());

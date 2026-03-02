@@ -56,7 +56,16 @@ public class TokenProviderImpl implements ITokenProvider {
     private final UserDetailsService userDetailsService;
 
     private final AuthenticationManager authenticationManager;
-    
+
+    /**
+     *
+     * @deprecated : not secured
+     *
+     */
+    @Deprecated(
+            forRemoval = true,
+            since = "1.2.1"
+    )
     @Override
     public LoginResponse generateTokens(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
@@ -67,6 +76,15 @@ public class TokenProviderImpl implements ITokenProvider {
                 .build();
     }
 
+    /**
+     *
+     * @deprecated : not secured
+     *
+     */
+    @Deprecated(
+            forRemoval = true,
+            since = "1.2.1"
+    )
     @Override
     public LoginResponse refresh(String oldRefreshToken) throws AuthenticationException {
         Optional<String> username = validateAndGetEmail("refresh:" + oldRefreshToken);
@@ -88,6 +106,15 @@ public class TokenProviderImpl implements ITokenProvider {
                 .build();
     }
 
+    /**
+     *
+     * @deprecated : not secured
+     *
+     */
+    @Deprecated(
+            forRemoval = true,
+            since = "1.2.1"
+    )
     @Override
     public void revokeTokens(HttpServletRequest request, String refreshToken) {
         String jwt = request.getHeader(authHeader).substring(7);
