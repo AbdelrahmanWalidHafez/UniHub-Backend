@@ -56,6 +56,9 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
                 path.equals("/api/v1/auth/forgot-password")||
                 path.equals("/api/v1/auth/change-forgot-password")||
                 path.equals("/api/v1/auth/verify-forgot-password-token")||
+                path.equals("/api/v1/auth/activate-account")||
+                path.equals("/api/v1/auth/verify-activation-code")||
+                path.equals("/api/v1/auth/set-password")||
                 path.startsWith("/api/v1/internal");
     }
 

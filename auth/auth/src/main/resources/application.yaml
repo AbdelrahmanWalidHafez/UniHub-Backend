@@ -16,6 +16,9 @@ spring:
         sendVerificationCode-out-0:
           destination: send-verification-code-topic
           content-type: application/json
+        sendActivationCode-out-0:
+          destination: send-activation-code-topic
+          content-type: application/json
       kafka:
         binder:
           brokers: ${KAFKA}
