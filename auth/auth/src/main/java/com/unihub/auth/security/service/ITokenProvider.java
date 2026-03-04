@@ -12,9 +12,15 @@ public interface ITokenProvider {
 
     LoginResponse generateTokens(LoginRequest loginRequest, HttpServletResponse response) ;
 
+    LoginResponse generateTokens(LoginRequest loginRequest);
+
     LoginResponse refresh(HttpServletRequest request,HttpServletResponse response) throws AuthenticationException;
 
+    LoginResponse refresh(String oldRefreshToken) throws AuthenticationException;
+
     void revokeTokens(HttpServletRequest request, HttpServletResponse response);
+
+    void revokeTokens(HttpServletRequest request,String refreshToken);
 
     void generateForgotPasswordVerificationCode(String email);
 

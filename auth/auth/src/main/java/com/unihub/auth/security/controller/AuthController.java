@@ -31,14 +31,31 @@ public class AuthController {
         return ResponseEntity.ok(tokenProvider.generateTokens(loginRequest,response));
     }
 
+    @PostMapping(value = "/login-mobile")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        return ResponseEntity.ok(tokenProvider.generateTokens(loginRequest));
+    }
+
+
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(HttpServletRequest request,HttpServletResponse response)  {
         return ResponseEntity.ok(tokenProvider.refresh(request,response));
     }
 
+    @PostMapping("/refresh-mobile")
+    public ResponseEntity<LoginResponse> refresh(@RequestBody String refreshToken)  {
+        return ResponseEntity.ok(tokenProvider.refresh(refreshToken));
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request,HttpServletResponse response) {
         tokenProvider.revokeTokens(request,response);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/logout-mobile")
+    public ResponseEntity<?> logout(HttpServletRequest request,@RequestBody String refreshToken) {
+        tokenProvider.revokeTokens(request,refreshToken);
         return ResponseEntity.noContent().build();
     }
 
