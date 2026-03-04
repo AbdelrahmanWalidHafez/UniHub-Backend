@@ -1,6 +1,7 @@
 package com.unihub.auth.security.filter;
 
 
+import com.unihub.auth.common.redis.concerns.RedisKeys;
 import com.unihub.auth.common.redis.service.IRedisService;
 import com.unihub.auth.security.config.JwtConfigurationProperties;
 import io.jsonwebtoken.Claims;
@@ -105,7 +106,7 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
 
     private void checkBlackListedToken(Claims claims) {
         String jti = claims.getId();
-        if (redisService.exists("blacklist:access:" + jti)) {
+        if (redisService.exists(RedisKeys.BLACKLIST_PREFIX + jti)) {
             throw new BadCredentialsException("invalid token received");
         }
     }
