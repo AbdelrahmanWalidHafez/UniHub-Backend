@@ -2,10 +2,7 @@ package com.unihub.auth.security.service.impl;
 
 import com.unihub.auth.common.redis.service.IRedisService;
 import com.unihub.auth.security.config.JwtConfigurationProperties;
-import com.unihub.auth.security.dto.request.ChangeForgotPasswordRequest;
-import com.unihub.auth.security.dto.request.LoginRequest;
-import com.unihub.auth.security.dto.request.SendVerificationCode;
-import com.unihub.auth.security.dto.request.VerificationRequest;
+import com.unihub.auth.security.dto.request.*;
 import com.unihub.auth.security.dto.response.AccessToken;
 import com.unihub.auth.security.dto.response.LoginResponse;
 import com.unihub.auth.security.dto.response.RefreshToken;
@@ -115,7 +112,7 @@ public class TokenProviderImpl implements ITokenProvider {
     @Override
     public void generateForgotPasswordVerificationCode(String email) {
         if(redisService.exists("verification:"+email)){
-            redisService.deleteKey("verification"+email);
+            redisService.deleteKey("verification:"+email);
         }
         if (userDetailsService.isExist(email)) {
          generateAndSendVerificationCode(email);
@@ -123,8 +120,18 @@ public class TokenProviderImpl implements ITokenProvider {
     }
 
     @Override
+    public void generateActivationCode(String email) {
+        if(redisService.exists("activation:"+email)){
+            redisService.deleteKey("activation:"+email);
+        }
+        if (userDetailsService.isExist(email)) {
+            generateAndSendActivationCode(email);
+        }
+    }
+
+    @Override
     public VerificationOpaqueToken verifyForgotPasswordVerificationCode(VerificationRequest verificationRequest){
-        Optional<String>code=validateAndGetVerificationCode("verification:"+verificationRequest.getEmail());
+        Optional<String>code=validateAndGetCode("verification:"+verificationRequest.getEmail());
         if (code.isEmpty()) {
             throw new BadCredentialsException("invalid verification code");
         }
@@ -132,6 +139,19 @@ public class TokenProviderImpl implements ITokenProvider {
             throw new IllegalArgumentException("invalid verification code");
         }
         redisService.deleteKey("verification:"+verificationRequest.getEmail());
+        return generateVerificationOpaqueToken(verificationRequest.getEmail());
+    }
+
+    @Override
+    public VerificationOpaqueToken verifyActivationCode(ActivationVerificationRequest verificationRequest){
+        Optional<String>code=validateAndGetCode("activation:"+verificationRequest.getEmail());
+        if (code.isEmpty()) {
+            throw new BadCredentialsException("invalid activation code");
+        }
+        if (!code.get().equals(verificationRequest.getActivationCode())) {
+            throw new IllegalArgumentException("invalid verification code");
+        }
+        redisService.deleteKey("activation:"+verificationRequest.getEmail());
         return generateVerificationOpaqueToken(verificationRequest.getEmail());
     }
 
@@ -146,6 +166,21 @@ public class TokenProviderImpl implements ITokenProvider {
         user.setPassword(passwordEncoder.encode(changeForgotPasswordRequest.getPassword()));
         userRepository.save(user);
         deleteVerificationToken(request);
+    }
+
+    @Override
+    public void setPassword(SetPasswordRequest request) {
+       Optional<String>email=validateAndGetEmail("verification_token:"+request.getVerificationToken());
+       if(email.isEmpty()){
+           throw  new BadCredentialsException("invalid verification code");
+       }
+        validatePasswordConfirmation(request.getPassword(), request.getConfirmPassword());
+        User user = userRepository.findByEmail(email.get())
+                .orElseThrow(() -> new EntityNotFoundException("Resource doesn't exist"));
+        user.setAccountNonLocked(true);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(user);
+        deleteVerificationToken("verification_token"+request.getVerificationToken());
     }
 
     private AccessToken generateAccessToken(SecretKey key, Authentication authentication)  {
@@ -222,6 +257,22 @@ public class TokenProviderImpl implements ITokenProvider {
                 .build());
     }
 
+    private void generateAndSendActivationCode(String email) {
+        StringBuilder stringBuilder=new StringBuilder();
+        SecureRandom random=new SecureRandom();
+
+        for (int i = 0; i <6 ; i++) {
+            stringBuilder.append(random.nextInt(10));
+        }
+        redisService.setValue("activation:"+email,stringBuilder.toString(), Duration.ofSeconds(verificationCodeTTL));
+        streamBridge.send("sendActivationCode-out-0", SendActivationCode
+                .builder()
+                .activationCode(stringBuilder.toString())
+                .to(email)
+                .expirationTime(verificationCodeTTL)
+                .build());
+    }
+
     private VerificationOpaqueToken generateVerificationOpaqueToken(String email) {
         String verificationOpaqueToken = UUID.randomUUID() + "-" + UUID.randomUUID();
         redisService.setValue("verification_token:"+ verificationOpaqueToken, email, Duration.ofSeconds(verificationTokenTTL));
@@ -239,13 +290,17 @@ public class TokenProviderImpl implements ITokenProvider {
         }
     }
 
-    private Optional<String> validateAndGetVerificationCode(String key){
+    private Optional<String> validateAndGetCode(String key){
         return Optional.ofNullable(redisService.getValue(key));
     }
 
     private void deleteVerificationToken(HttpServletRequest request){
         String verification_token=request.getHeader(jwtProperties.authorizationHeader()).substring(7);
         redisService.deleteKey("verification_token:"+verification_token);
+    }
+
+    private void deleteVerificationToken(String verificationToken){
+        redisService.deleteKey("verification_token:"+verificationToken);
     }
 
     private void setCookie(RefreshToken token,HttpServletResponse response){

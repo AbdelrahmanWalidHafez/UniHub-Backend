@@ -1,5 +1,6 @@
 package com.unihub.mail.service;
 
+import com.unihub.mail.dto.SendActivationCode;
 import com.unihub.mail.dto.SendVerificationCode;
 import com.unihub.mail.dto.SystemAdminResponse;
 import jakarta.mail.MessagingException;
@@ -13,4 +14,6 @@ public interface IMailService {
     void sendRejectionMail(String to) throws IOException, MessagingException;
 
     void sendVerificationCode(SendVerificationCode sendVerificationCode) throws IOException, MessagingException;
+
+    void sendActivationCode(SendActivationCode sendActivationCode) throws IOException, MessagingException;
 }

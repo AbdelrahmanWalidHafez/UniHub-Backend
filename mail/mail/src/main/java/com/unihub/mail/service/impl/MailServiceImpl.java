@@ -1,5 +1,6 @@
 package com.unihub.mail.service.impl;
 
+import com.unihub.mail.dto.SendActivationCode;
 import com.unihub.mail.dto.SendVerificationCode;
 import com.unihub.mail.dto.SystemAdminResponse;
 import com.unihub.mail.service.IMailService;
@@ -49,6 +50,14 @@ public class MailServiceImpl implements IMailService {
         mailSender.send(message);
     }
 
+    @Async
+    @Override
+    public void sendActivationCode(SendActivationCode sendActivationCode) throws IOException, MessagingException {
+        MimeMessage message = createMimeMessage(sendActivationCode.getTo(),"Activation Code OTP");
+        message.setContent(populateTemplate(sendActivationCode),"text/html");
+        mailSender.send(message);
+    }
+
     private MimeMessage createMimeMessage(String to,String subject) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         message.setFrom(new InternetAddress(from));
@@ -62,6 +71,13 @@ public class MailServiceImpl implements IMailService {
         String htmlTemplate= fetchTemplate("OTP.html");
         return htmlTemplate.replace("{{OTP}}",sendVerificationCode.getVerificationCode())
                            .replace("{{ExpirationMinutes}}", Long.valueOf(sendVerificationCode.getExpirationTime() / 60).toString());
+
+    }
+
+    private String populateTemplate(SendActivationCode sendActivationCode) throws IOException {
+        String htmlTemplate= fetchTemplate("activation.html");
+        return htmlTemplate.replace("{{OTP}}",sendActivationCode.getActivationCode())
+                .replace("{{ExpirationMinutes}}", Long.valueOf(sendActivationCode.getExpirationTime() / 60).toString());
 
     }
 

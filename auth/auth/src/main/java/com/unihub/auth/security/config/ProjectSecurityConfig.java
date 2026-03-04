@@ -50,7 +50,10 @@ public class ProjectSecurityConfig {
                                 "/api/v1/auth/refresh",
                                 "/actuator/**",
                                 "/api/v1/auth/forgot-password",
-                                "/api/v1/auth/verify-forgot-password-token").permitAll()
+                                "/api/v1/auth/verify-forgot-password-token",
+                                "/api/v1/auth/activate-account",
+                                "/api/v1/auth/verify-activation-code",
+                                "/api/v1/auth/set-password").permitAll()
                         .requestMatchers("/api/v1/roles/**").hasRole("SYSTEM_ADMIN")
                         .requestMatchers("/api/v1/account-management/**").access((authentication, context) ->
                         new AuthorizationDecision(

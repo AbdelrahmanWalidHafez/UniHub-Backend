@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Forgot Password OTP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff; /* Full background white */
+            margin: 0;
+            padding: 0;
+            color: #3a4a52; /* Dark text for general content */
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #ffffff; /* Container white */
+            border-radius: 8px;
+            overflow: hidden;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            text-align: center;
+            background-color: #ffffff; /* Header white */
+            padding: 15px;
+        }
+
+        .header img {
+            max-height: 50px;
+            display: block;
+            margin: 0 auto 10px auto;
+        }
+
+        .header h2 {
+            color: #3a4a52; /* Dark text, matches logo */
+            margin: 0;
+        }
+
+        .content {
+            margin-top: 20px;
+        }
+
+        .content p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #3a4a52;
+        }
+
+        .info-box {
+            background-color: #ffffff; /* White background */
+            padding: 15px 0;
+            margin: 20px 0;
+        }
+
+        .info-box p {
+            margin: 8px 0;
+            font-size: 16px;
+        }
+
+        .info-box b {
+            color: #3a4a52; /* Dark Gray like logo */
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #aaaaaa;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media screen and (max-width: 640px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="https://lh3.googleusercontent.com/a/ACg8ocKHoCIaQ_FT1Keo5afhfpgPvGI-gvT6NOyWNQ_pvIrIi6WsHyw=s288-c-no" alt="UniHub Logo">
+        <h2>UniHub Password Reset OTP</h2>
+    </div>
+    <div class="content">
+        <p>We received a request to activate your account. Use the OTP below to create your password. <strong>Do not share this code with anyone.</strong></p>
+
+        <div class="info-box">
+            <p><b>OTP Code:</b> {{OTP}}</p>
+            <p>This code is valid for <b>{{ExpirationMinutes}} minutes</b>.</p>
+        </div>
+
+        <p>If you did not request a password reset, please ignore this email or contact support immediately.</p>
+    </div>
+    <div class="footer">
+        &copy; 2026 UniHub. All rights reserved.
+    </div>
+</div>
+</body>
+</html>

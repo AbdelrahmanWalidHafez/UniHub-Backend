@@ -1,6 +1,7 @@
 package com.unihub.mail.functions;
 
 import com.unihub.mail.dto.SendAcceptanceMailDto;
+import com.unihub.mail.dto.SendActivationCode;
 import com.unihub.mail.dto.SendVerificationCode;
 import com.unihub.mail.service.IMailService;
 import jakarta.mail.MessagingException;
@@ -44,6 +45,17 @@ public class MailFunctions {
         return request -> {
             try {
                 mailService.sendVerificationCode(request);
+            } catch (IOException | MessagingException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    @Bean
+    public Consumer<SendActivationCode> sendActivationCode(){
+        return request -> {
+            try {
+                mailService.sendActivationCode(request);
             } catch (IOException | MessagingException e) {
                 throw new RuntimeException(e);
             }
