@@ -1,5 +1,6 @@
 package com.unihub.auth.security.service.impl;
 
+import com.unihub.auth.common.redis.concerns.RedisKeys;
 import com.unihub.auth.common.redis.service.IRedisService;
 import com.unihub.auth.security.config.JwtConfigurationProperties;
 import com.unihub.auth.security.dto.request.*;
@@ -19,6 +20,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -39,9 +41,16 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TokenProviderImpl implements ITokenProvider {
+
+    @Value("${verification.codeTTL}")
+    private  long verificationCodeTTL;
+
+    @Value("${verification.tokenTTL}")
+    private  long verificationTokenTTL;
 
     private final StreamBridge streamBridge;
 
@@ -51,24 +60,20 @@ public class TokenProviderImpl implements ITokenProvider {
 
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${verification.codeTTL}")
-    private  long verificationCodeTTL;
-
-    @Value("${verification.tokenTTL}")
-    private  long verificationTokenTTL;
-
     private final JwtConfigurationProperties jwtProperties;
 
     private final ProjectUserDetailsService userDetailsService;
 
+    private final JwtGenerationContext jwtGenerationContext;
+
     private final AuthenticationManager authenticationManager;
 
-    private final JwtGenerationContext jwtGenerationContext;
+    private static final SecureRandom secureRandom=new SecureRandom();
 
 
     @Override
     public LoginResponse generateTokens(LoginRequest loginRequest, HttpServletResponse response){
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        Authentication authentication = authenticate(loginRequest);
         setCookie(generateRefreshToken(authentication.getName()),response);
         return LoginResponse
                 .builder()
@@ -78,7 +83,7 @@ public class TokenProviderImpl implements ITokenProvider {
 
     @Override
     public LoginResponse generateTokens(LoginRequest loginRequest){
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        Authentication authentication = authenticate(loginRequest);
         return LoginResponse
                 .builder()
                 .accessToken(generateAccessToken(getSecretKey(jwtProperties.secret()), authentication))
@@ -89,17 +94,7 @@ public class TokenProviderImpl implements ITokenProvider {
     @Override
     public LoginResponse refresh(HttpServletRequest request,HttpServletResponse response) throws AuthenticationException {
         String oldRefreshToken=getRefreshTokenFromCookie(request);
-        Optional<String> username = validateAndGetEmail("refresh:" + oldRefreshToken);
-        if (username.isEmpty()) {
-            throw new AuthenticationException("invalid refresh token received") {
-                @Override
-                public @Nullable Authentication getAuthenticationRequest() {
-                    return super.getAuthenticationRequest();
-                }
-            } ;
-
-        }
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username.get());
+        UserDetails userDetails = validateRefreshToken(oldRefreshToken);
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         setCookie(rotateRefreshToken(oldRefreshToken,authentication.getName()),response);
         return LoginResponse
@@ -110,17 +105,7 @@ public class TokenProviderImpl implements ITokenProvider {
 
     @Override
     public LoginResponse refresh(String oldRefreshToken) throws AuthenticationException {
-        Optional<String> username = validateAndGetEmail("refresh:" + oldRefreshToken);
-        if (username.isEmpty()) {
-            throw new AuthenticationException("invalid refresh token received") {
-                @Override
-                public @Nullable Authentication getAuthenticationRequest() {
-                    return super.getAuthenticationRequest();
-                }
-            } ;
-
-        }
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username.get());
+        UserDetails userDetails = validateRefreshToken(oldRefreshToken);
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         return LoginResponse
                 .builder()
@@ -131,30 +116,20 @@ public class TokenProviderImpl implements ITokenProvider {
 
     @Override
     public void revokeTokens(HttpServletRequest request, HttpServletResponse response) {
-        String jwt = request.getHeader(jwtProperties.authorizationHeader()).substring(7);
-        Duration ttl = Duration.ofMillis(getExpirationDate(jwt, getSecretKey(jwtProperties.secret())).getTime() - System.currentTimeMillis());
-        if (!ttl.isNegative() && !ttl.isZero()) {
-            blackListToken(jwt, ttl);
-        }
+        fetchAndBlackListJwt(request);
         deleteCookie(response);
         revokeRefreshToken(getRefreshTokenFromCookie(request));
     }
 
     @Override
     public void revokeTokens(HttpServletRequest request,String refreshToken) {
-        String jwt = request.getHeader(jwtProperties.authorizationHeader()).substring(7);
-        Duration ttl = Duration.ofMillis(getExpirationDate(jwt, getSecretKey(jwtProperties.secret())).getTime() - System.currentTimeMillis());
-        if (!ttl.isNegative() && !ttl.isZero()) {
-            blackListToken(jwt, ttl);
-        }
+        fetchAndBlackListJwt(request);
         revokeRefreshToken(refreshToken);
     }
 
     @Override
     public void generateForgotPasswordVerificationCode(String email) {
-        if(redisService.exists("verification:"+email)){
-            redisService.deleteKey("verification:"+email);
-        }
+        redisService.deleteKey(RedisKeys.VERIFICATION_PREFIX +email);
         if (userDetailsService.isExist(email)) {
          generateAndSendVerificationCode(email);
         }
@@ -162,9 +137,7 @@ public class TokenProviderImpl implements ITokenProvider {
 
     @Override
     public void generateActivationCode(String email) {
-        if(redisService.exists("activation:"+email)){
-            redisService.deleteKey("activation:"+email);
-        }
+        redisService.deleteKey(RedisKeys.ACTIVATION_PREFIX+email);
         if (userDetailsService.isExist(email)) {
             generateAndSendActivationCode(email);
         }
@@ -172,27 +145,27 @@ public class TokenProviderImpl implements ITokenProvider {
 
     @Override
     public VerificationOpaqueToken verifyForgotPasswordVerificationCode(VerificationRequest verificationRequest){
-        Optional<String>code=validateAndGetCode("verification:"+verificationRequest.getEmail());
+        Optional<String>code=validateAndGetCode(RedisKeys.VERIFICATION_PREFIX+verificationRequest.getEmail());
         if (code.isEmpty()) {
             throw new BadCredentialsException("invalid verification code");
         }
         if (!code.get().equals(verificationRequest.getVerificationCode())) {
             throw new IllegalArgumentException("invalid verification code");
         }
-        redisService.deleteKey("verification:"+verificationRequest.getEmail());
+        redisService.deleteKey(RedisKeys.VERIFICATION_PREFIX+verificationRequest.getEmail());
         return generateVerificationOpaqueToken(verificationRequest.getEmail());
     }
 
     @Override
     public VerificationOpaqueToken verifyActivationCode(ActivationVerificationRequest verificationRequest){
-        Optional<String>code=validateAndGetCode("activation:"+verificationRequest.getEmail());
+        Optional<String>code=validateAndGetCode(RedisKeys.ACTIVATION_PREFIX+verificationRequest.getEmail());
         if (code.isEmpty()) {
             throw new BadCredentialsException("invalid activation code");
         }
         if (!code.get().equals(verificationRequest.getActivationCode())) {
             throw new IllegalArgumentException("invalid verification code");
         }
-        redisService.deleteKey("activation:"+verificationRequest.getEmail());
+        redisService.deleteKey(RedisKeys.ACTIVATION_PREFIX+verificationRequest.getEmail());
         return generateVerificationOpaqueToken(verificationRequest.getEmail());
     }
 
@@ -211,7 +184,7 @@ public class TokenProviderImpl implements ITokenProvider {
 
     @Override
     public void setPassword(SetPasswordRequest request) {
-       Optional<String>email=validateAndGetEmail("verification_token:"+request.getVerificationToken());
+       Optional<String>email=validateAndGetEmail(RedisKeys.VERIFICATION_TOKEN_PREFIX+request.getVerificationToken());
        if(email.isEmpty()){
            throw  new BadCredentialsException("invalid verification code");
        }
@@ -221,7 +194,7 @@ public class TokenProviderImpl implements ITokenProvider {
         user.setAccountNonLocked(true);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
-        deleteVerificationToken("verification_token"+request.getVerificationToken());
+        deleteVerificationToken(request.getVerificationToken());
     }
 
     private AccessToken generateAccessToken(SecretKey key, Authentication authentication)  {
@@ -237,7 +210,7 @@ public class TokenProviderImpl implements ITokenProvider {
     private RefreshToken generateRefreshToken(String username) {
         String refreshToken = UUID.randomUUID() + "-" + UUID.randomUUID();
         Duration ttl = Duration.ofMillis(jwtProperties.refreshToken().expirationTime());
-        redisService.setValue("refresh:"+ refreshToken, username, ttl);
+        redisService.setValue(RedisKeys.REFRESH_PREFIX+refreshToken, username, ttl);
         return RefreshToken
                 .builder()
                 .tokenType("Opaque")
@@ -251,7 +224,7 @@ public class TokenProviderImpl implements ITokenProvider {
     }
 
     private void revokeRefreshToken(String refreshToken) {
-        redisService.deleteKey("refresh:" + refreshToken);
+        redisService.deleteKey(RedisKeys.REFRESH_PREFIX+refreshToken);
     }
 
     private Optional<String> validateAndGetEmail(String key) {
@@ -270,45 +243,32 @@ public class TokenProviderImpl implements ITokenProvider {
 
     private void blackListToken(String jwt, Duration ttl) {
         String jti=Jwts.parserBuilder().setSigningKey(getSecretKey(jwtProperties.secret())).build().parseClaimsJws(jwt).getBody().getId();
-        redisService.setValue("blacklist:access:"+ jti, "1", ttl);
+        redisService.setValue(RedisKeys.BLACKLIST_PREFIX+ jti, "1", ttl);
     }
 
     private UniversityMetadata getUniMetaData(Authentication authentication) {
          User user=userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-         if(user.getUniversityMetadata()!=null) {
-             return user.getUniversityMetadata();
-         }
-         return null;
+         return user.getUniversityMetadata();
     }
 
     private void generateAndSendVerificationCode(String email) {
-        StringBuilder stringBuilder=new StringBuilder();
-        SecureRandom random=new SecureRandom();
-
-        for (int i = 0; i <6 ; i++) {
-            stringBuilder.append(random.nextInt(10));
-        }
-        redisService.setValue("verification:"+email,stringBuilder.toString(), Duration.ofSeconds(verificationCodeTTL));
+       String otp=generateOtp();
+        redisService.setValue(RedisKeys.VERIFICATION_PREFIX+email,otp, Duration.ofSeconds(verificationCodeTTL));
         streamBridge.send("sendVerificationCode-out-0", SendVerificationCode
                 .builder()
-                .verificationCode(stringBuilder.toString())
+                .verificationCode(otp)
                 .to(email)
                 .expirationTime(verificationCodeTTL)
                 .build());
     }
 
     private void generateAndSendActivationCode(String email) {
-        StringBuilder stringBuilder=new StringBuilder();
-        SecureRandom random=new SecureRandom();
-
-        for (int i = 0; i <6 ; i++) {
-            stringBuilder.append(random.nextInt(10));
-        }
-        redisService.setValue("activation:"+email,stringBuilder.toString(), Duration.ofSeconds(verificationCodeTTL));
+        String otp=generateOtp();
+        redisService.setValue(RedisKeys.ACTIVATION_PREFIX+email,otp, Duration.ofSeconds(verificationCodeTTL));
         streamBridge.send("sendActivationCode-out-0", SendActivationCode
                 .builder()
-                .activationCode(stringBuilder.toString())
+                .activationCode(otp)
                 .to(email)
                 .expirationTime(verificationCodeTTL)
                 .build());
@@ -316,7 +276,7 @@ public class TokenProviderImpl implements ITokenProvider {
 
     private VerificationOpaqueToken generateVerificationOpaqueToken(String email) {
         String verificationOpaqueToken = UUID.randomUUID() + "-" + UUID.randomUUID();
-        redisService.setValue("verification_token:"+ verificationOpaqueToken, email, Duration.ofSeconds(verificationTokenTTL));
+        redisService.setValue(RedisKeys.VERIFICATION_TOKEN_PREFIX+ verificationOpaqueToken, email, Duration.ofSeconds(verificationTokenTTL));
         return VerificationOpaqueToken
                 .builder()
                 .token(verificationOpaqueToken)
@@ -337,18 +297,18 @@ public class TokenProviderImpl implements ITokenProvider {
 
     private void deleteVerificationToken(HttpServletRequest request){
         String verification_token=request.getHeader(jwtProperties.authorizationHeader()).substring(7);
-        redisService.deleteKey("verification_token:"+verification_token);
+        deleteVerificationToken(verification_token);
     }
 
     private void deleteVerificationToken(String verificationToken){
-        redisService.deleteKey("verification_token:"+verificationToken);
+        redisService.deleteKey(RedisKeys.VERIFICATION_TOKEN_PREFIX+verificationToken);
     }
 
     private void setCookie(RefreshToken token,HttpServletResponse response){
         Cookie cookie=new Cookie("refreshToken",token.getRefreshToken());
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
-        cookie.setPath("/api/v1/auth/refresh");
+        cookie.setPath("/api/v1/auth");
         cookie.setMaxAge((int)token.getExpiresIn());
         cookie.setAttribute("SameSite", "Strict");
         response.addCookie(cookie);
@@ -371,10 +331,44 @@ public class TokenProviderImpl implements ITokenProvider {
         Cookie cookie=new Cookie("refreshToken",null);
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
-        cookie.setPath("/api/auth/v1/refresh");
+        cookie.setPath("/api/v1/auth");
         cookie.setMaxAge((0));
         cookie.setAttribute("SameSite", "Strict");
         response.addCookie(cookie);
+    }
+
+    private Authentication authenticate(LoginRequest request){
+        return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+    }
+
+    private UserDetails validateRefreshToken(String oldRefreshToken){
+        Optional<String> username = validateAndGetEmail(RedisKeys.REFRESH_PREFIX+oldRefreshToken);
+        if (username.isEmpty()) {
+            throw new AuthenticationException("invalid refresh token received") {
+                @Override
+                public @Nullable Authentication getAuthenticationRequest() {
+                    return super.getAuthenticationRequest();
+                }
+            } ;
+
+        }
+        return userDetailsService.loadUserByUsername(username.get());
+    }
+
+    private void fetchAndBlackListJwt(HttpServletRequest request){
+        String jwt = request.getHeader(jwtProperties.authorizationHeader()).substring(7);
+        Duration ttl = Duration.ofMillis(getExpirationDate(jwt, getSecretKey(jwtProperties.secret())).getTime() - System.currentTimeMillis());
+        if (!ttl.isNegative() && !ttl.isZero()) {
+            blackListToken(jwt, ttl);
+        }
+    }
+
+    private String generateOtp(){
+        StringBuilder stringBuilder=new StringBuilder();
+        for (int i = 0; i <6 ; i++) {
+            stringBuilder.append(secureRandom.nextInt(10));
+        }
+        return stringBuilder.toString();
     }
 }
 

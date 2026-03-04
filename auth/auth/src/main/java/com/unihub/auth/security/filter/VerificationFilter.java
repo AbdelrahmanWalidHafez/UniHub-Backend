@@ -1,5 +1,6 @@
 package com.unihub.auth.security.filter;
 
+import com.unihub.auth.common.redis.concerns.RedisKeys;
 import com.unihub.auth.common.redis.service.IRedisService;
 import com.unihub.auth.security.config.JwtConfigurationProperties;
 import jakarta.persistence.EntityNotFoundException;
@@ -55,7 +56,7 @@ public class VerificationFilter extends OncePerRequestFilter {
 
     private String verifyToken(String verificationToken) {
 
-        if (!redisService.exists("verification_token:"+ verificationToken)) {
+        if (!redisService.exists(RedisKeys.VERIFICATION_TOKEN_PREFIX + verificationToken)) {
             throw new BadCredentialsException("invalid token received");
         }
         Optional<String> email = validateAndGetUsername(verificationToken);
@@ -66,7 +67,7 @@ public class VerificationFilter extends OncePerRequestFilter {
     }
 
     private Optional<String> validateAndGetUsername(String verificationToken) {
-        return Optional.ofNullable(redisService.getValue("verification_token:"+ verificationToken));
+        return Optional.ofNullable(redisService.getValue(RedisKeys.VERIFICATION_TOKEN_PREFIX + verificationToken));
     }
 
     private void setAuthentication(String email) {

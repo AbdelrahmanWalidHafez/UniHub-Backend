@@ -1,6 +1,7 @@
 package com.unihub.gateway.security.filter;
 
 
+import com.unihub.gateway.common.redis.concerns.RedisKeys;
 import com.unihub.gateway.common.redis.serivce.IRedisService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -91,7 +92,7 @@ public class JwtValidatorFilter implements WebFilter {
 
     private void checkBlackListedToken(Claims claims) {
         String jti = claims.getId();
-        if (redisService.exists("blacklist:access:" + jti)) {
+        if (redisService.exists(RedisKeys.BLACKLIST_PREFIX+ jti)) {
             throw new BadCredentialsException("invalid token received");
         }
     }

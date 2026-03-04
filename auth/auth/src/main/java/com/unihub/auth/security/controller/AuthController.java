@@ -1,5 +1,6 @@
 package com.unihub.auth.security.controller;
 
+import com.unihub.auth.security.dto.request.RefreshTokenRequest;
 import com.unihub.auth.security.dto.request.*;
 import com.unihub.auth.security.dto.response.LoginResponse;
 import com.unihub.auth.security.dto.response.UserDto;
@@ -43,8 +44,8 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-mobile")
-    public ResponseEntity<LoginResponse> refresh(@RequestBody String refreshToken)  {
-        return ResponseEntity.ok(tokenProvider.refresh(refreshToken));
+    public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest)  {
+        return ResponseEntity.ok(tokenProvider.refresh(refreshTokenRequest.getRefreshToken()));
     }
 
     @PostMapping("/logout")
@@ -54,8 +55,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout-mobile")
-    public ResponseEntity<?> logout(HttpServletRequest request,@RequestBody String refreshToken) {
-        tokenProvider.revokeTokens(request,refreshToken);
+    public ResponseEntity<?> logout(HttpServletRequest request,@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+        tokenProvider.revokeTokens(request,refreshTokenRequest.getRefreshToken());
         return ResponseEntity.noContent().build();
     }
 
