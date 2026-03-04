@@ -47,7 +47,8 @@ public class ProjectSecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/v1/auth/login",
-                                "/api/v1/auth/refresh",
+                                "/api/v1/auth/login-mobile",
+                                "/api/v1/auth/refresh-mobile",
                                 "/actuator/**",
                                 "/api/v1/auth/forgot-password",
                                 "/api/v1/auth/verify-forgot-password-token").permitAll()

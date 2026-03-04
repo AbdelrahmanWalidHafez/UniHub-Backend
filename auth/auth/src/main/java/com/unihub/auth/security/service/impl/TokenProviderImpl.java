@@ -80,6 +80,16 @@ public class TokenProviderImpl implements ITokenProvider {
     }
 
     @Override
+    public LoginResponse generateTokens(LoginRequest loginRequest){
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        return LoginResponse
+                .builder()
+                .accessToken(generateAccessToken(getSecretKey(jwtProperties.secret()), authentication))
+                .refreshToken(generateRefreshToken(authentication.getName()))
+                .build();
+    }
+
+    @Override
     public LoginResponse refresh(HttpServletRequest request,HttpServletResponse response) throws AuthenticationException {
         String oldRefreshToken=getRefreshTokenFromCookie(request);
         Optional<String> username = validateAndGetEmail("refresh:" + oldRefreshToken);
@@ -102,6 +112,27 @@ public class TokenProviderImpl implements ITokenProvider {
     }
 
     @Override
+    public LoginResponse refresh(String oldRefreshToken) throws AuthenticationException {
+        Optional<String> username = validateAndGetEmail("refresh:" + oldRefreshToken);
+        if (username.isEmpty()) {
+            throw new AuthenticationException("invalid refresh token received") {
+                @Override
+                public @Nullable Authentication getAuthenticationRequest() {
+                    return super.getAuthenticationRequest();
+                }
+            } ;
+
+        }
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username.get());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        return LoginResponse
+                .builder()
+                .accessToken(generateAccessToken(getSecretKey(jwtProperties.secret()), authentication))
+                .refreshToken(rotateRefreshToken(oldRefreshToken,authentication.getName()))
+                .build();
+    }
+
+    @Override
     public void revokeTokens(HttpServletRequest request, HttpServletResponse response) {
         String jwt = request.getHeader(jwtProperties.authorizationHeader()).substring(7);
         Duration ttl = Duration.ofMillis(getExpirationDate(jwt, getSecretKey(jwtProperties.secret())).getTime() - System.currentTimeMillis());
@@ -110,6 +141,16 @@ public class TokenProviderImpl implements ITokenProvider {
         }
         deleteCookie(response);
         revokeRefreshToken(getRefreshTokenFromCookie(request));
+    }
+
+    @Override
+    public void revokeTokens(HttpServletRequest request,String refreshToken) {
+        String jwt = request.getHeader(jwtProperties.authorizationHeader()).substring(7);
+        Duration ttl = Duration.ofMillis(getExpirationDate(jwt, getSecretKey(jwtProperties.secret())).getTime() - System.currentTimeMillis());
+        if (!ttl.isNegative() && !ttl.isZero()) {
+            blackListToken(jwt, ttl);
+        }
+        revokeRefreshToken(refreshToken);
     }
 
     @Override
