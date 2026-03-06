@@ -45,11 +45,15 @@ public class SecurityConfig {
                                     hasRequiredAuthorities(auth, "ROLE_SYSTEM_ADMIN", "IS_ACTIVE")
                             ))
                     );
-            exchange.pathMatchers("/unihub/usage/api/v1/usage").hasRole("SYSTEM_ADMIN");
             exchange.pathMatchers("/unihub/universitymanagement/api/v1/get-university/**").authenticated();
             exchange.pathMatchers("/unihub/universitymanagement/api/v1/internal/**").denyAll();
             //S3 microservice
             exchange.pathMatchers("/unihub/s3/**").authenticated();
+            //usage
+            exchange.pathMatchers("/unihub/usage/api/v1/usage").hasRole("SYSTEM_ADMIN");
+            //announcement
+            exchange.pathMatchers("/unihub/announcement/api/v1/posts/secretary/**").hasRole("SECRETARY");
+            exchange.pathMatchers("/unihub/announcement/api/v1/posts/public/**").hasAnyRole("SECRETARY","INSTRUCTOR","STUDENT");
             exchange.anyExchange().authenticated();
         });
         http.csrf(ServerHttpSecurity.CsrfSpec::disable)

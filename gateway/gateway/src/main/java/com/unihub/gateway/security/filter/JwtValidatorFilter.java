@@ -61,6 +61,7 @@ public class JwtValidatorFilter implements WebFilter {
                             .request(request.mutate()
                                     .header("X-User-Email", claims.get("email", String.class))
                                     .header("X-User-University-Id", claims.get("university_id", String.class))
+                                    .header("X-User-College-Id", claims.get("college_id", String.class))
                                     .build()
                             )
                             .build())

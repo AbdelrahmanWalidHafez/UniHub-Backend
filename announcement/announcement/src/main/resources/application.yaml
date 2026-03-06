@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: ${APPLICATION_NAME}
+  config:
+    import: optional:configserver:http://config-server:8080
+  cloud:
+    stream:
+      bindings:
+        uploadFile-out-0:
+          destination: upload-file-topic
+          content-type: application/json
+        deleteFile-out-0:
+          destination: delete-file-topic
+          content-type: application/json
+      kafka:
+        binder:
+          brokers: ${KAFKA}
+
