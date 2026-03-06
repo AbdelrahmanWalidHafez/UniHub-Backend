@@ -37,6 +37,7 @@ public class CommentServiceImpl implements ICommentService {
         Post post=fetchPost(id, request);
         Comment comment=commentMapper.toEntity(commentRequest);
         comment.setPost(post);
+        comment.setRepliesCounts(0L);
         comment.setEdited(false);
         post.setCommentsCount(post.getCommentsCount()+1);
         return commentMapper.toDto(commentRepository.save(comment));
@@ -47,6 +48,7 @@ public class CommentServiceImpl implements ICommentService {
     public CommentDto createReply(UUID commentId, CreateCommentRequest commentRequest) {
         Comment commentToReply=fetchComment(commentId);
         Comment reply=commentMapper.toEntity(commentRequest);
+        commentToReply.setRepliesCounts(commentToReply.getRepliesCounts()+1);
         reply.setParent(commentToReply);
         reply.setPost(commentToReply.getPost());
         reply.getPost().setCommentsCount(reply.getPost().getCommentsCount()+1);
@@ -71,8 +73,12 @@ public class CommentServiceImpl implements ICommentService {
     @Override
     public List<CommentDto> getComments(UUID postId,int pageNum,HttpServletRequest request) {
         Post post=fetchPost(postId, request);
-        Pageable pageable=PageRequest.of(pageNum, 5, Sort.by("createdAt").descending());
-        return  commentRepository.findByPost(post,pageable).stream().map(commentMapper::toDto).collect(Collectors.toList());
+        return  commentRepository.findByPostAndParentIsNull(post,createPageable(pageNum)).stream().map(commentMapper::toDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CommentDto> getReplies(UUID commentId, int pageNum) {
+        return  commentRepository.findByParent(fetchComment(commentId),createPageable(pageNum)).stream().map(commentMapper::toDto).collect(Collectors.toList());
     }
 
     @Override
@@ -80,6 +86,9 @@ public class CommentServiceImpl implements ICommentService {
     public void deleteComment(UUID commentId,HttpServletRequest request) {
         Comment comment=fetchComment(commentId, postService.fetchEmailFromHeader(request));
         comment.getPost().setCommentsCount(Math.max(0,comment.getPost().getCommentsCount()-1));
+        if(comment.getParent()!=null){
+            comment.getParent().setRepliesCounts(Math.max(0,comment.getParent().getRepliesCounts()-1));
+        }
         commentRepository.delete(comment);
     }
 
@@ -89,6 +98,9 @@ public class CommentServiceImpl implements ICommentService {
         Post post=fetchPost(postId, request);
         Comment comment=fetchComment(commentId,post);
         comment.getPost().setCommentsCount(Math.max(0,comment.getPost().getCommentsCount()-1));
+        if(comment.getParent()!=null){
+            comment.getParent().setRepliesCounts(Math.max(0,comment.getParent().getRepliesCounts()-1));
+        }
         commentRepository.delete(comment);
     }
 
@@ -106,6 +118,10 @@ public class CommentServiceImpl implements ICommentService {
 
     private Comment fetchComment(UUID id,Post post){
         return commentRepository.findByCidAndPost(id,post).orElseThrow(EntityNotFoundException::new);
+    }
+
+    private Pageable createPageable(int pageNum){
+        return PageRequest.of(pageNum, 5, Sort.by("createdAt").descending());
     }
 
 }

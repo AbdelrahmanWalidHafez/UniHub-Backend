@@ -19,6 +19,8 @@ public interface ICommentService {
 
     List<CommentDto> getComments(UUID postId, int pageNum, HttpServletRequest request);
 
+    List<CommentDto> getReplies(UUID commentId, int pageNum);
+
     void deleteComment(UUID commentId,HttpServletRequest request);
 
     void deleteCommentSecretary(UUID postId,UUID commentId,HttpServletRequest request);

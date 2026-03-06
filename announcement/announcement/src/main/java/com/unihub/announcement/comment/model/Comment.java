@@ -28,6 +28,9 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private boolean edited;
 
+    @Column(nullable = false)
+    private long repliesCounts;
+
     @ManyToOne(fetch = FetchType.LAZY,optional = false)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;

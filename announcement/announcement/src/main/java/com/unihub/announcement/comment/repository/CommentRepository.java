@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.lang.ScopedValue;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,7 +15,9 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
     Optional<Comment> findByCidAndCreatedBy(UUID id,String email);
 
-    List<Comment> findByPost(Post post, Pageable pageable);
+    List<Comment> findByPostAndParentIsNull(Post post, Pageable pageable);
 
     Optional<Comment> findByCidAndPost(UUID id, Post post);
+
+    List<Comment> findByParent(Comment parent, Pageable pageable);
 }

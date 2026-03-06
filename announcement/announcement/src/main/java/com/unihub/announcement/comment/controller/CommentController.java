@@ -48,6 +48,11 @@ public class CommentController {
         return ResponseEntity.ok(CommentsDto.builder().comments(commentService.getComments(postId,pageNum,request)).build());
     }
 
+    @GetMapping("/public/get-comments-reply/{commentId}")
+    public ResponseEntity<CommentsDto> getCommentReplies(@PathVariable UUID commentId,@RequestParam(value = "page_num",defaultValue = "1") int pageNum) {
+        return ResponseEntity.ok(CommentsDto.builder().comments(commentService.getReplies(commentId,pageNum)).build());
+    }
+
     @DeleteMapping("/public/delete/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable UUID commentId,HttpServletRequest request) {
         commentService.deleteComment(commentId,request);
