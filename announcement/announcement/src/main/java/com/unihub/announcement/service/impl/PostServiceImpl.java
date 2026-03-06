@@ -1,5 +1,6 @@
 package com.unihub.announcement.service.impl;
 
+import com.unihub.announcement.like.repository.PostLikeRepository;
 import com.unihub.announcement.post.dto.request.CreatePostRequest;
 import com.unihub.announcement.post.dto.request.DeleteFileRequest;
 import com.unihub.announcement.post.dto.request.UploadFileRequest;
@@ -12,6 +13,7 @@ import com.unihub.announcement.service.IPostService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +27,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +38,10 @@ public class PostServiceImpl implements IPostService {
     private final StreamBridge streamBridge;
 
     private final PostRepository postRepository;
+
+    private final PostLikeRepository postLikeRepository;
+    @Value("${aws.bucket}")
+    private String bucketLink;
 
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
             "application/pdf",
@@ -59,23 +66,19 @@ public class PostServiceImpl implements IPostService {
 
     @Override
     public PostDto getPost(UUID id, HttpServletRequest request) {
-        return  postMapper.toDto(fetchPost(id ,fetchCidFromHeader(request)));
+        return  postMapper.toDto(fetchPost(id ,fetchCidFromHeader(request),fetchEmailFromHeader(request)));
     }
 
     @Override
     public List<PostDto> getPosts(HttpServletRequest request,int pageNum, String sortDir, String sortField) {
         Pageable pageable=createPageable(pageNum,sortDir,sortField);
-        return postRepository.findAllByCidAndStatus(fetchCidFromHeader(request),Status.ACCEPTED,pageable).stream()
-                .map(postMapper::toDto)
-                .toList();
+        return postsDto(postRepository.findAllByCidAndStatus(fetchCidFromHeader(request),Status.ACCEPTED,pageable),request);
     }
 
     @Override
     public List<PostDto> getUserPosts(HttpServletRequest request,int pageNum, String sortDir, String sortField) {
         Pageable pageable=createPageable(pageNum,sortDir,sortField);
-        return postRepository.findAllByCidAndCreatedBy(fetchCidFromHeader(request),fetchEmailFromHeader(request),pageable).stream()
-                .map(postMapper::toDto)
-                .toList();
+        return postsDto(postRepository.findAllByCidAndCreatedBy(fetchCidFromHeader(request),fetchEmailFromHeader(request),pageable),request);
     }
 
 
@@ -105,12 +108,11 @@ public class PostServiceImpl implements IPostService {
 
     @Override
     public List<PostDto> getPosts(HttpServletRequest request, int pageNum, String sortDir, String sortField, Status status) {
-
         Pageable pageable=createPageable(pageNum,sortDir,sortField);
         if (status!=null) {
-            return postRepository.findAllByCidAndStatus(fetchCidFromHeader(request),status,pageable).stream().map(postMapper::toDto).toList();
+            return postsDto(postRepository.findAllByCidAndStatus(fetchCidFromHeader(request),status,pageable),request);
         }
-        return postRepository.findAllByCid(fetchCidFromHeader(request),pageable).stream().map(postMapper::toDto).toList();
+        return postsDto(postRepository.findAllByCid(fetchCidFromHeader(request),pageable),request);
     }
 
     @Override
@@ -126,7 +128,7 @@ public class PostServiceImpl implements IPostService {
     @Transactional
     public void deletePost(UUID id, HttpServletRequest request) {
         Post post = fetchPost(id, fetchCidFromHeader(request),fetchEmailFromHeader(request));
-        deleteFile(post.getMedia());
+        deleteFile(post.getMediaUrl());
         postRepository.delete(post);
     }
 
@@ -140,6 +142,7 @@ public class PostServiceImpl implements IPostService {
     private Post generateEntity(CreatePostRequest createPostRequest,HttpServletRequest request) {
         Post post = postMapper.toEntity(createPostRequest);
         post.setStatus(Status.DRAFT);
+        post.setLikesCount(0L);
         post.setCid(fetchCidFromHeader(request));
         return post;
     }
@@ -160,10 +163,10 @@ public class PostServiceImpl implements IPostService {
         if(isInvalidValidContentType(media)){
             throw new IllegalArgumentException("Invalid content type");
         }
-        post.setMedia(generateFileKey());
+        post.setMediaUrl(bucketLink+generateFileKey());
         UploadFileRequest uploadFileRequest=UploadFileRequest.builder()
                 .fileContent(Base64.getEncoder().encodeToString(media.getBytes()))
-                .key(post.getMedia())
+                .key(post.getMediaUrl())
                 .contentType(media.getContentType())
                 .build();
         uploadFile(uploadFileRequest);
@@ -200,14 +203,14 @@ public class PostServiceImpl implements IPostService {
                                    MultipartFile media,
                                    boolean removeMedia) throws IOException {
 
-        if(removeMedia && post.getMedia() != null){
-            deleteFile(post.getMedia());
-            post.setMedia(null);
+        if(removeMedia && post.getMediaUrl() != null){
+            deleteFile(post.getMediaUrl());
+            post.setMediaUrl(null);
             return;
         }
         if(media != null && !media.isEmpty()){
-            if(post.getMedia() != null){
-                deleteFile(post.getMedia());
+            if(post.getMediaUrl() != null){
+                deleteFile(post.getMediaUrl());
             }
             uploadFile(post, media);
         }
@@ -220,12 +223,25 @@ public class PostServiceImpl implements IPostService {
     }
 
     private Pageable createPageable(int pageNum, String sortDir, String sortField){
-
         int pageSize=5;
         return  PageRequest.of(
                 pageNum-1,
                 pageSize,
                 sortDir.equalsIgnoreCase("asc")? Sort.by(sortField).ascending():Sort.by(sortField).descending()
         );
+    }
+    private List<PostDto> postsDto(List<Post> posts, HttpServletRequest request){
+
+        List<UUID> postIds = posts.stream().map(Post::getPid).toList();
+        Set<UUID> likedPostIds = postLikeRepository
+                .findAllByPost_PidAndCreatedBy(postIds,fetchEmailFromHeader(request))
+                .stream()
+                .map(like -> like.getPost().getPid())
+                .collect(Collectors.toSet());
+        return posts.stream().map(post -> {
+            PostDto dto = postMapper.toDto(post);
+            dto.setLikedByCurrentUser(likedPostIds.contains(post.getPid()));
+            return dto;
+        }).toList();
     }
 }

@@ -2,6 +2,7 @@ package com.unihub.announcement.post.model;
 
 
 import com.unihub.announcement.common.model.BaseEntity;
+import com.unihub.announcement.like.model.PostLike;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,9 +33,14 @@ public class Post extends BaseEntity {
     @Column(columnDefinition = "text")
     private String content;
 
-    private String media;
+    private String mediaUrl;
 
     private UUID cid;
+
+    private long likesCount;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostLike> likes;
 
     @Version
     private long version;
