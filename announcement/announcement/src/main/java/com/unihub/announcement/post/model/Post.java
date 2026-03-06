@@ -1,6 +1,7 @@
 package com.unihub.announcement.post.model;
 
 
+import com.unihub.announcement.comment.model.Comment;
 import com.unihub.announcement.common.model.BaseEntity;
 import com.unihub.announcement.like.model.PostLike;
 import jakarta.persistence.*;
@@ -39,8 +40,13 @@ public class Post extends BaseEntity {
 
     private long likesCount;
 
+    private long commentsCount;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostLike> likes;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 
     @Version
     private long version;

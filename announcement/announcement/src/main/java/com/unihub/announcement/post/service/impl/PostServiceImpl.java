@@ -1,4 +1,4 @@
-package com.unihub.announcement.service.impl;
+package com.unihub.announcement.post.service.impl;
 
 import com.unihub.announcement.like.repository.PostLikeRepository;
 import com.unihub.announcement.post.dto.request.CreatePostRequest;
@@ -8,8 +8,8 @@ import com.unihub.announcement.post.dto.response.PostDto;
 import com.unihub.announcement.post.mapper.PostMapper;
 import com.unihub.announcement.post.model.Post;
 import com.unihub.announcement.post.model.Status;
-import com.unihub.announcement.repository.PostRepository;
-import com.unihub.announcement.service.IPostService;
+import com.unihub.announcement.post.repository.PostRepository;
+import com.unihub.announcement.post.service.IPostService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -139,24 +139,31 @@ public class PostServiceImpl implements IPostService {
         postRepository.delete(post);
     }
 
+    public Post fetchPost(UUID id,UUID cid){
+        return  postRepository
+                .findByPidAndCid(id,cid)
+                .orElseThrow(()->new EntityNotFoundException("Resource Not found"));
+    }
+
+    public UUID fetchCidFromHeader(HttpServletRequest request){
+        return UUID.fromString(request.getHeader("X-User-College-Id"));
+    }
+
+    public String fetchEmailFromHeader(HttpServletRequest request){
+        return request.getHeader("X-User-Email");
+    }
+
     private Post generateEntity(CreatePostRequest createPostRequest,HttpServletRequest request) {
         Post post = postMapper.toEntity(createPostRequest);
         post.setStatus(Status.DRAFT);
         post.setLikesCount(0L);
+        post.setCommentsCount(0L);
         post.setCid(fetchCidFromHeader(request));
         return post;
     }
 
     private String generateFileKey(){
         return UUID.randomUUID().toString().replace("-", "");
-    }
-
-    private UUID fetchCidFromHeader(HttpServletRequest request){
-       return UUID.fromString(request.getHeader("X-User-College-Id"));
-    }
-
-    private String fetchEmailFromHeader(HttpServletRequest request){
-        return request.getHeader("X-User-Email");
     }
 
     private void uploadFile(Post post, MultipartFile media) throws IOException {
@@ -179,12 +186,6 @@ public class PostServiceImpl implements IPostService {
 
     private void uploadFile(UploadFileRequest uploadFileRequest){
         streamBridge.send("uploadFile-out-0",uploadFileRequest);
-    }
-
-    private Post fetchPost(UUID id,UUID cid){
-        return  postRepository
-                .findByPidAndCid(id,cid)
-                .orElseThrow(()->new EntityNotFoundException("Resource Not found"));
     }
 
     private Post fetchPost(UUID id,UUID cid,String email){

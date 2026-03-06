@@ -4,7 +4,8 @@ import com.unihub.announcement.like.model.PostLike;
 import com.unihub.announcement.like.repository.PostLikeRepository;
 import com.unihub.announcement.like.service.ILikeService;
 import com.unihub.announcement.post.model.Post;
-import com.unihub.announcement.repository.PostRepository;
+import com.unihub.announcement.post.repository.PostRepository;
+import com.unihub.announcement.post.service.IPostService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +22,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class LikeServiceImpl implements ILikeService {
 
-    private final PostRepository postRepository;
+    private final IPostService postService;
 
     private final PostLikeRepository postLikeRepository;
 
     @Transactional
     public void toggleLike(UUID id, HttpServletRequest request) {
-        Post post = fetchPost(id, fetchCidFromHeader(request));
-        String email = fetchEmailFromHeader(request);
+        Post post =postService.fetchPost(id,postService.fetchCidFromHeader(request));
+        String email = postService.fetchEmailFromHeader(request);
         postLikeRepository.findByPostAndCreatedBy(post, email)
                 .ifPresentOrElse(
                         like -> {
@@ -45,27 +46,12 @@ public class LikeServiceImpl implements ILikeService {
     @Override
     @Transactional(readOnly = true)
     public List<String> getUsersWhoLiked(UUID postId, HttpServletRequest request, int pageNum) {
-        Post post = fetchPost(postId, fetchCidFromHeader(request));
+        Post post = postService.fetchPost(postId,postService.fetchCidFromHeader(request));
         Pageable pageable = PageRequest.of(pageNum, 5, Sort.by("createdAt").descending());
         return postLikeRepository.findAllByPost(post, pageable)
                 .stream()
                 .map(PostLike::getCreatedBy)
                 .toList();
-    }
-
-    private Post fetchPost(UUID id, UUID cid){
-        return  postRepository
-                .findByPidAndCid(id,cid)
-                .orElseThrow(()->new EntityNotFoundException("Resource Not found"));
-    }
-
-
-    private UUID fetchCidFromHeader(HttpServletRequest request){
-        return UUID.fromString(request.getHeader("X-User-College-Id"));
-    }
-
-    private String fetchEmailFromHeader(HttpServletRequest request){
-        return request.getHeader("X-User-Email");
     }
 
 }

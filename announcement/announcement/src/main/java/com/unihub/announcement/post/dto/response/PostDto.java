@@ -1,5 +1,6 @@
 package com.unihub.announcement.post.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unihub.announcement.post.model.Status;
 import lombok.*;
@@ -19,6 +20,7 @@ public class PostDto {
 
     private String title;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String content;
 
     @JsonProperty("media_url")
@@ -28,6 +30,9 @@ public class PostDto {
 
     @JsonProperty("likes_count")
     private long likesCount;
+
+    @JsonProperty("comments_count")
+    private long commentsCount;
 
     @JsonProperty("liked_by_current_user")
     private boolean likedByCurrentUser;
@@ -42,8 +47,10 @@ public class PostDto {
     private String createdBy;
 
     @JsonProperty("updated_at")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private LocalDateTime updatedAt;
 
     @JsonProperty("updated_by")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String updatedBy;
 }

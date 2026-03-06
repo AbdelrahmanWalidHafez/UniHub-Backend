@@ -4,7 +4,7 @@ import com.unihub.announcement.post.dto.request.CreatePostRequest;
 import com.unihub.announcement.post.dto.response.PostDto;
 import com.unihub.announcement.post.dto.response.PostsDto;
 import com.unihub.announcement.post.model.Status;
-import com.unihub.announcement.service.IPostService;
+import com.unihub.announcement.post.service.IPostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

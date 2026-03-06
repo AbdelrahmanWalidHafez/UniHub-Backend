@@ -1,7 +1,8 @@
-package com.unihub.announcement.service;
+package com.unihub.announcement.post.service;
 
 import com.unihub.announcement.post.dto.request.CreatePostRequest;
 import com.unihub.announcement.post.dto.response.PostDto;
+import com.unihub.announcement.post.model.Post;
 import com.unihub.announcement.post.model.Status;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,4 +32,10 @@ public interface IPostService {
     PostDto updateStatus(UUID id, HttpServletRequest request,Status status);
 
     void delete(UUID id,HttpServletRequest request);
+
+    UUID fetchCidFromHeader(HttpServletRequest request);
+
+    String fetchEmailFromHeader(HttpServletRequest request);
+
+    Post fetchPost(UUID id, UUID cid);
 }

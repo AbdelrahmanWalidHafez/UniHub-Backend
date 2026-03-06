@@ -29,6 +29,7 @@ public class PostMapper {
         postDto.setMediaUrl(post.getMediaUrl());
         postDto.setCid(post.getCid());
         postDto.setLikesCount(post.getLikesCount());
+        postDto.setCommentsCount(post.getCommentsCount());
         postDto.setUpdatedAt(post.getUpdatedAt());
         postDto.setUpdatedBy(post.getUpdatedBy());
         postDto.setCreatedBy(post.getCreatedBy());

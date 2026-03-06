@@ -1,4 +1,4 @@
-package com.unihub.announcement.repository;
+package com.unihub.announcement.post.repository;
 
 import com.unihub.announcement.post.model.Post;
 import com.unihub.announcement.post.model.Status;
