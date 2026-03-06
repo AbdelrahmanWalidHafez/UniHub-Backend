@@ -54,6 +54,7 @@ public class SecurityConfig {
             //announcement
             exchange.pathMatchers("/unihub/announcement/api/v1/posts/secretary/**").hasRole("SECRETARY");
             exchange.pathMatchers("/unihub/announcement/api/v1/posts/public/**").hasAnyRole("SECRETARY","INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/announcement/api/v1/likes/**").hasAnyRole("SECRETARY","INSTRUCTOR","STUDENT");
             exchange.anyExchange().authenticated();
         });
         http.csrf(ServerHttpSecurity.CsrfSpec::disable)
