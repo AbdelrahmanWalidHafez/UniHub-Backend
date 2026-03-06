@@ -66,7 +66,7 @@ public class PostServiceImpl implements IPostService {
 
     @Override
     public PostDto getPost(UUID id, HttpServletRequest request) {
-        return  postMapper.toDto(fetchPost(id ,fetchCidFromHeader(request),fetchEmailFromHeader(request)));
+        return  postMapper.toDto(fetchPost(id ,fetchCidFromHeader(request)),fetchEmailFromHeader(request));
     }
 
     @Override
@@ -166,7 +166,7 @@ public class PostServiceImpl implements IPostService {
         post.setMediaUrl(bucketLink+generateFileKey());
         UploadFileRequest uploadFileRequest=UploadFileRequest.builder()
                 .fileContent(Base64.getEncoder().encodeToString(media.getBytes()))
-                .key(post.getMediaUrl())
+                .key(post.getMediaUrl().substring(post.getMediaUrl().lastIndexOf("/")+1))
                 .contentType(media.getContentType())
                 .build();
         uploadFile(uploadFileRequest);
@@ -234,7 +234,7 @@ public class PostServiceImpl implements IPostService {
 
         List<UUID> postIds = posts.stream().map(Post::getPid).toList();
         Set<UUID> likedPostIds = postLikeRepository
-                .findAllByPost_PidAndCreatedBy(postIds,fetchEmailFromHeader(request))
+                .findAllByPostIdsAndCreatedBy(postIds,fetchEmailFromHeader(request))
                 .stream()
                 .map(like -> like.getPost().getPid())
                 .collect(Collectors.toSet());

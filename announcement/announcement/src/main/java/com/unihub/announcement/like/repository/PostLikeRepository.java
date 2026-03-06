@@ -22,5 +22,7 @@ public interface PostLikeRepository extends JpaRepository<PostLike, UUID> {
     @Query("SELECT pl.post.pid FROM PostLike pl WHERE pl.createdBy = :email AND pl.post.cid = :cid")
     Set<UUID> findPostIdsLikedByUser(@Param("email") String email, @Param("cid") UUID cid);
 
-    List<PostLike> findAllByPost_PidAndCreatedBy(List<UUID> postIds, String currentUser);
+    @Query("SELECT pl FROM PostLike pl WHERE pl.post.pid IN :postIds AND pl.createdBy = :createdBy")
+    List<PostLike> findAllByPostIdsAndCreatedBy(@Param("postIds") List<UUID> postIds,
+                                                @Param("createdBy") String createdBy);
 }
