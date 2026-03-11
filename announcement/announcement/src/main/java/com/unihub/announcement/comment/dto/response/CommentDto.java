@@ -22,6 +22,11 @@ public class CommentDto {
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
+    @JsonProperty("replies_count")
+    private long repliesCount;
+
+    @JsonProperty("is_edited")
+    private boolean isEdited;
 
     @JsonProperty("created_by")
     private String createdBy;

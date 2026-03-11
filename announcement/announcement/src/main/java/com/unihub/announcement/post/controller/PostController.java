@@ -2,6 +2,7 @@ package com.unihub.announcement.post.controller;
 
 import com.unihub.announcement.post.dto.request.CreatePostRequest;
 import com.unihub.announcement.post.dto.response.PostDto;
+import com.unihub.announcement.post.dto.response.PostStatusCountDto;
 import com.unihub.announcement.post.dto.response.PostsDto;
 import com.unihub.announcement.post.model.Status;
 import com.unihub.announcement.post.service.IPostService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -62,6 +64,11 @@ public class PostController {
         );
     }
 
+    @GetMapping("/public/get-my-posts-analysis")
+    public ResponseEntity<List<PostStatusCountDto>> getMyPostsAnalysis(HttpServletRequest request){
+        return ResponseEntity.ok(postService.getUserPostsAnalysis(request));
+    }
+
     @PatchMapping("/public/publish/{id}")
     public ResponseEntity<PostDto>publish(@PathVariable UUID id,HttpServletRequest request){
         return ResponseEntity.ok(postService.publish(id,request));
@@ -91,7 +98,7 @@ public class PostController {
                                              @RequestParam(name = "page_num", defaultValue = "1") int pageNum,
                                              @RequestParam(value = "sort_dir", defaultValue = "desc") String sortDir,
                                              @RequestParam(value = "sort_field", defaultValue = "createdAt") String sortField,
-                                             @RequestParam(value="status",required = false) Status status){
+                                             @RequestParam(value="status",defaultValue ="PENDING") Status status){
         return ResponseEntity.ok(
                 PostsDto.builder()
                         .posts(postService.getPosts(request,pageNum,sortDir,sortField,status))

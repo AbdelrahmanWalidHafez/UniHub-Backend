@@ -35,6 +35,8 @@ spring:
       kafka:
         binder:
           brokers: ${KAFKA}
+          configuration:
+            max.request.size: 52428800
 stripe:
   stripeSk: ${STRIPESK}
   stripePk: ${STRIPEPK}

@@ -38,11 +38,6 @@ public class CommentController {
         return ResponseEntity.ok(commentService.updateComment(commentId,createCommentRequest,request));
     }
 
-    @GetMapping("/public/get-comment/{commentId}")
-    public ResponseEntity<CommentDto> getComment(@PathVariable UUID commentId) {
-        return ResponseEntity.ok(commentService.getComment(commentId));
-    }
-
     @GetMapping("/public/get-comments/{postId}")
     public ResponseEntity<CommentsDto> getComments(@PathVariable UUID postId,@RequestParam(value = "page_num",defaultValue = "1") int pageNum,HttpServletRequest request) {
         return ResponseEntity.ok(CommentsDto.builder().comments(commentService.getComments(postId,pageNum,request)).build());

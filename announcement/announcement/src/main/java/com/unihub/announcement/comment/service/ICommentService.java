@@ -15,8 +15,6 @@ public interface ICommentService {
 
     CommentDto updateComment(UUID commentId,CreateCommentRequest commentRequest,HttpServletRequest request);
 
-    CommentDto getComment(UUID commentId);
-
     List<CommentDto> getComments(UUID postId, int pageNum, HttpServletRequest request);
 
     List<CommentDto> getReplies(UUID commentId, int pageNum);

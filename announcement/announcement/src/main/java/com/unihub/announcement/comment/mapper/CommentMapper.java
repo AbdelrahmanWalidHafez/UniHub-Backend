@@ -17,6 +17,8 @@ public class CommentMapper {
     public CommentDto toDto(Comment comment) {
         CommentDto commentDto = new CommentDto();
         commentDto.setCid(comment.getCid());
+        commentDto.setEdited(comment.isEdited());
+        commentDto.setRepliesCount(comment.getRepliesCounts());
         commentDto.setContent(comment.getContent());
         commentDto.setCreatedAt(comment.getCreatedAt());
         commentDto.setCreatedBy(comment.getCreatedBy());

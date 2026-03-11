@@ -6,6 +6,7 @@ import com.unihub.announcement.comment.mapper.CommentMapper;
 import com.unihub.announcement.comment.model.Comment;
 import com.unihub.announcement.comment.repository.CommentRepository;
 import com.unihub.announcement.post.model.Post;
+import com.unihub.announcement.post.repository.PostRepository;
 import com.unihub.announcement.post.service.IPostService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +29,8 @@ public class CommentServiceImpl implements ICommentService {
     private final IPostService postService;
 
     private final CommentMapper commentMapper;
+
+    private final PostRepository postRepository;
 
     private final CommentRepository commentRepository;
 
@@ -65,12 +68,6 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     @Override
-    public CommentDto getComment(UUID commentId) {
-        Comment comment = fetchComment(commentId);
-        return commentMapper.toDto(comment);
-    }
-
-    @Override
     public List<CommentDto> getComments(UUID postId,int pageNum,HttpServletRequest request) {
         Post post=fetchPost(postId, request);
         return  commentRepository.findByPostAndParentIsNull(post,createPageable(pageNum)).stream().map(commentMapper::toDto).collect(Collectors.toList());
@@ -85,7 +82,7 @@ public class CommentServiceImpl implements ICommentService {
     @Transactional
     public void deleteComment(UUID commentId,HttpServletRequest request) {
         Comment comment=fetchComment(commentId, postService.fetchEmailFromHeader(request));
-        comment.getPost().setCommentsCount(Math.max(0,comment.getPost().getCommentsCount()-1));
+        comment.getPost().setCommentsCount(Math.max(0,comment.getPost().getCommentsCount()-1-comment.getRepliesCounts()));
         if(comment.getParent()!=null){
             comment.getParent().setRepliesCounts(Math.max(0,comment.getParent().getRepliesCounts()-1));
         }
@@ -97,7 +94,7 @@ public class CommentServiceImpl implements ICommentService {
     public void deleteCommentSecretary(UUID postId,UUID commentId,HttpServletRequest request) {
         Post post=fetchPost(postId, request);
         Comment comment=fetchComment(commentId,post);
-        comment.getPost().setCommentsCount(Math.max(0,comment.getPost().getCommentsCount()-1));
+        comment.getPost().setCommentsCount(Math.max(0,comment.getPost().getCommentsCount()-1+comment.getRepliesCounts()));
         if(comment.getParent()!=null){
             comment.getParent().setRepliesCounts(Math.max(0,comment.getParent().getRepliesCounts()-1));
         }
@@ -121,7 +118,7 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     private Pageable createPageable(int pageNum){
-        return PageRequest.of(pageNum, 5, Sort.by("createdAt").descending());
+        return PageRequest.of(pageNum-1, 5, Sort.by("createdAt").descending());
     }
 
 }

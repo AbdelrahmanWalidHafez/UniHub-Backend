@@ -47,7 +47,7 @@ public class LikeServiceImpl implements ILikeService {
     @Transactional(readOnly = true)
     public List<String> getUsersWhoLiked(UUID postId, HttpServletRequest request, int pageNum) {
         Post post = postService.fetchPost(postId,postService.fetchCidFromHeader(request));
-        Pageable pageable = PageRequest.of(pageNum, 5, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(pageNum-1, 5, Sort.by("createdAt").descending());
         return postLikeRepository.findAllByPost(post, pageable)
                 .stream()
                 .map(PostLike::getCreatedBy)

@@ -22,7 +22,7 @@ public class LikeController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/likes/{postId}")
+    @GetMapping("/{postId}")
     public ResponseEntity<List<String>> getLikes(@PathVariable UUID postId, HttpServletRequest request,
                                                  @RequestParam(value = "page_num", defaultValue = "1")int page_num) {
         List<String> users = likeService.getUsersWhoLiked(postId, request,page_num);

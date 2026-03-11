@@ -2,6 +2,7 @@ package com.unihub.announcement.post.service;
 
 import com.unihub.announcement.post.dto.request.CreatePostRequest;
 import com.unihub.announcement.post.dto.response.PostDto;
+import com.unihub.announcement.post.dto.response.PostStatusCountDto;
 import com.unihub.announcement.post.model.Post;
 import com.unihub.announcement.post.model.Status;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,8 @@ public interface IPostService {
     List<PostDto> getPosts(HttpServletRequest request,int pageNum, String sortDir, String sortField);
 
     List<PostDto> getUserPosts(HttpServletRequest request,int pageNum, String sortDir, String sortField);
+
+    List<PostStatusCountDto> getUserPostsAnalysis(HttpServletRequest request);
 
     PostDto publish(UUID id,HttpServletRequest request);
 

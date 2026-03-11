@@ -5,6 +5,7 @@ import com.unihub.announcement.post.dto.request.CreatePostRequest;
 import com.unihub.announcement.post.dto.request.DeleteFileRequest;
 import com.unihub.announcement.post.dto.request.UploadFileRequest;
 import com.unihub.announcement.post.dto.response.PostDto;
+import com.unihub.announcement.post.dto.response.PostStatusCountDto;
 import com.unihub.announcement.post.mapper.PostMapper;
 import com.unihub.announcement.post.model.Post;
 import com.unihub.announcement.post.model.Status;
@@ -81,6 +82,11 @@ public class PostServiceImpl implements IPostService {
         return postsDto(postRepository.findAllByCidAndCreatedBy(fetchCidFromHeader(request),fetchEmailFromHeader(request),pageable),request);
     }
 
+    @Override
+    public List<PostStatusCountDto> getUserPostsAnalysis(HttpServletRequest request) {
+        return  postRepository.countPostsByStatusForUser(fetchEmailFromHeader(request));
+    }
+
 
     @Override
     public PostDto publish(UUID id,HttpServletRequest request) {
@@ -109,10 +115,7 @@ public class PostServiceImpl implements IPostService {
     @Override
     public List<PostDto> getPosts(HttpServletRequest request, int pageNum, String sortDir, String sortField, Status status) {
         Pageable pageable=createPageable(pageNum,sortDir,sortField);
-        if (status!=null) {
-            return postsDto(postRepository.findAllByCidAndStatus(fetchCidFromHeader(request),status,pageable),request);
-        }
-        return postsDto(postRepository.findAllByCid(fetchCidFromHeader(request),pageable),request);
+        return postsDto(postRepository.findAllByCidAndStatus(fetchCidFromHeader(request),status,pageable),request);
     }
 
     @Override
@@ -166,14 +169,23 @@ public class PostServiceImpl implements IPostService {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
+    private String getExtension(MultipartFile file) {
+        String filename = file.getOriginalFilename();
+        if (filename == null || !filename.contains(".")) {
+            throw new IllegalArgumentException("Invalid file name");
+        }
+        return filename.substring(filename.lastIndexOf(".") + 1);
+    }
+
     private void uploadFile(Post post, MultipartFile media) throws IOException {
-        if(isInvalidValidContentType(media)){
+        if (isInvalidValidContentType(media)) {
             throw new IllegalArgumentException("Invalid content type");
         }
-        post.setMediaUrl(bucketLink+generateFileKey());
-        UploadFileRequest uploadFileRequest=UploadFileRequest.builder()
-                .fileContent(Base64.getEncoder().encodeToString(media.getBytes()))
-                .key(post.getMediaUrl().substring(post.getMediaUrl().lastIndexOf("/")+1))
+        String key = generateFileKey() + "." + getExtension(media);
+        post.setMediaUrl(bucketLink + key);
+        UploadFileRequest uploadFileRequest = UploadFileRequest.builder()
+                   .fileContent(Base64.getEncoder().encodeToString(media.getBytes()))
+                .key(key)
                 .contentType(media.getContentType())
                 .build();
         uploadFile(uploadFileRequest);

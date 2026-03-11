@@ -22,7 +22,9 @@ spring:
       kafka:
         binder:
           brokers: ${KAFKA}
-
+          configuration:
+            fetch.max.bytes: 52428800
+            max.partition.fetch.bytes: 52428800
 aws:
   accessKey: ${ACCESS_KEY}
   secretKey: ${SECRET_KEY}
