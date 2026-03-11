@@ -94,7 +94,7 @@ public class CommentServiceImpl implements ICommentService {
     public void deleteCommentSecretary(UUID postId,UUID commentId,HttpServletRequest request) {
         Post post=fetchPost(postId, request);
         Comment comment=fetchComment(commentId,post);
-        comment.getPost().setCommentsCount(Math.max(0,comment.getPost().getCommentsCount()-1+comment.getRepliesCounts()));
+        post.setCommentsCount(Math.max(0,post.getCommentsCount()-1-comment.getRepliesCounts()));
         if(comment.getParent()!=null){
             comment.getParent().setRepliesCounts(Math.max(0,comment.getParent().getRepliesCounts()-1));
         }

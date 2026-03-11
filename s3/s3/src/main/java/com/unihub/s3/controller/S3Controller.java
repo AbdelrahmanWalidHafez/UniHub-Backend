@@ -1,5 +1,6 @@
 package com.unihub.s3.controller;
 
+import com.unihub.s3.dto.request.UploadFileRequest;
 import com.unihub.s3.dto.response.FileResponse;
 import com.unihub.s3.service.IS3Service;
 import lombok.RequiredArgsConstructor;
@@ -8,10 +9,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @Validated
 @RestController
@@ -29,6 +29,12 @@ public class S3Controller {
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         ContentDisposition.inline().filename(key).build().toString())
                 .body(file.getContent());
+    }
+
+    @PostMapping("/upload-file")
+    public ResponseEntity<Void> uploadFile(@RequestBody UploadFileRequest request) throws IOException {
+        s3Service.uploadFile(request);
+        return ResponseEntity.accepted().build();
     }
 
 }

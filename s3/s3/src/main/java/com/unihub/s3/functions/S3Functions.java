@@ -18,18 +18,6 @@ public class S3Functions {
     private final IS3Service s3Service;
 
     @Bean
-    public Consumer<UploadFileRequest> uploadFile() {
-        return fileRequest -> {
-
-            try {
-                s3Service.uploadFile(Base64.getDecoder().decode(fileRequest.getFileContent()), fileRequest.getContentType(), fileRequest.getKey());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        };
-    }
-
-    @Bean
      public Consumer<DeleteFileRequest> deleteFile () {
         return deleteFileRequest -> s3Service.deleteFile(deleteFileRequest.getKey());
     }

@@ -2,10 +2,12 @@ package com.unihub.s3.service.impl;
 
 
 import com.unihub.s3.config.S3ConfigurationProperties;
+import com.unihub.s3.dto.request.UploadFileRequest;
 import com.unihub.s3.dto.response.FileResponse;
 import com.unihub.s3.service.IS3Service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -21,13 +23,14 @@ public class S3ServiceImpl implements IS3Service {
 
     private final S3ConfigurationProperties s3ConfigurationProperties;
 
+    @Async
     @Override
-    public void uploadFile(byte[]file,String contentType,String key) {
+    public void uploadFile(UploadFileRequest request) {
         s3Client.putObject(PutObjectRequest.builder()
                 .bucket(s3ConfigurationProperties.bucketname())
-                .key(key)
-                .contentType(contentType)
-                .build(), RequestBody.fromBytes(file));
+                .key(request.getKey())
+                .contentType(request.getContentType())
+                .build(), RequestBody.fromBytes(request.getFileContent()));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.unihub.announcement.post.service.impl;
 
 import com.unihub.announcement.like.repository.PostLikeRepository;
+import com.unihub.announcement.post.client.S3FeignClient;
 import com.unihub.announcement.post.dto.request.CreatePostRequest;
 import com.unihub.announcement.post.dto.request.DeleteFileRequest;
 import com.unihub.announcement.post.dto.request.UploadFileRequest;
@@ -24,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -37,6 +37,8 @@ public class PostServiceImpl implements IPostService {
     private final PostMapper postMapper;
 
     private final StreamBridge streamBridge;
+
+    private final S3FeignClient s3FeignClient;
 
     private final PostRepository postRepository;
 
@@ -184,7 +186,7 @@ public class PostServiceImpl implements IPostService {
         String key = generateFileKey() + "." + getExtension(media);
         post.setMediaUrl(bucketLink + key);
         UploadFileRequest uploadFileRequest = UploadFileRequest.builder()
-                   .fileContent(Base64.getEncoder().encodeToString(media.getBytes()))
+                .fileContent(media.getBytes())
                 .key(key)
                 .contentType(media.getContentType())
                 .build();
@@ -197,7 +199,7 @@ public class PostServiceImpl implements IPostService {
     }
 
     private void uploadFile(UploadFileRequest uploadFileRequest){
-        streamBridge.send("uploadFile-out-0",uploadFileRequest);
+       s3FeignClient.uploadFile(uploadFileRequest);
     }
 
     private Post fetchPost(UUID id,UUID cid,String email){

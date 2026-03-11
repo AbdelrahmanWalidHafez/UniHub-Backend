@@ -42,7 +42,7 @@ public class CollegeServiceImpl implements ICollegeService {
 
 
     @Override
-    @Transactional()
+    @Transactional
     public CollegeDto createCollege(CreateCollegeRequest collegeRequest, HttpServletRequest request) {
         College college=collegeMapper.toEntity(collegeRequest);
         University university=universityService.fetchUniversity(fetchUniHeader(request));

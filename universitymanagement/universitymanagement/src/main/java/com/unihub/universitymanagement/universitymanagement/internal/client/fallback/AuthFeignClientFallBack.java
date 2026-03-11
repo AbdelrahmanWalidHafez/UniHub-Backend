@@ -16,13 +16,13 @@ public class AuthFeignClientFallBack implements AuthFeignClient {
 
     @Override
     public ResponseEntity<SystemAdminResponse> createSystemAdmin(SystemAdminRequest request, String apiKey) {
-        log.error("Feign client fallback triggered: University service is unavailable. Request: {}", request);
+        log.error("Feign client fallback triggered: Auth service is unavailable. Request: {}", request);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
     }
 
     @Override
     public ResponseEntity<Long> countUsers(UUID cid, String apiKey) {
-        log.error("Feign client fallback triggered: University service is unavailable.");
+        log.error("Feign client fallback triggered: Auth service is unavailable.");
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
     }
 

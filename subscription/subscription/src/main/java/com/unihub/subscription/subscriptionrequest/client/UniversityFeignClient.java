@@ -18,7 +18,6 @@ public interface UniversityFeignClient {
     @PostMapping(value = "/api/v1/internal/create", consumes = "application/json")
     ResponseEntity<UniversityResponse> createUniversity(@RequestBody CreateUniversityRequest request);
 
-
     @GetMapping(value = "/api/v1/internal/get-subscription-plan-count/{id}", consumes = "application/json")
     ResponseEntity<Long> getSubscriptionPlanCount(@PathVariable UUID id);
 }
