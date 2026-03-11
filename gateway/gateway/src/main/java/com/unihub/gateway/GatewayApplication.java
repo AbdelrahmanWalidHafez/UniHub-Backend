@@ -43,6 +43,11 @@ public class GatewayApplication {
 								.rewritePath("/unihub/usage/(?<segment>.*)","/${segment}")
 								.requestRateLimiter(config ->config.setRateLimiter(redisRateLimiter()).setKeyResolver(routeKeyResolver()) ))
 						.uri("lb://USAGE"))
+				.route(p->p.path("/unihub/announcement/**")
+						.filters(f->f
+								.rewritePath("/unihub/announcement/(?<segment>.*)","/${segment}")
+								.requestRateLimiter(config ->config.setRateLimiter(redisRateLimiter()).setKeyResolver(routeKeyResolver()) ))
+						.uri("lb://ANNOUNCEMENT"))
 				.build();
 
 	}

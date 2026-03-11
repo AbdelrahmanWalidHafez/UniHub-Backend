@@ -34,7 +34,7 @@ public interface CollegeRepository extends JpaRepository<College,UUID> {
             COUNT(c.id), c.id, c.collegeName
         )
         FROM College c
-        WHERE c.university.id = :universityId
+        WHERE c.university.uniId = :universityId
         GROUP BY c.id, c.collegeName
     """)
     List<CollegeDashboardDTO> getCollegeDashboardData(@Param("universityId") UUID universityId);
