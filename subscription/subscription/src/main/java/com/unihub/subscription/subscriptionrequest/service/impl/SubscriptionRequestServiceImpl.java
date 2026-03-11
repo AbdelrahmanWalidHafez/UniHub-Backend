@@ -3,6 +3,7 @@ package com.unihub.subscription.subscriptionrequest.service.impl;
 import com.unihub.subscription.state.SubscriptionRequestContext;
 import com.unihub.subscription.state.impl.ApprovedState;
 import com.unihub.subscription.state.impl.RejectedState;
+import com.unihub.subscription.subscriptionrequest.client.S3FeignClient;
 import com.unihub.subscription.subscriptionrequest.client.UniversityFeignClient;
 import com.unihub.subscription.subscriptionrequest.dto.request.DeleteFileRequest;
 import com.unihub.subscription.subscriptionrequest.dto.request.SubscriptionRequestDto;
@@ -35,7 +36,9 @@ public class SubscriptionRequestServiceImpl implements ISubscriptionRequestServi
 
    
     private final StreamBridge streamBridge;
-   
+
+    private final S3FeignClient s3FeignClient;
+
     private final SubscriptionMapper subscriptionMapper;
     
     private final UniversityFeignClient universityFeignClient;
@@ -99,7 +102,7 @@ public class SubscriptionRequestServiceImpl implements ISubscriptionRequestServi
 
     @Override
     public void uploadFile(UploadFileRequest uploadFileRequest){
-        streamBridge.send("uploadFile-out-0",uploadFileRequest);
+        s3FeignClient.uploadFile(uploadFileRequest);
     }
 
     @Override
@@ -130,13 +133,13 @@ public class SubscriptionRequestServiceImpl implements ISubscriptionRequestServi
             throw new IllegalArgumentException("Invalid content type");
         }
         UploadFileRequest uploadFileRequest=UploadFileRequest.builder()
-                .fileContent(Base64.getEncoder().encodeToString(accreditation.getBytes()))
+                .fileContent(accreditation.getBytes())
                 .key(subscriptionRequest.getAccreditationKey())
                 .contentType(accreditation.getContentType())
                 .build();
         uploadFile(uploadFileRequest);
         uploadFileRequest=UploadFileRequest.builder()
-                .fileContent(Base64.getEncoder().encodeToString(logo.getBytes()))
+                .fileContent(logo.getBytes())
                 .key(subscriptionRequest.getUniversityLogoKey())
                 .contentType(logo.getContentType())
                 .build();

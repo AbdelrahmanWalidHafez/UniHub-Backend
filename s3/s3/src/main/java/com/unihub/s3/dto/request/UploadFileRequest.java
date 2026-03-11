@@ -8,7 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UploadFileRequest {
 
-    private String fileContent;
+    private byte[] fileContent;
 
     private String key;
 

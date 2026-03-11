@@ -57,7 +57,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -95,7 +103,7 @@
 				<version>3.5.1</version>
 				<configuration>
 					<to>
-						<image>unihub/${project.artifactId}:s3</image>
+						<image>unihub/${project.artifactId}:s4</image>
 					</to>
 				</configuration>
 			</plugin>

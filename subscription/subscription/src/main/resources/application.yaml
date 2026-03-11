@@ -14,9 +14,6 @@ spring:
             read-timeout: 16000
     stream:
       bindings:
-        uploadFile-out-0:
-          destination: upload-file-topic
-          content-type: application/json
         deleteFile-out-0:
           destination: delete-file-topic
           content-type: application/json
@@ -35,8 +32,6 @@ spring:
       kafka:
         binder:
           brokers: ${KAFKA}
-          configuration:
-            max.request.size: 52428800
 stripe:
   stripeSk: ${STRIPESK}
   stripePk: ${STRIPEPK}
