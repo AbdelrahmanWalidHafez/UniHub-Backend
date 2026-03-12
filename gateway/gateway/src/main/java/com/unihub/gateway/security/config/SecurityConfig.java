@@ -48,7 +48,8 @@ public class SecurityConfig {
             exchange.pathMatchers("/unihub/universitymanagement/api/v1/get-university/**").authenticated();
             exchange.pathMatchers("/unihub/universitymanagement/api/v1/internal/**").denyAll();
             //S3 microservice
-            exchange.pathMatchers("/unihub/s3/**").authenticated();
+            exchange.pathMatchers("/unihub/s3/api/v1/get-file/**").authenticated();
+            exchange.pathMatchers("/unihub/s3/api/v1/upload-file").denyAll();
             //usage
             exchange.pathMatchers("/unihub/usage/api/v1/usage").hasRole("SYSTEM_ADMIN");
             //announcement
