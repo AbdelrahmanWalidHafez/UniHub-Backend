@@ -17,17 +17,17 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/colleges/system-admin")
+@RequestMapping("/api/v1/colleges")
 public class CollegeController {
 
     private final ICollegeService collegeService;
 
-    @PostMapping("/create")
+    @PostMapping("/system-admin/create")
     public ResponseEntity<CollegeDto> createCollege(@Valid @RequestBody CreateCollegeRequest collegeRequest, HttpServletRequest request) {
         return  ResponseEntity.status(HttpStatus.CREATED).body(collegeService.createCollege(collegeRequest,request));
     }
 
-    @GetMapping("/get-college/{id}")
+    @GetMapping("/public/get-college/{id}")
     public ResponseEntity<CollegeDto> getCollege(@PathVariable UUID id,HttpServletRequest request){
         return  ResponseEntity.ok(collegeService.getCollege(id,request));
     }
@@ -41,7 +41,7 @@ public class CollegeController {
      * @since 2/23/26
      * @return CollegeMetaDataRResponses
      */
-    @GetMapping("/get-colleges")
+    @GetMapping("/system-admin/get-colleges")
     public ResponseEntity<CollegeMetadataResponses> getAllColleges(
             HttpServletRequest request,
             @RequestParam(name = "page_num", defaultValue = "1") int pageNum,
@@ -54,18 +54,18 @@ public class CollegeController {
         ) ;
     }
 
-    @PutMapping ("/update-college/{id}")
+    @PutMapping ("/system-admin/update-college/{id}")
     public ResponseEntity<CollegeDto> updateCollege(HttpServletRequest request,@PathVariable UUID id, @Valid @RequestBody CreateCollegeRequest createCollegeRequest){
         return ResponseEntity.ok(collegeService.updateCollege(request,id,createCollegeRequest));
     }
 
-    @DeleteMapping("/delete-college/{id}")
+    @DeleteMapping("/system-admin/delete-college/{id}")
     public ResponseEntity<CollegeDto> deleteCollege(HttpServletRequest request,@PathVariable UUID id){
         collegeService.deleteCollege(request,id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/search-college")
+    @GetMapping("/system-admin/search-college")
     public ResponseEntity<CollegeMetadataResponses> searchCollege(@RequestParam("search_text")String searchText,HttpServletRequest request){
         return ResponseEntity.ok(
                 CollegeMetadataResponses.builder()

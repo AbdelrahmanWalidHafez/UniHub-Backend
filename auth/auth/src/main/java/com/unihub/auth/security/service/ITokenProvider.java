@@ -33,4 +33,6 @@ public interface ITokenProvider {
     void changeForgotPassword(ChangeForgotPasswordRequest changeForgotPasswordRequest, Authentication authentication,HttpServletRequest request);
 
     void setPassword(SetPasswordRequest request);
+
+    void changePassword(ChangePasswordRequest changePasswordRequest, Authentication authentication);
 }

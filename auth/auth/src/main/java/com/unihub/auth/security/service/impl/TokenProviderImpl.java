@@ -32,6 +32,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -170,6 +172,7 @@ public class TokenProviderImpl implements ITokenProvider {
     }
 
     @Override
+    @Transactional
     public void changeForgotPassword(ChangeForgotPasswordRequest changeForgotPasswordRequest, Authentication authentication,HttpServletRequest request) {
         validatePasswordConfirmation(changeForgotPasswordRequest.getPassword(), changeForgotPasswordRequest.getConfirmPassword());
         User user = userRepository.findByEmail(authentication.getName())
@@ -183,6 +186,7 @@ public class TokenProviderImpl implements ITokenProvider {
     }
 
     @Override
+    @Transactional
     public void setPassword(SetPasswordRequest request) {
        Optional<String>email=validateAndGetEmail(RedisKeys.VERIFICATION_TOKEN_PREFIX+request.getVerificationToken());
        if(email.isEmpty()){
@@ -197,6 +201,17 @@ public class TokenProviderImpl implements ITokenProvider {
         deleteVerificationToken(request.getVerificationToken());
     }
 
+    @Override
+    @Transactional
+    public void changePassword(ChangePasswordRequest changePasswordRequest, Authentication authentication) {
+        validatePasswordConfirmation(changePasswordRequest.getPassword(), changePasswordRequest.getConfirmPassword());
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new EntityNotFoundException("Resource doesn't exist"));
+        if (passwordEncoder.matches(changePasswordRequest.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("you can't use your old password");
+        }
+        user.setPassword(passwordEncoder.encode(changePasswordRequest.getPassword()));
+    }
     private AccessToken generateAccessToken(SecretKey key, Authentication authentication)  {
        UniversityMetadata userUniversityMetadata = getUniMetaData(authentication);
         String jwt = jwtGenerationContext.performJwtGeneration(authentication,userUniversityMetadata,key);

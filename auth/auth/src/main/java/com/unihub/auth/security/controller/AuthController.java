@@ -107,4 +107,10 @@ public class AuthController {
         tokenProvider.setPassword(setPasswordRequest);
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/change-password")
+    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,Authentication authentication){
+        tokenProvider.changePassword(changePasswordRequest,authentication);
+        return ResponseEntity.ok().build();
+    }
 }
