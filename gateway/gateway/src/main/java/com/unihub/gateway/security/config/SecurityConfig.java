@@ -39,12 +39,19 @@ public class SecurityConfig {
             exchange.pathMatchers("/unihub/subscription/api/v1/inquiries/customer-service/**").hasRole("CUSTOMER_SERVICE");
             //university management microservice
             exchange.pathMatchers("/unihub/universitymanagement/api/v1/customer-service/**").hasRole("CUSTOMER_SERVICE");
-            exchange.pathMatchers("/unihub/universitymanagement/api/v1/colleges/**")
+            exchange.pathMatchers("/unihub/universitymanagement/api/v1/colleges/system-admin")
                     .access((mono, context) -> mono
                             .map(auth -> new AuthorizationDecision(
                                     hasRequiredAuthorities(auth, "ROLE_SYSTEM_ADMIN", "IS_ACTIVE")
                             ))
                     );
+            exchange.pathMatchers("/unihub/universitymanagement/api/v1/colleges/public/**")
+                    .hasAnyRole(
+                    "STUDENT",
+                    "SECRETARY",
+                    "INSTRUCTOR",
+                    "SYSTEM_ADMIN"
+            );
             exchange.pathMatchers("/unihub/universitymanagement/api/v1/get-university/**").authenticated();
             exchange.pathMatchers("/unihub/universitymanagement/api/v1/internal/**").denyAll();
             //S3 microservice
