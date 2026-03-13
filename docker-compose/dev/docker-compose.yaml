@@ -177,6 +177,24 @@ services:
       - announcement_db_data:/var/lib/postgresql/data
     networks:
       - unihub
+  ai-db:
+    image: postgres:16
+    container_name: ai_db
+    environment:
+      POSTGRES_DB: ai_db
+      POSTGRES_USER: ai_user
+      POSTGRES_PASSWORD: ai_pass
+    ports:
+      - "5436:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ai_user -d ai_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - ai_db_data:/var/lib/postgresql/data
+    networks:
+      - unihub
 
   auth-server:
     image: unihub/auth:s4
@@ -315,7 +333,7 @@ services:
     env_file:
       - ../../announcement/.env
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent localhost:8088/actuator/health/readiness | grep UP || exit 1"]
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8089/actuator/health/readiness | grep UP || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -323,6 +341,27 @@ services:
     networks:
       - unihub
 
+  ai-server:
+    image: unihub/ai:s5
+    container_name: ai-server
+    depends_on:
+     eureka-server:
+        condition: service_healthy
+     kafka:
+        condition: service_started
+     ai-db:
+        condition: service_healthy
+    command: sh -c "sleep 5 && java -jar /app/ai.jar"
+    env_file:
+      - ../../ai/.env
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8090/actuator/health/readiness | grep UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - unihub
 networks:
   unihub:
     driver: bridge
@@ -332,4 +371,5 @@ volumes:
   subscription_db_data:
   university_db_data:
   announcement_db_data:
+  ai_db_data:
   redis_data:

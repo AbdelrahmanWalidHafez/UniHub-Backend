@@ -48,8 +48,12 @@ public class GatewayApplication {
 								.rewritePath("/unihub/announcement/(?<segment>.*)","/${segment}")
 								.requestRateLimiter(config ->config.setRateLimiter(redisRateLimiter()).setKeyResolver(routeKeyResolver()) ))
 						.uri("lb://ANNOUNCEMENT"))
+				.route(p->p.path("/unihub/ai/**")
+						.filters(f->f
+								.rewritePath("/unihub/ai/(?<segment>.*)","/${segment}")
+								.requestRateLimiter(config ->config.setRateLimiter(redisRateLimiter()).setKeyResolver(routeKeyResolver()) ))
+						.uri("lb://AI"))
 				.build();
-
 	}
 
 	@Bean
