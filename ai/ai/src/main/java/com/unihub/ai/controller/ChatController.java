@@ -1,20 +1,17 @@
 package com.unihub.ai.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.audio.transcription.AudioTranscriptionPrompt;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.image.ImageModel;
-import org.springframework.ai.image.ImagePrompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionModel;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionOptions;
-import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.ai.openai.api.OpenAiAudioApi;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,10 +21,10 @@ import reactor.core.publisher.Flux;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 
 import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/chat")
 @RequiredArgsConstructor
@@ -36,8 +33,6 @@ public class ChatController {
     private final ChatClient chatClient;
 
     private final ChatMemory chatMemory;
-
-    private final ImageModel imageModel;
 
     private final OpenAiAudioTranscriptionModel transcriptionModel;
 
@@ -54,46 +49,27 @@ public class ChatController {
                 .content();
     }
 
-    @PostMapping(value = "/voice", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> chatWithVoice(@RequestParam("message") MultipartFile voice ,@RequestHeader("X-User-Email") String email) {
-        try {
-            String originalFilename = voice.getOriginalFilename();
-            String ext = (originalFilename != null && originalFilename.contains("."))
-                    ? originalFilename.substring(originalFilename.lastIndexOf('.'))
-                    : ".webm";
-
-            Path tempFile = Files.createTempFile("voice_", ext);
-            try {
-                voice.transferTo(tempFile);
-                Resource audioResource = new FileSystemResource(tempFile.toFile());
-
-                OpenAiAudioTranscriptionOptions options = OpenAiAudioTranscriptionOptions.builder()
-                        .model("whisper-1")
+    @PostMapping(value = "/voice",produces = MediaType.TEXT_EVENT_STREAM_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Flux<String> chatWithVoice(@RequestParam("message") MultipartFile voice, @RequestHeader("X-User-Email") String email) throws Exception {
+        Path tempFile = Files.createTempFile("voice_", "_" + voice.getOriginalFilename());
+        voice.transferTo(tempFile.toFile());
+        System.out.println("File size on disk: " + Files.size(tempFile) + " bytes");
+        Resource audioResource = new FileSystemResource(tempFile.toFile());
+        var response = transcriptionModel.call(new AudioTranscriptionPrompt(audioResource,
+                OpenAiAudioTranscriptionOptions.builder()
+                        .language("en")
                         .responseFormat(OpenAiAudioApi.TranscriptResponseFormat.TEXT)
-                        .build();
-
-                AudioTranscriptionPrompt prompt = new AudioTranscriptionPrompt(audioResource, options);
-                String transcribedText = transcriptionModel.call(prompt).getResult().getOutput();
-
-                if (transcribedText.isBlank()) {
-                    return Flux.just("Sorry, I couldn't understand the audio. Please try again.");
-                }
-
-                return chatClient.prompt()
-                        .user(transcribedText)
-                        .system(promptSystemSpec -> promptSystemSpec.param("userEmail",email))
-                        .advisors(advisorSpec -> advisorSpec.param(CONVERSATION_ID,email))
-                        .options(ToolCallingChatOptions.builder()
-                                .internalToolExecutionEnabled(true)
-                                .build())
-                        .stream()
-                        .content();
-            } finally {
-                Files.deleteIfExists(tempFile);
-            }
-        } catch (Exception e) {
-            return Flux.just("Error processing voice message: " + e.getMessage());
-        }
+                        .build()));
+        log.info(response.getResult().getOutput());
+        return chatClient.prompt()
+                .user(response.getResult().getOutput())
+                .system(promptSystemSpec -> promptSystemSpec.param("userEmail",email))
+                .options(ToolCallingChatOptions.builder()
+                        .internalToolExecutionEnabled(true)
+                        .build())
+                .advisors(advisorSpec -> advisorSpec.param(CONVERSATION_ID,email))
+                .stream()
+                .content();
     }
 
     @GetMapping("/history")

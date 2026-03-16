@@ -11,7 +11,6 @@ spring:
         repository:
           jdbc:
             initialize-schema: always
-            schema: classpath:/schema/schema.sql
 api:
   key: ${API_KEY}
 logging:
@@ -22,3 +21,7 @@ logging:
           chat:
             client:
               advisor: DEBUG
+        web:
+          client: DEBUG
+        http:
+          client: DEBUG
