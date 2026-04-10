@@ -1,17 +1,27 @@
 package com.unihub.classroom.clazz.service.impl;
 
+import com.unihub.classroom.clazz.controller.OwnerDto;
 import com.unihub.classroom.clazz.dto.ClassRoomResponse;
 import com.unihub.classroom.clazz.dto.CreateClassroomDto;
+import com.unihub.classroom.clazz.dto.MemberDto;
 import com.unihub.classroom.clazz.mapper.ClassRoomMapper;
+import com.unihub.classroom.clazz.mapper.MemberMapper;
 import com.unihub.classroom.clazz.model.ClassRoom;
+import com.unihub.classroom.clazz.model.Member;
 import com.unihub.classroom.clazz.repository.ClassRoomRepository;
+import com.unihub.classroom.clazz.repository.MemberRepository;
 import com.unihub.classroom.clazz.service.IClassRoomService;
 import com.unihub.classroom.clazz.service.state.ClassRoomContext;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -19,7 +29,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ClassRoomServiceImpl  implements IClassRoomService {
 
+    private final MemberMapper memberMapper;
+
     private final ClassRoomMapper classRoomMapper;
+
+    private final MemberRepository memberRepository;
 
     private final ClassRoomRepository classRoomRepository;
 
@@ -42,6 +56,55 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
         classRoomContext.handleRequest(classRoom);
         classRoomRepository.save(classRoom);
         return classRoomMapper.toDto(classRoom);
+    }
+
+    @Override
+    @Transactional
+    public MemberDto joinClassRoom(String code, HttpServletRequest request) {
+        String email = fetchEmailFromHeader(request);
+        ClassRoom classRoom = fetchClassRoom(code,request);
+        if (isMemberExist(email,classRoom)||isOwner(email,classRoom)){
+            throw new IllegalArgumentException("Member already exists");
+        }
+        Member member = generateMember(email);
+        classRoom.addMember(member);
+        classRoomRepository.save(classRoom);
+        return memberMapper.toDto(member);
+    }
+
+    @Override
+    @Transactional
+    public void leaveClassRoom(UUID id, HttpServletRequest request) {
+        ClassRoom classRoom = fetchClassRoom(id);
+        if (!isOwner(fetchEmailFromHeader(request), classRoom)) {
+            Member member = classRoom.getMembers()
+                    .stream()
+                    .filter(m -> m.getEmail().equals(fetchEmailFromHeader(request))).findFirst()
+                    .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+            classRoom.removeMember(member);
+        } else {
+            classRoomRepository.delete(classRoom);
+        }
+    }
+
+    @Override
+    public List<MemberDto> fetchMembers(UUID id, HttpServletRequest request, int pageNum){
+        ClassRoom classRoom = fetchClassRoom(id);
+        if (!isMemberExist(fetchEmailFromHeader(request),classRoom)){
+            throw new EntityNotFoundException("No classroom found with id: "+id);
+        }
+        return memberRepository.findByClassroom_Id(id,generatePageable(pageNum))
+                .stream()
+                .map(memberMapper::toDto).toList();
+    }
+
+    @Override
+    public OwnerDto fetchOwner(UUID id, HttpServletRequest request) {
+        ClassRoom classRoom=fetchClassRoom(id);
+        if (!isMemberExist(fetchEmailFromHeader(request),classRoom)){
+            throw new EntityNotFoundException("No classroom found with id: "+id);
+        }
+        return OwnerDto.builder().email(classRoom.getCreatedBy()).build();
     }
 
 
@@ -73,9 +136,38 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
 
     private ClassRoom fetchClassRoom(UUID id,HttpServletRequest request){
         return classRoomRepository.findByIdAndCollegeIdAndUniversityIdAndCreatedBy(id
-                        ,fetchCidFromHeader(request)
-                        ,fetchUidFromHeader(request)
-                        ,fetchEmailFromHeader(request)).orElseThrow(()->new EntityNotFoundException("Classroom not found with id: "+id));
+                ,fetchCidFromHeader(request)
+                ,fetchUidFromHeader(request)
+                ,fetchEmailFromHeader(request)).orElseThrow(()->new EntityNotFoundException("Classroom not found with id: "+id));
+    }
+
+    private ClassRoom fetchClassRoom(String code,HttpServletRequest request){
+        return classRoomRepository.findByCodeAndCollegeIdAndUniversityId(code
+                ,fetchCidFromHeader(request)
+                ,fetchUidFromHeader(request)
+        ).orElseThrow(()->new EntityNotFoundException("Classroom not found with code: "+code));
+    }
+
+    private ClassRoom fetchClassRoom(UUID id){
+        return classRoomRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Classroom not found with id: "+id));
+    }
+
+
+    private boolean isMemberExist(String email,ClassRoom classRoom){
+        return memberRepository.findByEmailAndClassroom_Id(email,classRoom.getId()).isPresent();
+    }
+    private Member generateMember(String email){
+        return Member.builder()
+                .email(email)
+                .build();
+    }
+
+    private boolean isOwner(String email,ClassRoom classRoom){
+        return classRoom.getCreatedBy().equals(email);
+    }
+
+    private Pageable generatePageable(int pageNum){
+        return PageRequest.of(pageNum-1,10, Sort.by("createdAt").descending());
     }
 
 }

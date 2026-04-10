@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface ClassRoomRepository extends JpaRepository<ClassRoom, UUID> {
 
     Optional<ClassRoom> findByIdAndCollegeIdAndUniversityIdAndCreatedBy(UUID id, UUID collegeId, UUID universityId, String createdBy);
+
+    Optional<ClassRoom> findByCodeAndCollegeIdAndUniversityId(String code, UUID collegeId, UUID universityId);
 }

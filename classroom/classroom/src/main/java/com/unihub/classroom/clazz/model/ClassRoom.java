@@ -4,6 +4,8 @@ import com.unihub.classroom.common.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -12,6 +14,20 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        name = "class_room",
+        indexes = {
+
+                @Index(
+                        name = "idx_classroom_tenant_id",
+                        columnList = "id, college_id, university_id"
+                ),
+                @Index(
+                        name = "idx_classroom_code",
+                        columnList = "code"
+                ),
+        }
+)
 public class ClassRoom extends BaseEntity {
 
     @Id
@@ -31,7 +47,7 @@ public class ClassRoom extends BaseEntity {
     private int imageNum;
 
     @Column(nullable = false)
-    private boolean isArchived;
+    private boolean archived;
 
     @Column(nullable = false)
     private UUID universityId;
@@ -39,5 +55,21 @@ public class ClassRoom extends BaseEntity {
     @Column(nullable = false)
     private UUID collegeId;
 
+    @Builder.Default
+    @OneToMany(
+            mappedBy = "classroom",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Member> members=new ArrayList<>();
 
+    public void addMember(Member member) {
+        members.add(member);
+        member.setClassroom(this);
+    }
+
+    public void removeMember(Member member) {
+        members.remove(member);
+        member.setClassroom(null);
+    }
 }

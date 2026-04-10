@@ -28,7 +28,7 @@ public class CreateClassroomDto {
             regexp = "^[\\p{L}\\p{N} .,'-]+$",
             message = "Must contain only letters, numbers, spaces and . , ' -"
     )
-    @JsonProperty("class_subtitle")
+    @JsonProperty("class_sub_title")
     private String classSubTitle;
 
 }

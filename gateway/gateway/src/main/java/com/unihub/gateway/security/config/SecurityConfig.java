@@ -64,7 +64,12 @@ public class SecurityConfig {
             exchange.pathMatchers("/unihub/announcement/api/v1/posts/public/**").hasAnyRole("SECRETARY","INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/announcement/api/v1/likes/**").hasAnyRole("SECRETARY","INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/ai/api/v1/chat/**").hasAnyRole("INSTRUCTOR","STUDENT");
+            //classroom
             exchange.pathMatchers("/unihub/classroom/api/v1/classroom/instructor/**").hasRole("INSTRUCTOR");
+            exchange.pathMatchers("/unihub/classroom/api/v1/classroom/join").hasAnyRole("INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/classroom/api/v1/classroom/leave/**").hasAnyRole("INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/classroom/api/v1/classroom/get-members/**").hasAnyRole("INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/classroom/api/v1/classroom/get-owner/**").hasAnyRole("INSTRUCTOR","STUDENT");
             exchange.anyExchange().authenticated();
         });
         http.csrf(ServerHttpSecurity.CsrfSpec::disable)
