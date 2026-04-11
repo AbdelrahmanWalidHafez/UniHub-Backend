@@ -1,6 +1,6 @@
 package com.unihub.classroom.clazz.service.impl;
 
-import com.unihub.classroom.clazz.controller.OwnerDto;
+import com.unihub.classroom.clazz.dto.OwnerDto;
 import com.unihub.classroom.clazz.dto.ClassRoomResponse;
 import com.unihub.classroom.clazz.dto.CreateClassroomDto;
 import com.unihub.classroom.clazz.dto.MemberDto;
@@ -105,6 +105,21 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
             throw new EntityNotFoundException("No classroom found with id: "+id);
         }
         return OwnerDto.builder().email(classRoom.getCreatedBy()).build();
+    }
+
+    @Override
+    public List<ClassRoomResponse> fetchEnrolledClassRooms(HttpServletRequest request) {
+        return memberRepository.findActiveClassRoomsByEmail(fetchEmailFromHeader(request)).stream().map(classRoomMapper::toDto).toList();
+    }
+
+    @Override
+    public List<ClassRoomResponse> fetchArchivedClassRooms(HttpServletRequest request) {
+        return memberRepository.findArchivedClassRoomsByEmail(fetchEmailFromHeader(request)).stream().map(classRoomMapper::toDto).toList();
+    }
+
+    @Override
+    public List<ClassRoomResponse> fetchMyClassRooms(HttpServletRequest request){
+        return classRoomRepository.findByCreatedBy(fetchEmailFromHeader(request)).stream().map(classRoomMapper::toDto).toList();
     }
 
 

@@ -1,6 +1,6 @@
 package com.unihub.classroom.clazz.service;
 
-import com.unihub.classroom.clazz.controller.OwnerDto;
+import com.unihub.classroom.clazz.dto.OwnerDto;
 import com.unihub.classroom.clazz.dto.ClassRoomResponse;
 import com.unihub.classroom.clazz.dto.CreateClassroomDto;
 import com.unihub.classroom.clazz.dto.MemberDto;
@@ -22,4 +22,12 @@ public interface IClassRoomService {
     List<MemberDto> fetchMembers(UUID id, HttpServletRequest request, int pageNum);
 
     OwnerDto fetchOwner(UUID id, HttpServletRequest request);
+
+    List<ClassRoomResponse> fetchEnrolledClassRooms(HttpServletRequest request);
+
+
+    List<ClassRoomResponse> fetchArchivedClassRooms(HttpServletRequest request);
+
+    List<ClassRoomResponse> fetchMyClassRooms(HttpServletRequest request);
+
 }

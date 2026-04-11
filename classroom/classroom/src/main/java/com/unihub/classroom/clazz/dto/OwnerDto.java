@@ -1,4 +1,4 @@
-package com.unihub.classroom.clazz.controller;
+package com.unihub.classroom.clazz.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

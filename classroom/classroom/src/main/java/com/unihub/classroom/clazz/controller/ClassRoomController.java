@@ -1,14 +1,9 @@
 package com.unihub.classroom.clazz.controller;
 
-import com.unihub.classroom.clazz.dto.ClassRoomResponse;
-import com.unihub.classroom.clazz.dto.CreateClassroomDto;
-import com.unihub.classroom.clazz.dto.MemberDto;
-import com.unihub.classroom.clazz.dto.MembersDto;
+import com.unihub.classroom.clazz.dto.*;
 import com.unihub.classroom.clazz.service.IClassRoomService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.Path;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +50,21 @@ public class ClassRoomController {
     public ResponseEntity<OwnerDto>fetchOwner(@PathVariable UUID id, HttpServletRequest request){
         return ResponseEntity.ok(classRoomService.fetchOwner(id,request));
     }
+
+    @GetMapping("/get-enrolled-classes")
+    public ResponseEntity<ClassRoomsDto> fetchEnrolledClasses(HttpServletRequest request){
+        return  ResponseEntity.ok(ClassRoomsDto.builder().classRooms(classRoomService.fetchEnrolledClassRooms(request)).build());
+    }
+
+    @GetMapping("/get-archived-classes")
+    public ResponseEntity<ClassRoomsDto> fetchArchivedClasses(HttpServletRequest request){
+        return  ResponseEntity.ok(ClassRoomsDto.builder().classRooms(classRoomService.fetchArchivedClassRooms(request)).build());
+    }
+
+    @GetMapping("/instructor/get-my-classes")
+    public ResponseEntity<ClassRoomsDto> fetchMyClasses(HttpServletRequest request){
+        return  ResponseEntity.ok(ClassRoomsDto.builder().classRooms(classRoomService.fetchArchivedClassRooms(request)).build());
+    }
+
 
 }
