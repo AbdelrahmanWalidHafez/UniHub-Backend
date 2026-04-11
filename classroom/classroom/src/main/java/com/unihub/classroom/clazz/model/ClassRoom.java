@@ -1,6 +1,7 @@
 package com.unihub.classroom.clazz.model;
 
 import com.unihub.classroom.common.model.BaseEntity;
+import com.unihub.classroom.material.model.Material;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -63,6 +64,13 @@ public class ClassRoom extends BaseEntity {
     )
     private List<Member> members=new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(
+            mappedBy = "classroom",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Material> materials=new ArrayList<>();
     public void addMember(Member member) {
         members.add(member);
         member.setClassroom(this);
@@ -71,5 +79,15 @@ public class ClassRoom extends BaseEntity {
     public void removeMember(Member member) {
         members.remove(member);
         member.setClassroom(null);
+    }
+
+    public void addMaterial(Material material) {
+        materials.add(material);
+        material.setClassroom(this);
+    }
+
+    public void removeMaterial(Material material) {
+        materials.remove(material);
+        material.setClassroom(null);
     }
 }

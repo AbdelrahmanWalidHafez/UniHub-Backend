@@ -63,8 +63,7 @@ public class ClassRoomController {
 
     @GetMapping("/instructor/get-my-classes")
     public ResponseEntity<ClassRoomsDto> fetchMyClasses(HttpServletRequest request){
-        return  ResponseEntity.ok(ClassRoomsDto.builder().classRooms(classRoomService.fetchArchivedClassRooms(request)).build());
+        return  ResponseEntity.ok(ClassRoomsDto.builder().classRooms(classRoomService.fetchMyClassRooms(request)).build());
     }
-
 
 }

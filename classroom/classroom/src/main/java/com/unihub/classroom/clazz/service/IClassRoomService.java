@@ -1,9 +1,9 @@
 package com.unihub.classroom.clazz.service;
 
-import com.unihub.classroom.clazz.dto.OwnerDto;
 import com.unihub.classroom.clazz.dto.ClassRoomResponse;
 import com.unihub.classroom.clazz.dto.CreateClassroomDto;
 import com.unihub.classroom.clazz.dto.MemberDto;
+import com.unihub.classroom.clazz.dto.OwnerDto;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
@@ -29,5 +29,7 @@ public interface IClassRoomService {
     List<ClassRoomResponse> fetchArchivedClassRooms(HttpServletRequest request);
 
     List<ClassRoomResponse> fetchMyClassRooms(HttpServletRequest request);
+
+    String fetchEmailFromHeader(HttpServletRequest request);
 
 }
