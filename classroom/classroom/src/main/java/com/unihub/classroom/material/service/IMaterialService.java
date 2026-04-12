@@ -16,4 +16,7 @@ public interface IMaterialService {
     void deleteMaterial(UUID mid, HttpServletRequest request);
 
     MaterialResponseDto editMaterial( UUID mid, MaterialDto materialDto, List<MultipartFile> files, List<String> ToDeleteFiles,HttpServletRequest request) throws IOException;
+
+    MaterialResponseDto getMaterial(UUID mid, HttpServletRequest request);
 }
+

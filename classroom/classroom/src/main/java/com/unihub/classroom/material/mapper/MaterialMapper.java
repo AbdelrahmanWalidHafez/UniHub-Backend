@@ -23,6 +23,10 @@ public class MaterialMapper {
         materialResponseDto.setDescription(material.getDescription());
         materialResponseDto.setMaterialType(material.getMaterialType());
         materialResponseDto.setMaterialUrls(material.getMaterialUrls());
+        materialResponseDto.setCreatedBy(material.getCreatedBy());
+        materialResponseDto.setUpdatedBy(material.getUpdatedBy());
+        materialResponseDto.setCreatedAt(material.getCreatedAt());
+        materialResponseDto.setUpdatedAt(material.getUpdatedAt());
         return materialResponseDto;
     }
 }

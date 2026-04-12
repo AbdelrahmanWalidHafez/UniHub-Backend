@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,5 +32,17 @@ public class MaterialResponseDto {
     @JsonProperty("material_urls")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> materialUrls;
+
+    @JsonProperty("created_at")
+    private LocalDateTime createdAt;
+
+    @JsonProperty("updated_at")
+    private LocalDateTime updatedAt;
+
+    @JsonProperty("created_by")
+    private String createdBy;
+
+    @JsonProperty("updated_by")
+    private String updatedBy;
 
 }

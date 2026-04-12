@@ -88,23 +88,23 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
     }
 
     @Override
+    @Transactional
     public List<MemberDto> fetchMembers(UUID id, HttpServletRequest request, int pageNum){
-        ClassRoom classRoom = fetchClassRoom(id);
-        if (!isMemberExist(fetchEmailFromHeader(request),classRoom)){
-            throw new EntityNotFoundException("No classroom found with id: "+id);
-        }
-        return memberRepository.findByClassroom_Id(id,generatePageable(pageNum))
+
+        return memberRepository.findMembersByClassroomId(id,fetchEmailFromHeader(request),generatePageable(pageNum))
                 .stream()
                 .map(memberMapper::toDto).toList();
     }
 
     @Override
+    @Transactional
     public OwnerDto fetchOwner(UUID id, HttpServletRequest request) {
-        ClassRoom classRoom=fetchClassRoom(id);
-        if (!isMemberExist(fetchEmailFromHeader(request),classRoom)){
-            throw new EntityNotFoundException("No classroom found with id: "+id);
-        }
-        return OwnerDto.builder().email(classRoom.getCreatedBy()).build();
+        return OwnerDto.builder()
+                .email(
+                        classRoomRepository.findOwnerEmail(id,fetchEmailFromHeader(request))
+                        .orElseThrow(()->new EntityNotFoundException("Owner not found with id: "+id))
+                )
+                .build();
     }
 
     @Override

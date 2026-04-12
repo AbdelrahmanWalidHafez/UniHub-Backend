@@ -48,4 +48,9 @@ public class MaterialController {
         return ResponseEntity.ok(materialService.editMaterial(id, materialDto, files, ToDeleteFiles, request));
 
     }
+
+    @GetMapping("/get-material/{id}")
+    public ResponseEntity<MaterialResponseDto> getMaterial(@PathVariable UUID id, HttpServletRequest request){
+        return ResponseEntity.ok(materialService.getMaterial(id,request));
+    }
 }

@@ -35,4 +35,25 @@ public interface MemberRepository extends JpaRepository <Member, UUID>{
       AND c.archived = true
 """)
     List<ClassRoom> findArchivedClassRoomsByEmail(@Param("email") String email);
+
+    @Query("""
+    SELECT m
+    FROM Member m
+    JOIN m.classroom c
+    WHERE c.id = :classId
+    AND (
+        c.createdBy = :email
+        OR EXISTS (
+            SELECT 1
+            FROM Member m2
+            WHERE m2.classroom.id = :classId
+            AND m2.email = :email
+        )
+    )
+""")
+    Page<Member> findMembersByClassroomId(
+            @Param("classId") UUID classId,
+            @Param("email") String email,
+            Pageable pageable
+    );
 }

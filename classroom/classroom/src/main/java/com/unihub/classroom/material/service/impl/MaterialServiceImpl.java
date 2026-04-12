@@ -98,6 +98,20 @@ public class MaterialServiceImpl implements IMaterialService {
         return materialMapper.toDto(materialRepository.save(material));
     }
 
+
+    @Override
+    @Transactional
+    public MaterialResponseDto getMaterial(UUID mid, HttpServletRequest request) {
+        return materialMapper.toDto(
+                materialRepository
+                        .findMaterial(mid, classRoomService.fetchEmailFromHeader(request))
+                        .orElseThrow(()->new EntityNotFoundException("Material not found with id: "+mid)
+                        )
+        );
+    }
+
+
+
     private void uploadFiles(List<MultipartFile> materialFiles,ClassRoom classRoom,Material material) throws IOException {
         for (MultipartFile file : materialFiles) {
             if (isInvalidValidContentType(file)) {
