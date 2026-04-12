@@ -1,5 +1,7 @@
 package com.unihub.classroom.material.controller;
 
+import com.unihub.classroom.assginement.dto.request.CreateAssignmentRequest;
+import com.unihub.classroom.assginement.dto.response.AssignmentResponseDto;
 import com.unihub.classroom.material.dto.request.MaterialDto;
 import com.unihub.classroom.material.dto.response.MaterialResponseDto;
 import com.unihub.classroom.material.service.IMaterialService;
@@ -25,12 +27,28 @@ public class MaterialController {
 
     private final IMaterialService materialService;
 
-    @PostMapping(value = "/instructor/create/{id}",consumes =MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/instructor/create-announcement/{id}",consumes =MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<MaterialResponseDto> createAnnouncement(@RequestPart("data") @Valid MaterialDto materialDto,
+                                                              @RequestPart(value = "files",required = false) List<MultipartFile> files,
+                                                              @PathVariable UUID id,
+                                                              HttpServletRequest request) throws IOException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(materialService.createAnnouncement(materialDto,files,id,request));
+    }
+
+    @PostMapping(value = "/instructor/create-material/{id}",consumes =MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MaterialResponseDto> createMaterial(@RequestPart("data") @Valid MaterialDto materialDto,
                                                               @RequestPart(value = "files",required = false) List<MultipartFile> files,
                                                               @PathVariable UUID id,
                                                               HttpServletRequest request) throws IOException {
         return ResponseEntity.status(HttpStatus.CREATED).body(materialService.createMaterial(materialDto,files,id,request));
+    }
+
+    @PostMapping(value = "/instructor/create-assignment/{id}",consumes =MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AssignmentResponseDto> createAssignment(@RequestPart("data") @Valid CreateAssignmentRequest createAssignmentRequest,
+                                                                  @RequestPart(value = "files",required = false) List<MultipartFile> files,
+                                                                  @PathVariable UUID id,
+                                                                  HttpServletRequest request) throws IOException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(materialService.createAssignment(createAssignmentRequest,files,id,request));
     }
 
     @DeleteMapping("/instructor/delete/{id}")
@@ -39,13 +57,22 @@ public class MaterialController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/instructor/edit/{id}")
+    @PutMapping(value="/instructor/edit/{id}",consumes =MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MaterialResponseDto> editMaterial(@PathVariable UUID id,
                                                             @RequestPart("data") @Valid MaterialDto materialDto,
                                                             @RequestPart(value = "files",required = false) List<MultipartFile> files,
-                                                            @RequestPart(value = "ToDeleteFiles",required = false) List<String> ToDeleteFiles,
+                                                            @RequestPart(value = "ToDeleteFiles",required = false) List<String> toDeleteFiles,
                                                             HttpServletRequest request) throws IOException {
-        return ResponseEntity.ok(materialService.editMaterial(id, materialDto, files, ToDeleteFiles, request));
+        return ResponseEntity.ok(materialService.editMaterial(id, materialDto, files, toDeleteFiles, request));
+
+    }
+
+    @PutMapping("/instructor/edit/assignment/{id}")
+    public ResponseEntity<AssignmentResponseDto> editAssignment(@PathVariable UUID id, @RequestPart("data") @Valid CreateAssignmentRequest createAssignmentRequest,
+                                                                @RequestPart(value = "files",required = false) List<MultipartFile> files,
+                                                                @RequestPart(value = "ToDeleteFiles",required = false) List<String> toDeleteFiles,
+                                                                HttpServletRequest request) throws IOException {
+        return ResponseEntity.ok(materialService.editAssignment(id,createAssignmentRequest,files,toDeleteFiles,request));
 
     }
 

@@ -1,7 +1,7 @@
 package com.unihub.classroom.clazz.service;
 
-import com.unihub.classroom.clazz.dto.response.ClassRoomResponse;
 import com.unihub.classroom.clazz.dto.request.CreateClassroomDto;
+import com.unihub.classroom.clazz.dto.response.ClassRoomResponse;
 import com.unihub.classroom.clazz.dto.response.MemberDto;
 import com.unihub.classroom.clazz.dto.response.OwnerDto;
 import jakarta.servlet.http.HttpServletRequest;

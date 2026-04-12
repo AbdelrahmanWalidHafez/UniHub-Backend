@@ -33,6 +33,9 @@ public class MaterialResponseDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> materialUrls;
 
+    @JsonProperty("comments_count")
+    private int commentsCount;
+
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
 

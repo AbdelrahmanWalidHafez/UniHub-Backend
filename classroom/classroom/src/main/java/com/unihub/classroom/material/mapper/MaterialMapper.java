@@ -12,7 +12,7 @@ public class MaterialMapper {
         Material material = new Material();
         material.setHeadLine(materialDto.getHeadLine());
         material.setDescription(materialDto.getDescription());
-        material.setMaterialType(materialDto.getMaterialType());
+        material.setCommentsCount(0);
         return material;
     }
 
@@ -27,6 +27,7 @@ public class MaterialMapper {
         materialResponseDto.setUpdatedBy(material.getUpdatedBy());
         materialResponseDto.setCreatedAt(material.getCreatedAt());
         materialResponseDto.setUpdatedAt(material.getUpdatedAt());
+        materialResponseDto.setCommentsCount(material.getCommentsCount());
         return materialResponseDto;
     }
 }

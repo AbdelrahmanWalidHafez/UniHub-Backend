@@ -6,7 +6,6 @@ import com.unihub.classroom.comment.dto.response.CommentsDto;
 import com.unihub.classroom.comment.service.ICommentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.PUT;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

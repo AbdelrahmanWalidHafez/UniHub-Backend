@@ -1,17 +1,25 @@
 package com.unihub.classroom.material.service.impl;
 
+import com.unihub.classroom.assginement.dto.request.CreateAssignmentRequest;
+import com.unihub.classroom.assginement.dto.response.AssignmentResponseDto;
+import com.unihub.classroom.assginement.mapper.AssignmentMapper;
+import com.unihub.classroom.assginement.service.IAssignmentService;
 import com.unihub.classroom.clazz.model.ClassRoom;
 import com.unihub.classroom.clazz.repository.ClassRoomRepository;
 import com.unihub.classroom.clazz.service.IClassRoomService;
 import com.unihub.classroom.material.client.S3FeignClient;
 import com.unihub.classroom.material.dto.request.DeleteFileRequest;
 import com.unihub.classroom.material.dto.request.MaterialDto;
-import com.unihub.classroom.material.dto.response.MaterialResponseDto;
 import com.unihub.classroom.material.dto.request.UploadFileRequest;
+import com.unihub.classroom.material.dto.response.MaterialResponseDto;
 import com.unihub.classroom.material.mapper.MaterialMapper;
 import com.unihub.classroom.material.model.Material;
+import com.unihub.classroom.material.model.enums.MaterialType;
 import com.unihub.classroom.material.repository.MaterialRepository;
 import com.unihub.classroom.material.service.IMaterialService;
+import com.unihub.classroom.material.template.MaterialMaker;
+import com.unihub.classroom.material.template.concrete.AnnouncementMaker;
+import com.unihub.classroom.material.template.concrete.AssignmentMaker;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +32,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -38,7 +45,11 @@ public class MaterialServiceImpl implements IMaterialService {
 
     private final MaterialMapper materialMapper;
 
+    private final AssignmentMapper assignmentMapper;
+
     private final IClassRoomService classRoomService;
+
+    private final IAssignmentService assignmentService;
 
     private final MaterialRepository materialRepository;
 
@@ -47,28 +58,48 @@ public class MaterialServiceImpl implements IMaterialService {
     @Value("${aws.bucket}")
     private String bucketLink;
 
-    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
-            "application/pdf",
-            "image/jpeg",
-            "image/png",
-            "video/mp4",
-            "video/quicktime",
-            "video/x-msvideo",
-            "video/webm",
-            "video/x-matroska"
-    );
+    @Override
+    @Transactional
+    public MaterialResponseDto createAnnouncement(MaterialDto materialDto, List<MultipartFile> materialFiles, UUID cid, HttpServletRequest request) throws IOException {
+        MaterialMaker materialMaker= new AnnouncementMaker(this);
+        return materialMapper.toDto(generateMaterial(materialDto,materialMaker,materialFiles,cid,request));
+    }
+
 
     @Override
     @Transactional
     public MaterialResponseDto createMaterial(MaterialDto materialDto, List<MultipartFile> materialFiles, UUID cid, HttpServletRequest request) throws IOException {
+        MaterialMaker materialMaker=new com.unihub.classroom.material.template.concrete.MaterialMaker(this);
+        return materialMapper.toDto(generateMaterial(materialDto,materialMaker,materialFiles,cid,request));
+    }
 
-       ClassRoom classroom=fetchClassRoom(request,cid);
-        Material material=materialMapper.toEntity(materialDto);
+
+    @Override
+    @Transactional
+    public AssignmentResponseDto createAssignment(CreateAssignmentRequest createAssignmentRequest, List<MultipartFile> materialFiles, UUID cid, HttpServletRequest request) throws IOException {
+       MaterialMaker materialMaker= new AssignmentMaker(this);
+       Material material=generateMaterial(createAssignmentRequest.getMaterialDto(),materialMaker,materialFiles,cid,request);
+       return assignmentService.createAssignment(material,assignmentMapper.toEntity(createAssignmentRequest));
+    }
+
+    public  Material generateMaterial(Material material, List<MultipartFile> materialFiles, UUID cid, HttpServletRequest request) throws IOException {
+        ClassRoom classroom=fetchClassRoom(request,cid);
         classroom.addMaterial(material);
         if(materialFiles!=null&&!materialFiles.isEmpty()){
-          uploadFiles(materialFiles,classroom,material);
+            uploadFiles(materialFiles,classroom,material);
         }
-        return materialMapper.toDto(materialRepository.save(material));
+        return materialRepository.save(material);
+    }
+
+    @Override
+    @Transactional
+    public AssignmentResponseDto editAssignment(UUID mid, CreateAssignmentRequest createAssignmentRequest, List<MultipartFile> files, List<String> toDeleteFiles, HttpServletRequest request) throws IOException {
+        Material material=fetchMaterial(mid,request);
+        if (!material.getMaterialType().equals(MaterialType.ASSIGNMENT)&&material.getAssignment()==null) {
+            throw new IllegalArgumentException("Material is not an assignment");
+        }
+        editMaterial(material,createAssignmentRequest.getMaterialDto(),files,toDeleteFiles);
+        return assignmentService.editAssignment(material,createAssignmentRequest);
     }
 
     @Override
@@ -85,8 +116,11 @@ public class MaterialServiceImpl implements IMaterialService {
 
     @Override
     @Transactional
-    public MaterialResponseDto editMaterial(UUID mid, MaterialDto materialDto, List<MultipartFile> files, List<String> ToDeleteFiles,HttpServletRequest request) throws IOException {
-        Material material=fetchMaterial(mid,request);
+    public MaterialResponseDto editMaterial(UUID mid, MaterialDto materialDto, List<MultipartFile> files, List<String> toDeleteFiles,HttpServletRequest request) throws IOException {
+      return editMaterial(fetchMaterial(mid,request),materialDto,files,toDeleteFiles);
+    }
+
+    private MaterialResponseDto editMaterial(Material material,MaterialDto materialDto, List<MultipartFile> files, List<String> ToDeleteFiles) throws IOException {
         editMaterial(materialDto,material);
         if(files!=null&&!files.isEmpty()){
             uploadFiles(files,material.getClassroom(),material);
@@ -114,10 +148,6 @@ public class MaterialServiceImpl implements IMaterialService {
 
     private void uploadFiles(List<MultipartFile> materialFiles,ClassRoom classRoom,Material material) throws IOException {
         for (MultipartFile file : materialFiles) {
-            if (isInvalidValidContentType(file)) {
-                log.warn("Invalid or unsupported content type: {}", file.getContentType());
-                continue;
-            }
             String key=generateKey(file,classRoom);
             material.getMaterialUrls().add(bucketLink+key);
             UploadFileRequest uploadFileRequest= UploadFileRequest.builder()
@@ -134,11 +164,6 @@ public class MaterialServiceImpl implements IMaterialService {
         return classRoomRepository
                 .findByCreatedByAndId(classRoomService.fetchEmailFromHeader(request),id )
                 .orElseThrow(()->new EntityNotFoundException("Classroom not found with id: "+id));
-    }
-
-    private  boolean isInvalidValidContentType(MultipartFile file) {
-        String contentType = file.getContentType();
-        return !ALLOWED_CONTENT_TYPES.contains(contentType);
     }
 
     private String generateKey(MultipartFile file,ClassRoom classRoom){
@@ -169,8 +194,13 @@ public class MaterialServiceImpl implements IMaterialService {
     }
 
     private void editMaterial(MaterialDto materialDto,Material material){
-        material.setMaterialType(materialDto.getMaterialType());
         material.setDescription(materialDto.getDescription());
         material.setHeadLine(materialDto.getHeadLine());
+    }
+
+    private Material generateMaterial(MaterialDto materialDto,MaterialMaker materialMaker,List<MultipartFile> materialFiles,UUID cid,HttpServletRequest request) throws IOException {
+        Material material=materialMapper.toEntity(materialDto);
+        materialMaker.setMaterialType(material);
+        return materialMaker.generateMaterial(material,materialFiles,cid,request);
     }
 }

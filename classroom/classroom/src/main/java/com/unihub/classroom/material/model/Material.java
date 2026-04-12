@@ -1,5 +1,6 @@
 package com.unihub.classroom.material.model;
 
+import com.unihub.classroom.assginement.model.Assignment;
 import com.unihub.classroom.clazz.model.ClassRoom;
 import com.unihub.classroom.comment.model.Comment;
 import com.unihub.classroom.common.model.BaseEntity;
@@ -43,10 +44,14 @@ public class Material extends BaseEntity {
     @JoinColumn(name="classroom_id",nullable = false)
     private ClassRoom classroom;
 
+    private int CommentsCount;
 
     @Builder.Default
     @OneToMany(mappedBy = "material", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments=new ArrayList<>();
+
+    @OneToOne(mappedBy = "material", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Assignment assignment;
 
     public void addComment(Comment comment) {
         comments.add(comment);
@@ -57,6 +62,5 @@ public class Material extends BaseEntity {
         comments.remove(comment);
         comment.setMaterial(null);
     }
-
 
 }

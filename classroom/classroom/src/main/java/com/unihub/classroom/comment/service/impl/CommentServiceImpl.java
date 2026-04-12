@@ -40,6 +40,7 @@ public class CommentServiceImpl implements ICommentService {
         Comment comment=commentMapper.toEntity(createCommentRequest);
         comment.setEdited(false);
         material.addComment(comment);
+        material.setCommentsCount(material.getCommentsCount()+1);
         return commentMapper.toDto(commentRepository.save(comment));
     }
 
@@ -48,6 +49,7 @@ public class CommentServiceImpl implements ICommentService {
     public void deleteComment(UUID cid, HttpServletRequest request) {
         Comment comment=fetchComment(cid,request);
         comment.getMaterial().removeComment(comment);
+        comment.getMaterial().setCommentsCount(Math.max(comment.getMaterial().getCommentsCount()-1,0));
         commentRepository.delete(comment);
     }
 
