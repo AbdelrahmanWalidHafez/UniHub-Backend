@@ -1,7 +1,7 @@
 package com.unihub.classroom.material.client;
 
 import com.unihub.classroom.material.client.fallback.S3FallBack;
-import com.unihub.classroom.material.dto.UploadFileRequest;
+import com.unihub.classroom.material.dto.request.UploadFileRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

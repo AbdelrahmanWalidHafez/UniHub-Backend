@@ -1,4 +1,4 @@
-package com.unihub.classroom.clazz.dto;
+package com.unihub.classroom.clazz.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -10,8 +10,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MembersDto {
+public class ClassRoomsDto {
 
-    @JsonProperty
-    private List<MemberDto> members;
+    @JsonProperty("class_rooms")
+    private List<ClassRoomResponse> classRooms;
+
 }

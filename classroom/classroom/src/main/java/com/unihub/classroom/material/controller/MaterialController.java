@@ -1,7 +1,7 @@
 package com.unihub.classroom.material.controller;
 
-import com.unihub.classroom.material.dto.MaterialDto;
-import com.unihub.classroom.material.dto.MaterialResponseDto;
+import com.unihub.classroom.material.dto.request.MaterialDto;
+import com.unihub.classroom.material.dto.response.MaterialResponseDto;
 import com.unihub.classroom.material.service.IMaterialService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

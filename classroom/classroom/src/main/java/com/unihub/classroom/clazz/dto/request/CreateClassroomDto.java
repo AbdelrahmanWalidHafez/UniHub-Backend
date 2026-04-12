@@ -1,4 +1,4 @@
-package com.unihub.classroom.clazz.dto;
+package com.unihub.classroom.clazz.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;

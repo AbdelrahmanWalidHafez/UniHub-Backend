@@ -1,4 +1,4 @@
-package com.unihub.classroom.material.dto;
+package com.unihub.classroom.material.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unihub.classroom.material.model.enums.MaterialType;

@@ -1,6 +1,7 @@
 package com.unihub.classroom.clazz.controller;
 
-import com.unihub.classroom.clazz.dto.*;
+import com.unihub.classroom.clazz.dto.request.CreateClassroomDto;
+import com.unihub.classroom.clazz.dto.response.*;
 import com.unihub.classroom.clazz.service.IClassRoomService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

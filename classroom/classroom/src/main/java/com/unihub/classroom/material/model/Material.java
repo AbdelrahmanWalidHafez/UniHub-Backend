@@ -1,6 +1,7 @@
 package com.unihub.classroom.material.model;
 
 import com.unihub.classroom.clazz.model.ClassRoom;
+import com.unihub.classroom.comment.model.Comment;
 import com.unihub.classroom.common.model.BaseEntity;
 import com.unihub.classroom.material.model.enums.MaterialType;
 import jakarta.persistence.*;
@@ -41,5 +42,9 @@ public class Material extends BaseEntity {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="classroom_id",nullable = false)
     private ClassRoom classroom;
+
+    @OneToMany(mappedBy = "material", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
+
 
 }

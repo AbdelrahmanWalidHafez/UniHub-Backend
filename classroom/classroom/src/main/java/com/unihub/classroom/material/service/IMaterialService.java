@@ -1,7 +1,7 @@
 package com.unihub.classroom.material.service;
 
-import com.unihub.classroom.material.dto.MaterialDto;
-import com.unihub.classroom.material.dto.MaterialResponseDto;
+import com.unihub.classroom.material.dto.request.MaterialDto;
+import com.unihub.classroom.material.dto.response.MaterialResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
 

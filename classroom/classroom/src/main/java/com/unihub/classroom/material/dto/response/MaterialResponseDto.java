@@ -1,4 +1,4 @@
-package com.unihub.classroom.material.dto;
+package com.unihub.classroom.material.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

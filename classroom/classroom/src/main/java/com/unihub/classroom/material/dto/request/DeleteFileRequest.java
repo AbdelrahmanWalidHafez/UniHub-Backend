@@ -1,4 +1,4 @@
-package com.unihub.classroom.material.dto;
+package com.unihub.classroom.material.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,8 @@ import lombok.Setter;
 @Setter
 @Builder
 @AllArgsConstructor
-public class UploadFileRequest {
-
-    private byte[] fileContent;
+public class DeleteFileRequest {
 
     private String key;
 
-    private String contentType;
 }

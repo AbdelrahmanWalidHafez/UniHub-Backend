@@ -1,7 +1,7 @@
 package com.unihub.classroom.material.mapper;
 
-import com.unihub.classroom.material.dto.MaterialDto;
-import com.unihub.classroom.material.dto.MaterialResponseDto;
+import com.unihub.classroom.material.dto.request.MaterialDto;
+import com.unihub.classroom.material.dto.response.MaterialResponseDto;
 import com.unihub.classroom.material.model.Material;
 import org.springframework.stereotype.Component;
 

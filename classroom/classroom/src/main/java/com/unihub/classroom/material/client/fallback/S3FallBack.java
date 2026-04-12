@@ -1,7 +1,7 @@
 package com.unihub.classroom.material.client.fallback;
 
 import com.unihub.classroom.material.client.S3FeignClient;
-import com.unihub.classroom.material.dto.UploadFileRequest;
+import com.unihub.classroom.material.dto.request.UploadFileRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

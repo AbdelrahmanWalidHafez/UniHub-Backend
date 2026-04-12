@@ -1,7 +1,7 @@
 package com.unihub.classroom.clazz.mapper;
 
-import com.unihub.classroom.clazz.dto.ClassRoomResponse;
-import com.unihub.classroom.clazz.dto.CreateClassroomDto;
+import com.unihub.classroom.clazz.dto.response.ClassRoomResponse;
+import com.unihub.classroom.clazz.dto.request.CreateClassroomDto;
 import com.unihub.classroom.clazz.model.ClassRoom;
 import org.springframework.stereotype.Component;
 

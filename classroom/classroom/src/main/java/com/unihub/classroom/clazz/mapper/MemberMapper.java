@@ -1,6 +1,6 @@
 package com.unihub.classroom.clazz.mapper;
 
-import com.unihub.classroom.clazz.dto.MemberDto;
+import com.unihub.classroom.clazz.dto.response.MemberDto;
 import com.unihub.classroom.clazz.model.Member;
 import org.springframework.stereotype.Component;
 
