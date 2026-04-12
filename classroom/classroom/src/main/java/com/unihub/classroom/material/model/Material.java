@@ -43,8 +43,20 @@ public class Material extends BaseEntity {
     @JoinColumn(name="classroom_id",nullable = false)
     private ClassRoom classroom;
 
+
+    @Builder.Default
     @OneToMany(mappedBy = "material", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments;
+    private List<Comment> comments=new ArrayList<>();
+
+    public void addComment(Comment comment) {
+        comments.add(comment);
+        comment.setMaterial(this);
+    }
+
+    public void removeComment(Comment comment) {
+        comments.remove(comment);
+        comment.setMaterial(null);
+    }
 
 
 }

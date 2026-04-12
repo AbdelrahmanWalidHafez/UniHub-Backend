@@ -12,8 +12,6 @@ public interface MaterialRepository extends JpaRepository<Material, UUID> {
 
     Optional<Material> findByMidAndCreatedBy(UUID mid,String email);
 
-    Optional<Material> findByIdAndClassroom_Id(UUID mid, UUID cid);
-
     @Query("""
     SELECT m
     FROM Material m
