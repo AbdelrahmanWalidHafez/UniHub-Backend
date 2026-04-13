@@ -4,6 +4,7 @@ import com.unihub.classroom.assginement.dto.request.CreateAssignmentRequest;
 import com.unihub.classroom.assginement.dto.response.AssignmentResponseDto;
 import com.unihub.classroom.material.dto.request.MaterialDto;
 import com.unihub.classroom.material.dto.response.MaterialResponseDto;
+import com.unihub.classroom.material.dto.response.MaterialResponsesDto;
 import com.unihub.classroom.material.service.IMaterialService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -80,4 +81,10 @@ public class MaterialController {
     public ResponseEntity<MaterialResponseDto> getMaterial(@PathVariable UUID id, HttpServletRequest request){
         return ResponseEntity.ok(materialService.getMaterial(id,request));
     }
+
+    @GetMapping("/get-all-materials/{id}")
+    public ResponseEntity<MaterialResponsesDto> getAllMaterials(@PathVariable UUID id, HttpServletRequest request, @RequestParam(value = "page_num",defaultValue = "1")int pageNum){
+        return ResponseEntity.ok(MaterialResponsesDto.builder().materials(materialService.getAllMaterials(id,request,pageNum)).build());
+    }
+
 }

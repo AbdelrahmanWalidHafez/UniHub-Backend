@@ -26,6 +26,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -144,6 +147,15 @@ public class MaterialServiceImpl implements IMaterialService {
         );
     }
 
+    @Override
+    @Transactional
+    public List<MaterialResponseDto> getAllMaterials(UUID id, HttpServletRequest request, int pageNum){
+        return materialRepository
+                .findMaterials(classRoomService.fetchEmailFromHeader(request), id,generatePageable(pageNum))
+                .stream()
+                .map(materialMapper::toDto).toList();
+    }
+
 
 
     private void uploadFiles(List<MultipartFile> materialFiles,ClassRoom classRoom,Material material) throws IOException {
@@ -202,5 +214,9 @@ public class MaterialServiceImpl implements IMaterialService {
         Material material=materialMapper.toEntity(materialDto);
         materialMaker.setMaterialType(material);
         return materialMaker.generateMaterial(material,materialFiles,cid,request);
+    }
+
+    private Pageable generatePageable(int pageNum){
+        return PageRequest.of(pageNum-1,5, Sort.by("createdAt").descending());
     }
 }

@@ -6,6 +6,7 @@ import com.unihub.classroom.material.dto.request.MaterialDto;
 import com.unihub.classroom.material.dto.response.MaterialResponseDto;
 import com.unihub.classroom.material.model.Material;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -29,5 +30,7 @@ public interface IMaterialService {
     Material generateMaterial(Material material, List<MultipartFile> materialFiles, UUID cid, HttpServletRequest request) throws IOException;
 
     AssignmentResponseDto editAssignment(UUID mid, CreateAssignmentRequest createAssignmentRequest, List<MultipartFile> materialFiles, List<String> toDeleteFiles, HttpServletRequest request) throws IOException;
+
+    List<MaterialResponseDto> getAllMaterials(UUID id, HttpServletRequest request, int pageNum);
 }
 
