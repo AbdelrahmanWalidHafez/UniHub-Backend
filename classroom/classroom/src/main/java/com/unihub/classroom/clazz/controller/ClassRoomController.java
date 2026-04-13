@@ -57,7 +57,12 @@ public class ClassRoomController {
         return  ResponseEntity.ok(ClassRoomsDto.builder().classRooms(classRoomService.fetchEnrolledClassRooms(request)).build());
     }
 
-    @GetMapping("/get-archived-classes")
+    @GetMapping("/fetch-archived-classes")
+    public ResponseEntity<ClassRoomsDto> getArchivedClasses(HttpServletRequest request){
+        return  ResponseEntity.ok(ClassRoomsDto.builder().classRooms(classRoomService.getArchivedClassRooms(request)).build());
+    }
+
+    @GetMapping("/instructor/get-archived-classes")
     public ResponseEntity<ClassRoomsDto> fetchArchivedClasses(HttpServletRequest request){
         return  ResponseEntity.ok(ClassRoomsDto.builder().classRooms(classRoomService.fetchArchivedClassRooms(request)).build());
     }
@@ -65,6 +70,11 @@ public class ClassRoomController {
     @GetMapping("/instructor/get-my-classes")
     public ResponseEntity<ClassRoomsDto> fetchMyClasses(HttpServletRequest request){
         return  ResponseEntity.ok(ClassRoomsDto.builder().classRooms(classRoomService.fetchMyClassRooms(request)).build());
+    }
+
+    @GetMapping("/instructor/get-active-classes")
+    public ResponseEntity<ClassRoomsDto> fetchActiveClasses(HttpServletRequest request){
+        return ResponseEntity.ok(ClassRoomsDto.builder().classRooms(classRoomService.fetchActiveClassRooms(classRoomService.fetchEmailFromHeader(request),request)).build());
     }
 
 }

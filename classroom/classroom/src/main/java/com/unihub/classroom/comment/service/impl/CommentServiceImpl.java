@@ -83,7 +83,7 @@ public class CommentServiceImpl implements ICommentService {
 
     private Comment fetchComment(UUID cid, HttpServletRequest request){
         return  commentRepository
-                .findByIdAndCreatedBy(cid,classRoomService.fetchEmailFromHeader(request))
+                .findByCidAndCreatedBy(cid,classRoomService.fetchEmailFromHeader(request))
                 .orElseThrow(()->new EntityNotFoundException("no comment found with id:"+cid));
     }
 

@@ -17,6 +17,8 @@ public interface ClassRoomRepository extends JpaRepository<ClassRoom, UUID> {
 
     Optional<ClassRoom> findByCreatedByAndId(String email, UUID id);
 
+    List<ClassRoom> findByCreatedByAndArchived(String email,boolean archived);
+
     List<ClassRoom> findByCreatedBy(String email);
 
     @Query("""

@@ -16,8 +16,6 @@ public interface MemberRepository extends JpaRepository <Member, UUID>{
 
     Optional<Member> findByEmailAndClassroom_Id(String email, UUID classroomId);
 
-    Page<Member> findByClassroom_Id(UUID classroomId, Pageable pageable);
-
     @Query("""
     SELECT m.classroom
     FROM Member m

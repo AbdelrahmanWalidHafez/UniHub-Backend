@@ -26,9 +26,13 @@ public interface IClassRoomService {
     List<ClassRoomResponse> fetchEnrolledClassRooms(HttpServletRequest request);
 
 
+    List<ClassRoomResponse> getArchivedClassRooms(HttpServletRequest request);
+
     List<ClassRoomResponse> fetchArchivedClassRooms(HttpServletRequest request);
 
     List<ClassRoomResponse> fetchMyClassRooms(HttpServletRequest request);
+
+    public List<ClassRoomResponse> fetchActiveClassRooms(String email, HttpServletRequest request);
 
     String fetchEmailFromHeader(HttpServletRequest request);
 

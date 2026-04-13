@@ -113,13 +113,23 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
     }
 
     @Override
-    public List<ClassRoomResponse> fetchArchivedClassRooms(HttpServletRequest request) {
+    public List<ClassRoomResponse> getArchivedClassRooms(HttpServletRequest request){
         return memberRepository.findArchivedClassRoomsByEmail(fetchEmailFromHeader(request)).stream().map(classRoomMapper::toDto).toList();
+    }
+
+    @Override
+    public List<ClassRoomResponse> fetchArchivedClassRooms(HttpServletRequest request) {
+        return classRoomRepository.findByCreatedByAndArchived(fetchEmailFromHeader(request),true).stream().map(classRoomMapper::toDto).toList();
     }
 
     @Override
     public List<ClassRoomResponse> fetchMyClassRooms(HttpServletRequest request){
         return classRoomRepository.findByCreatedBy(fetchEmailFromHeader(request)).stream().map(classRoomMapper::toDto).toList();
+    }
+
+    @Override
+    public List<ClassRoomResponse> fetchActiveClassRooms(String email, HttpServletRequest request){
+        return classRoomRepository.findByCreatedByAndArchived(email,false).stream().map(classRoomMapper::toDto).toList();
     }
 
 
@@ -128,7 +138,7 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
     }
 
     private String generateCode() {
-        return UUID.randomUUID().toString().replace("-","").substring(0, 6);
+        return UUID.randomUUID().toString().replace("-","").substring(0, 8);
     }
 
     private ClassRoomContext initContext(ClassRoom classRoom){
