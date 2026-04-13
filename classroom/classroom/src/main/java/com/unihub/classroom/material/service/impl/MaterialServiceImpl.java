@@ -180,7 +180,7 @@ public class MaterialServiceImpl implements IMaterialService {
 
     private String generateKey(MultipartFile file,ClassRoom classRoom){
         String extension = getExtension(file.getOriginalFilename());
-        return   classRoom.getCode() + "/" + UUID.randomUUID() + "." + extension;
+        return   classRoom.getCode() + "/" + file.getOriginalFilename() + "." + extension;
     }
 
     private String getExtension(String filename) {
