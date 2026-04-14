@@ -12,7 +12,18 @@ import java.util.UUID;
 
 public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
-    Optional<Comment> findByCidAndCreatedBy(UUID cid,String email);
+    @Query("""
+        SELECT cmt
+        FROM Comment cmt
+        JOIN cmt.material m
+        JOIN m.classroom c
+        WHERE cmt.cid = :cid
+        AND (
+            c.createdBy = :email
+            OR cmt.createdBy= :email
+        )
+    """)
+    Optional<Comment> findByCidAndUser(UUID cid,String email);
 
 
     @Query("""

@@ -87,4 +87,9 @@ public class MaterialController {
         return ResponseEntity.ok(MaterialResponsesDto.builder().materials(materialService.getAllMaterials(id,request,pageNum)).build());
     }
 
+    @GetMapping("/get-all-assignments/{id}")
+    public ResponseEntity<MaterialResponsesDto> getAllAssignments(@PathVariable UUID id, HttpServletRequest request, @RequestParam(value = "page_num",defaultValue = "1")int pageNum){
+        return ResponseEntity.ok(MaterialResponsesDto.builder().materials(materialService.getAllAssignments(id,request,pageNum)).build());
+    }
+
 }

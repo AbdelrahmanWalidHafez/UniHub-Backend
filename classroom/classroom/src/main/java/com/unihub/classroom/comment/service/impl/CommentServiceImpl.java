@@ -48,8 +48,8 @@ public class CommentServiceImpl implements ICommentService {
     @Transactional
     public void deleteComment(UUID cid, HttpServletRequest request) {
         Comment comment=fetchComment(cid,request);
-        comment.getMaterial().removeComment(comment);
         comment.getMaterial().setCommentsCount(Math.max(comment.getMaterial().getCommentsCount()-1,0));
+        comment.getMaterial().removeComment(comment);
         commentRepository.delete(comment);
     }
 
@@ -77,13 +77,13 @@ public class CommentServiceImpl implements ICommentService {
 
 
     private Material fetchMaterial(UUID materialId, HttpServletRequest request){
-        return materialRepository.findByMidAndCreatedBy(materialId, classRoomService.fetchEmailFromHeader(request))
+        return materialRepository.findMaterial(materialId, classRoomService.fetchEmailFromHeader(request))
                 .orElseThrow(()->new EntityNotFoundException("Material not found with id: "+materialId));
     }
 
     private Comment fetchComment(UUID cid, HttpServletRequest request){
         return  commentRepository
-                .findByCidAndCreatedBy(cid,classRoomService.fetchEmailFromHeader(request))
+                .findByCidAndUser(cid,classRoomService.fetchEmailFromHeader(request))
                 .orElseThrow(()->new EntityNotFoundException("no comment found with id:"+cid));
     }
 

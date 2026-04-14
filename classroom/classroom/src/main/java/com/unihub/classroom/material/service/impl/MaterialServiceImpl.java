@@ -157,6 +157,16 @@ public class MaterialServiceImpl implements IMaterialService {
     }
 
 
+    @Override
+    @Transactional
+    public List<MaterialResponseDto> getAllAssignments(UUID id, HttpServletRequest request, int pageNum){
+        return materialRepository
+                .findAssignments(classRoomService.fetchEmailFromHeader(request), id,MaterialType.ASSIGNMENT,generatePageable(pageNum))
+                .stream()
+                .map(materialMapper::toDto).toList();
+    }
+
+
 
     private void uploadFiles(List<MultipartFile> materialFiles,ClassRoom classRoom,Material material) throws IOException {
         for (MultipartFile file : materialFiles) {
