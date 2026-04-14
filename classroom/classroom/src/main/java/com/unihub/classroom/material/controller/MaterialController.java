@@ -77,10 +77,7 @@ public class MaterialController {
 
     }
 
-    @GetMapping("/get-material/{id}")
-    public ResponseEntity<MaterialResponseDto> getMaterial(@PathVariable UUID id, HttpServletRequest request){
-        return ResponseEntity.ok(materialService.getMaterial(id,request));
-    }
+
 
     @GetMapping("/get-all-materials/{id}")
     public ResponseEntity<MaterialResponsesDto> getAllMaterials(@PathVariable UUID id, HttpServletRequest request, @RequestParam(value = "page_num",defaultValue = "1")int pageNum){
