@@ -17,6 +17,9 @@ public class AssignmentResponseDto {
 
     Integer points;
 
+    @JsonProperty("due_date")
+    private LocalDateTime dueDate;
+
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
 

@@ -16,6 +16,7 @@ public class AssignmentMapper {
     public Assignment toEntity(CreateAssignmentRequest request) {
         return Assignment.builder()
                 .points(request.getPoints())
+                .dueDate(request.getDueDate())
                 .build();
     }
 
@@ -23,6 +24,7 @@ public class AssignmentMapper {
         AssignmentResponseDto assignmentResponseDto = new AssignmentResponseDto();
         assignmentResponseDto.setMaterial(materialMapper.toDto(assignment.getMaterial()));
         assignmentResponseDto.setPoints(assignment.getPoints());
+        assignmentResponseDto.setDueDate(assignment.getDueDate());
         return assignmentResponseDto;
     }
 }

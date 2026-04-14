@@ -27,7 +27,7 @@ public class Material extends BaseEntity {
     @Column(nullable = false)
     private String headLine;
 
-    @Column(nullable = false)
+    @Column(nullable = false,columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)

@@ -5,6 +5,7 @@ import com.unihub.classroom.material.model.Material;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -22,6 +23,9 @@ public class Assignment extends BaseEntity {
     @OneToOne(optional = false)
     @JoinColumn(name = "material_id")
     private Material material;
+
+    @Column(nullable = false)
+    private LocalDateTime dueDate;
 
     private Integer points;
 }
