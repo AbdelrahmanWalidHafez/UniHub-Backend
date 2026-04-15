@@ -75,6 +75,8 @@ public class SecurityConfig {
             exchange.pathMatchers("/unihub/classroom/api/v1/material/instructor/**").hasRole("INSTRUCTOR");
             exchange.pathMatchers("/unihub/classroom/api/v1/material/get-material/**").hasAnyRole("INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/classroom/api/v1/comment/**").hasAnyRole("INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/classroom/api/v1/submissions/student/**").hasRole("STUDENT");
+            exchange.pathMatchers("/unihub/classroom/api/v1/submissions/instructor/**").hasRole("INSTRUCTOR");
             exchange.anyExchange().authenticated();
         });
         http.csrf(ServerHttpSecurity.CsrfSpec::disable)
