@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class CreateAssignmentRequest {
 
     @JsonProperty("material")
+    @NotNull(message = "Material cannot be blank")
     private MaterialDto materialDto;
 
     @NotNull(message = "Point cannot be blank")

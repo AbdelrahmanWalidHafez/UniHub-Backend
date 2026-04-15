@@ -150,11 +150,11 @@ public class MaterialServiceImpl implements IMaterialService {
 
     @Override
     @Transactional
-    public List<MaterialResponseDto> getAllAssignments(UUID id, HttpServletRequest request, int pageNum){
+    public List<AssignmentResponseDto> getAllAssignments(UUID id, HttpServletRequest request, int pageNum){
         return materialRepository
                 .findAssignments(httpHeadersUtils.fetchEmailFromHeader(request), id,MaterialType.ASSIGNMENT,generatePageable(pageNum))
                 .stream()
-                .map(materialMapper::toDto).toList();
+                .map(material -> assignmentMapper.toDto(material.getAssignment())).toList();
     }
 
     private ClassRoom fetchClassRoom(HttpServletRequest request,UUID id){

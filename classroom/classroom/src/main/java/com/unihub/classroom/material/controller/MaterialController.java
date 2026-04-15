@@ -2,6 +2,7 @@ package com.unihub.classroom.material.controller;
 
 import com.unihub.classroom.assginement.dto.request.CreateAssignmentRequest;
 import com.unihub.classroom.assginement.dto.response.AssignmentResponseDto;
+import com.unihub.classroom.assginement.dto.response.AssignmentResponsesDto;
 import com.unihub.classroom.material.dto.request.MaterialDto;
 import com.unihub.classroom.material.dto.response.MaterialResponseDto;
 import com.unihub.classroom.material.dto.response.MaterialResponsesDto;
@@ -89,8 +90,8 @@ public class MaterialController {
     }
 
     @GetMapping("/get-all-assignments/{id}")
-    public ResponseEntity<MaterialResponsesDto> getAllAssignments(@PathVariable UUID id, HttpServletRequest request, @RequestParam(value = "page_num",defaultValue = "1")int pageNum){
-        return ResponseEntity.ok(MaterialResponsesDto.builder().materials(materialService.getAllAssignments(id,request,pageNum)).build());
+    public ResponseEntity<AssignmentResponsesDto> getAllAssignments(@PathVariable UUID id, HttpServletRequest request, @RequestParam(value = "page_num",defaultValue = "1")int pageNum){
+        return ResponseEntity.ok(AssignmentResponsesDto.builder().assignments(materialService.getAllAssignments(id,request,pageNum)).build());
     }
 
 }
