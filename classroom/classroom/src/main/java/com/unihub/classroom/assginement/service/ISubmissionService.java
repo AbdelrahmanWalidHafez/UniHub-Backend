@@ -22,4 +22,6 @@ public interface ISubmissionService {
     SubmissionResponseDto getSubmission(UUID sid, HttpServletRequest request);
 
     List<SubmissionResponseDto> getSubmissions(UUID aid, HttpServletRequest request, int pageNum);
+
+    //TODO ADD INSTRUCTOR ASSIGN POINTS
 }

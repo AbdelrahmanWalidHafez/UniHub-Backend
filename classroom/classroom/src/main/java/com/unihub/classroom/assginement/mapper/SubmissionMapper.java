@@ -10,6 +10,8 @@ public class SubmissionMapper {
     public SubmissionResponseDto toDto(Submission submission){
         SubmissionResponseDto submissionResponseDto = new SubmissionResponseDto();
         submissionResponseDto.setSid(submission.getSid());
+        submissionResponseDto.setEdited(submission.isEdited());
+        submissionResponseDto.setGrade(submission.getGrade());
         submissionResponseDto.setSubmissionUrls(submission.getSubmissionUrls());
         submissionResponseDto.setCreatedAt(submission.getCreatedAt());
         submissionResponseDto.setUpdatedAt(submission.getUpdatedAt());

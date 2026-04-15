@@ -27,8 +27,10 @@ public class Submission extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID sid;
 
+    @Column(nullable = false)
     private boolean edited;
 
+    @Column(nullable = false)
     private Integer grade;
 
     @ElementCollection

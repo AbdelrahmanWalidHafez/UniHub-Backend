@@ -17,6 +17,10 @@ public class SubmissionResponseDto {
 
     private UUID sid;
 
+    private boolean edited;
+
+    private Integer grade;
+
     @JsonProperty("submission_urls")
     private List<String> submissionUrls;
 

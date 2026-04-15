@@ -1,11 +1,9 @@
 package com.unihub.classroom.utils;
 
-import com.unihub.classroom.assginement.model.Submission;
 import com.unihub.classroom.clazz.model.ClassRoom;
 import com.unihub.classroom.material.client.S3FeignClient;
 import com.unihub.classroom.material.dto.request.DeleteFileRequest;
 import com.unihub.classroom.material.dto.request.UploadFileRequest;
-import com.unihub.classroom.material.model.Material;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -28,6 +26,23 @@ public class FileUtils {
 
     private final S3FeignClient s3FeignClient;
 
+    /**
+     * Uploads a list of files to external storage and attaches their generated URLs to the given target entity.
+     * <p>
+     * For each file, a unique storage key is generated based on the file and classroom context. The file is then
+     * uploaded using the configured storage mechanism, and the resulting public URL is added to the target entity's
+     * list of file URLs via the provided URL getter.
+     *
+     * @param files        the list of files to upload; must not be null
+     * @param classRoom    the classroom context used to generate unique file storage keys
+     * @param target       the target entity that will receive the uploaded file URLs (e.g., Material or Submission)
+     * @param urlGetter    a function that returns the mutable list of file URLs from the target entity
+     * @param <T>          the type of the target entity
+     * @throws IOException  if an I/O error occurs during file processing or upload
+     *
+     * @see com.unihub.classroom.material.model.Material
+     * @see com.unihub.classroom.assginement.model.Submission
+     */
     public <T> void uploadFiles(List<MultipartFile> files, ClassRoom classRoom, T target, Function<T, List<String>> urlGetter) throws IOException {
         List<String> urls = urlGetter.apply(target);
         for (MultipartFile file : files) {

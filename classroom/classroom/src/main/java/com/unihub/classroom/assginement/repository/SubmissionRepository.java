@@ -24,6 +24,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
     AND (
         c.createdBy = :email
         OR s.createdBy = :email
+        OR a.createdBy= :email
     )
 """)
     Optional<Submission> findSubmission(
