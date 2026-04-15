@@ -5,6 +5,7 @@ import com.unihub.classroom.material.dto.response.MaterialResponseDto;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -12,6 +13,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AssignmentResponseDto {
+
+    @JsonProperty("assignment_id")
+    private UUID aid;
 
     MaterialResponseDto material;
 

@@ -17,11 +17,11 @@ public interface ISubmissionService {
 
     void deleteSubmission(UUID sid, HttpServletRequest request);
 
-    SubmissionResponseDto getSubmission(UUID sid, UUID aid, HttpServletRequest request);
-
-    SubmissionResponseDto getSubmission(UUID sid, HttpServletRequest request);
+    SubmissionResponseDto getStudentSubmission(UUID aid, HttpServletRequest request);
 
     List<SubmissionResponseDto> getSubmissions(UUID aid, HttpServletRequest request, int pageNum);
+
+    SubmissionResponseDto getInstructorSubmission(UUID sid, HttpServletRequest request);
 
     //TODO ADD INSTRUCTOR ASSIGN POINTS
 }

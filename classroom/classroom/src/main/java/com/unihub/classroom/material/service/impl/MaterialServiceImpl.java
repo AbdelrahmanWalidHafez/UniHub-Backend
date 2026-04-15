@@ -3,6 +3,7 @@ package com.unihub.classroom.material.service.impl;
 import com.unihub.classroom.assginement.dto.request.CreateAssignmentRequest;
 import com.unihub.classroom.assginement.dto.response.AssignmentResponseDto;
 import com.unihub.classroom.assginement.mapper.AssignmentMapper;
+import com.unihub.classroom.assginement.model.Assignment;
 import com.unihub.classroom.assginement.service.IAssignmentService;
 import com.unihub.classroom.clazz.model.ClassRoom;
 import com.unihub.classroom.clazz.repository.ClassRoomRepository;
@@ -128,7 +129,7 @@ public class MaterialServiceImpl implements IMaterialService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public MaterialResponseDto getMaterial(UUID mid, HttpServletRequest request) {
         return materialMapper.toDto(
                 materialRepository
@@ -139,7 +140,7 @@ public class MaterialServiceImpl implements IMaterialService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<MaterialResponseDto> getAllMaterials(UUID id, HttpServletRequest request, int pageNum){
         return materialRepository
                 .findMaterials(httpHeadersUtils.fetchEmailFromHeader(request), id,generatePageable(pageNum))
@@ -149,12 +150,18 @@ public class MaterialServiceImpl implements IMaterialService {
 
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<AssignmentResponseDto> getAllAssignments(UUID id, HttpServletRequest request, int pageNum){
         return materialRepository
                 .findAssignments(httpHeadersUtils.fetchEmailFromHeader(request), id,MaterialType.ASSIGNMENT,generatePageable(pageNum))
                 .stream()
                 .map(material -> assignmentMapper.toDto(material.getAssignment())).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AssignmentResponseDto getAssignment(UUID id, HttpServletRequest request) {
+        return assignmentMapper.toDto(fetchAssignment(id,request));
     }
 
     private ClassRoom fetchClassRoom(HttpServletRequest request,UUID id){
@@ -181,5 +188,9 @@ public class MaterialServiceImpl implements IMaterialService {
 
     private Pageable generatePageable(int pageNum){
         return PageRequest.of(pageNum-1,5, Sort.by("createdAt").descending());
+    }
+    private Assignment fetchAssignment(UUID id,HttpServletRequest request){
+        return materialRepository.findAssignmentByMaterial(id, httpHeadersUtils.fetchEmailFromHeader(request))
+                .orElseThrow(()->new EntityNotFoundException("Assignment not found with id: "+id));
     }
 }

@@ -19,6 +19,13 @@ import java.util.UUID;
                 @Index(name = "idx_submission_assignment_id", columnList = "assignment_id"),
                 @Index(name = "idx_submission_created_by", columnList = "created_by"),
                 @Index(name = "idx_submission_assignment_created_by", columnList = "assignment_id, created_by")
+
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_submission_assignment_user",
+                        columnNames = {"assignment_id", "created_by"}
+                )
         }
 )
 public class Submission extends BaseEntity {
@@ -32,6 +39,9 @@ public class Submission extends BaseEntity {
 
     @Column(nullable = false)
     private Integer grade;
+
+    @Version
+    private Long version;
 
     @ElementCollection
     @Column(name = "url")

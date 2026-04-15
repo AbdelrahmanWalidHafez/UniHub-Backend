@@ -2,7 +2,6 @@ package com.unihub.classroom.material.service;
 
 import com.unihub.classroom.assginement.dto.request.CreateAssignmentRequest;
 import com.unihub.classroom.assginement.dto.response.AssignmentResponseDto;
-import com.unihub.classroom.assginement.dto.response.AssignmentResponsesDto;
 import com.unihub.classroom.material.dto.request.MaterialDto;
 import com.unihub.classroom.material.dto.response.MaterialResponseDto;
 import com.unihub.classroom.material.model.Material;
@@ -34,5 +33,7 @@ public interface IMaterialService {
     List<MaterialResponseDto> getAllMaterials(UUID id, HttpServletRequest request, int pageNum);
 
     List<AssignmentResponseDto> getAllAssignments(UUID id, HttpServletRequest request, int pageNum);
+
+    AssignmentResponseDto getAssignment(UUID id, HttpServletRequest request);
 }
 

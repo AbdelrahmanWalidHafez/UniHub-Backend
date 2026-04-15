@@ -94,4 +94,9 @@ public class MaterialController {
         return ResponseEntity.ok(AssignmentResponsesDto.builder().assignments(materialService.getAllAssignments(id,request,pageNum)).build());
     }
 
+    @GetMapping("/get-assignment/{id}")
+    public ResponseEntity<AssignmentResponseDto> getAssignments(@PathVariable UUID id, HttpServletRequest request){
+        return ResponseEntity.ok(materialService.getAssignment(id,request));
+    }
+
 }

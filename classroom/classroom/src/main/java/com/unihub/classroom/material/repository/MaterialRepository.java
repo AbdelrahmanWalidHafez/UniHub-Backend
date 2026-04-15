@@ -1,5 +1,6 @@
 package com.unihub.classroom.material.repository;
 
+import com.unihub.classroom.assginement.model.Assignment;
 import com.unihub.classroom.material.model.Material;
 import com.unihub.classroom.material.model.enums.MaterialType;
 import org.springframework.data.domain.Page;
@@ -77,5 +78,27 @@ public interface MaterialRepository extends JpaRepository<Material, UUID> {
             @Param("class_id") UUID classId,
             @Param("materialType") MaterialType materialType,
             Pageable pageable
+    );
+
+    @Query("""
+SELECT a
+FROM Material m
+JOIN m.assignment a
+JOIN m.classroom c
+WHERE m.mid = :materialId
+AND a IS NOT NULL
+AND (
+    c.createdBy = :email
+    OR EXISTS (
+        SELECT 1
+        FROM Member mem
+        WHERE mem.classroom.id = c.id
+        AND mem.email = :email
+    )
+)
+""")
+    Optional<Assignment> findAssignmentByMaterial(
+            UUID materialId,
+            String email
     );
 }

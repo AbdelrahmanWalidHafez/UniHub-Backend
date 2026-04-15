@@ -36,6 +36,8 @@ public class Assignment extends BaseEntity {
 
     private Integer points;
 
+    @Version
+    private Long version;
 
     @Builder.Default
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)

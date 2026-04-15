@@ -22,6 +22,7 @@ public class AssignmentMapper {
 
     public AssignmentResponseDto toDto(Assignment assignment){
         AssignmentResponseDto assignmentResponseDto = new AssignmentResponseDto();
+        assignmentResponseDto.setAid(assignment.getId());
         assignmentResponseDto.setMaterial(materialMapper.toDto(assignment.getMaterial()));
         assignmentResponseDto.setPoints(assignment.getPoints());
         assignmentResponseDto.setDueDate(assignment.getDueDate());

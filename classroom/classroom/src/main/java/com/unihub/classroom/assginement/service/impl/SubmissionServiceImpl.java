@@ -43,15 +43,13 @@ public class SubmissionServiceImpl implements ISubmissionService {
     @Transactional
     public SubmissionResponseDto submitAssignment(UUID assignmentID, HttpServletRequest request, List<MultipartFile> submissionFiles) throws IOException {
         Assignment assignment=fetchAssignment(assignmentID,request);
-        if (assignment.getDueDate().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Assignment deadline has passed");
-        }
+        checkDueDate(assignment);
         Submission submission=new Submission();
         submission.setEdited(false);
         submission.setGrade(-1);
         assignment.addSubmission(submission);
         if(submissionFiles!=null&&!submissionFiles.isEmpty()){
-            //TODO UPLOAD THE FILES IN VECTOR DB AT AI MS
+            //TODO UPLOAD THE FILES IN VECTOR DB AT AI MS;
             fileUtils.uploadFiles(submissionFiles,assignment.getMaterial().getClassroom(), submission, Submission::getSubmissionUrls);
         }
         return submissionMapper.toDto(submissionRepository.save(submission));
@@ -60,9 +58,8 @@ public class SubmissionServiceImpl implements ISubmissionService {
     @Override
     @Transactional
     public SubmissionResponseDto editSubmission(UUID sid, List<MultipartFile> files, List<String> toDeleteFiles, HttpServletRequest request) throws IOException {
-        Submission submission=submissionRepository
-                .findBySidAndCreatedBy(sid, httpHeadersUtils.fetchEmailFromHeader(request))
-                .orElseThrow(()->new EntityNotFoundException("Submission not found with id: "+sid));
+        Submission submission=fetchStudentSubmission(sid,request);
+         checkDueDate(submission.getAssignment());
         submission.setEdited(true);
         if(files!=null&&!files.isEmpty()){
             fileUtils.uploadFiles(files,submission.getAssignment().getMaterial().getClassroom(), submission, Submission::getSubmissionUrls);
@@ -77,8 +74,9 @@ public class SubmissionServiceImpl implements ISubmissionService {
     @Override
     @Transactional
     public void deleteSubmission(UUID sid, HttpServletRequest request) {
-        Submission submission=fetchSubmission(request,sid);
+        Submission submission=fetchForDeletion(sid,request);
         Assignment assignment=submission.getAssignment();
+        checkDueDate(assignment);
         if (submission.getSubmissionUrls() != null) {
             submission.getSubmissionUrls().forEach(fileUtils::deleteFile);
         }
@@ -87,18 +85,13 @@ public class SubmissionServiceImpl implements ISubmissionService {
     }
 
     @Override
-    public SubmissionResponseDto getSubmission(UUID sid, UUID aid, HttpServletRequest request){
-        return submissionMapper.toDto(fetchSubmission(sid,aid,request));
+    @Transactional(readOnly = true)
+    public SubmissionResponseDto getStudentSubmission( UUID aid, HttpServletRequest request){
+        return submissionMapper.toDto(fetchStudentSubmissionByAssignment(aid,request));
     }
 
     @Override
-    @Transactional
-    public SubmissionResponseDto getSubmission(UUID sid, HttpServletRequest request) {
-        return submissionMapper.toDto(fetchSubmission(request,sid));
-    }
-
-    @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<SubmissionResponseDto> getSubmissions(UUID aid, HttpServletRequest request, int pageNum) {
         return submissionRepository.findAllByAssignment(aid, httpHeadersUtils.fetchEmailFromHeader(request),generatePageable(pageNum))
                 .stream()
@@ -106,23 +99,49 @@ public class SubmissionServiceImpl implements ISubmissionService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public SubmissionResponseDto getInstructorSubmission(UUID sid, HttpServletRequest request) {
+        return submissionMapper.toDto(fetchInstructorSubmission(sid,request));
+    }
+
+
+
     private Assignment fetchAssignment(UUID assignmentID, HttpServletRequest request){
         return assignmentRepository.findAssignment(assignmentID, httpHeadersUtils.fetchEmailFromHeader(request))
                 .orElseThrow(()->new EntityNotFoundException("Assignment not found with id: "+assignmentID));
     }
 
-    private Submission fetchSubmission(UUID sid,UUID aid, HttpServletRequest request){
-        return submissionRepository.findBySidAndCreatedByAndAssignment_Id(sid, httpHeadersUtils.fetchEmailFromHeader(request),aid)
+    private Submission fetchStudentSubmission(UUID sid,HttpServletRequest request){
+          return submissionRepository.findBySidAndCreatedBy(sid, httpHeadersUtils.fetchEmailFromHeader(request))
                 .orElseThrow(()->new EntityNotFoundException("Submission not found with id: "+sid));
     }
 
-    private Submission fetchSubmission(HttpServletRequest request, UUID sid){
-        return submissionRepository.findSubmission(sid, httpHeadersUtils.fetchEmailFromHeader(request))
+    private Submission fetchForDeletion(UUID sid,HttpServletRequest request){
+        return submissionRepository.findByIdForDeletion(sid, httpHeadersUtils.fetchEmailFromHeader(request))
                 .orElseThrow(()->new EntityNotFoundException("Submission not found with id: "+sid));
     }
+
+    private Submission fetchStudentSubmissionByAssignment(UUID aid, HttpServletRequest request){
+        return submissionRepository.findByCreatedByAndAssignment_Id(httpHeadersUtils.fetchEmailFromHeader(request),aid)
+                .orElseThrow(()->new EntityNotFoundException("assignment not found with id: "+aid));
+    }
+
+    private Submission fetchInstructorSubmission(UUID sid, HttpServletRequest request){
+        return submissionRepository
+                .findSubmission(sid, httpHeadersUtils.fetchEmailFromHeader(request))
+                .orElseThrow(()->new EntityNotFoundException("Submission not found with id: "+sid));
+    }
+
 
     private Pageable generatePageable(int pageNum){
         return PageRequest.of(pageNum-1,5, Sort.by("createdAt").descending());
+    }
+
+    private void checkDueDate(Assignment assignment){
+        if (assignment.getDueDate().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Assignment deadline has passed");
+        }
     }
 
 }

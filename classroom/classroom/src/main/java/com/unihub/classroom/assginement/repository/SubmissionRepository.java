@@ -1,50 +1,63 @@
 package com.unihub.classroom.assginement.repository;
 
 import com.unihub.classroom.assginement.model.Submission;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
 
+    @EntityGraph(attributePaths = {"submissionUrls"})
     Optional<Submission> findBySidAndCreatedBy(UUID sid,String email);
 
+    @EntityGraph(attributePaths = {"submissionUrls"})
+    Optional<Submission> findByCreatedByAndAssignment_Id(String email,UUID assignmentId);
+
+
+    @EntityGraph(attributePaths = {"submissionUrls"})
+    @Query("SELECT s FROM Submission s WHERE s.sid = :sid AND s.createdBy = :email")
+    Optional<Submission> findByIdForDeletion(@Param("sid") UUID sid, @Param("email") String email);
+
     @Query("""
-    SELECT s
+    SELECT DISTINCT s
     FROM Submission s
-    JOIN s.assignment a
-    JOIN a.material m
-    JOIN m.classroom c
-    WHERE s.sid = :submissionId
+    JOIN FETCH s.assignment a
+    JOIN FETCH a.material m
+    JOIN FETCH m.classroom c
+    LEFT JOIN FETCH s.submissionUrls
+    WHERE a.id = :assignmentId
     AND (
         c.createdBy = :email
-        OR s.createdBy = :email
-        OR a.createdBy= :email
+        OR a.createdBy = :email
+        OR m.createdBy = :email
     )
 """)
-    Optional<Submission> findSubmission(
-            @Param("submissionId") UUID submissionId,
-            @Param("email") String email
+    List<Submission> findAllByAssignment(
+            UUID assignmentId,
+            String email,
+            Pageable pageable
     );
 
     @Query("""
     SELECT s
     FROM Submission s
     JOIN FETCH s.assignment a
-    JOIN FETCH a.material m
-    JOIN FETCH m.classroom c
-    WHERE a.id = :assignmentId
-    AND c.createdBy = :email
+    WHERE s.sid = :sid
+    AND (
+        a.createdBy = :email
+        OR a.material.createdBy = :email
+        OR a.material.classroom.createdBy = :email
+    )
 """)
-    Page<Submission> findAllByAssignment(
-            @Param("assignmentId") UUID assignmentId,
-            @Param("email") String email, Pageable pageable
+    Optional<Submission> findSubmission(
+            @Param("sid") UUID sid,
+            @Param("email") String email
     );
 
-    Optional<Submission> findBySidAndCreatedByAndAssignment_Id(UUID sid,String email,UUID assignmentId);
 }

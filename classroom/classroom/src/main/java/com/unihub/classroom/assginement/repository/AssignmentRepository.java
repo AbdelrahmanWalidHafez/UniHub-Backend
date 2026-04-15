@@ -11,21 +11,17 @@ import java.util.UUID;
 public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
 
     @Query("""
-    SELECT a
+    SELECT DISTINCT a
     FROM Assignment a
-    JOIN a.material m
-    JOIN m.classroom c
+    JOIN FETCH a.material m
+    JOIN FETCH m.classroom c
+    LEFT JOIN c.members mem
     WHERE a.id = :assignmentId
     AND (
         c.createdBy = :email
-        OR EXISTS (
-            SELECT 1
-            FROM Member mem
-            WHERE mem.classroom = c
-            AND mem.email = :email
-        )
+        OR mem.email = :email
     )
-""")
+    """)
     Optional<Assignment> findAssignment(
             @Param("assignmentId") UUID assignmentId,
             @Param("email") String email

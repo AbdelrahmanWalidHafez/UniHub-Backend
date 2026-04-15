@@ -51,6 +51,9 @@ public class Material extends BaseEntity {
 
     private int CommentsCount;
 
+    @Version
+    private Long version;
+
     @Builder.Default
     @OneToMany(mappedBy = "material", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments=new ArrayList<>();

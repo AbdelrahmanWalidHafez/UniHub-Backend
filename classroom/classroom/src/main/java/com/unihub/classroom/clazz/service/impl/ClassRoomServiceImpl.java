@@ -91,7 +91,7 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<MemberDto> fetchMembers(UUID id, HttpServletRequest request, int pageNum){
 
         return memberRepository.findMembersByClassroomId(id,httpHeadersUtils.fetchEmailFromHeader(request),generatePageable(pageNum))
@@ -100,7 +100,7 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public OwnerDto fetchOwner(UUID id, HttpServletRequest request) {
         return OwnerDto.builder()
                 .email(

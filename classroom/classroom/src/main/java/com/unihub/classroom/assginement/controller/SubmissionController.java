@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Validated
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/submissions")
 public class SubmissionController {
@@ -45,9 +46,9 @@ public class SubmissionController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/student/get-submission/{id}")
-    public ResponseEntity<SubmissionResponseDto> getSubmission(@PathVariable UUID id, HttpServletRequest request){
-        return ResponseEntity.ok(submissionService.getSubmission(id, request));
+    @GetMapping("/student/get-submission/{aid}")
+    public ResponseEntity<SubmissionResponseDto> getStudentSubmission(@PathVariable UUID aid, HttpServletRequest request){
+        return ResponseEntity.ok(submissionService.getStudentSubmission(aid, request));
     }
 
     @GetMapping("/instructor/get-all-submissions/{id}")
@@ -55,9 +56,9 @@ public class SubmissionController {
         return ResponseEntity.ok(SubmissionResponsesDto.builder().submissions(submissionService.getSubmissions(id, request, pageNum)).build());
     }
 
-    @GetMapping("/instructor/{aid}/get-submission/{sid}")
-    public ResponseEntity<SubmissionResponseDto> getSubmission(@PathVariable UUID aid, @PathVariable UUID sid, HttpServletRequest request){
-        return ResponseEntity.ok(submissionService.getSubmission(sid, aid, request));
+    @GetMapping("/instructor/get-submission/{sid}")
+    public ResponseEntity<SubmissionResponseDto> getInstructorSubmission(@PathVariable UUID sid, HttpServletRequest request){
+        return ResponseEntity.ok(submissionService.getInstructorSubmission(sid, request));
     }
 
 }

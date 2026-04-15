@@ -63,7 +63,7 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public CommentsDto getComments(UUID mid, HttpServletRequest request, int pageNum){
         return CommentsDto.builder()
                 .comments(commentRepository
