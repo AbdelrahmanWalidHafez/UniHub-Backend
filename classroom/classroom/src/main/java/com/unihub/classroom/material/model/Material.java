@@ -13,11 +13,16 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Getter
 @Setter
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        indexes = {
+                @Index(name = "idx_material_classroom_id", columnList = "classroom_id")
+        }
+)
 public class Material extends BaseEntity {
 
     @Id

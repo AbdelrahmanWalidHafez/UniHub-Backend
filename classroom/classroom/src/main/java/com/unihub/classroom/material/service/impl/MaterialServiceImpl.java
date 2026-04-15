@@ -6,11 +6,7 @@ import com.unihub.classroom.assginement.mapper.AssignmentMapper;
 import com.unihub.classroom.assginement.service.IAssignmentService;
 import com.unihub.classroom.clazz.model.ClassRoom;
 import com.unihub.classroom.clazz.repository.ClassRoomRepository;
-import com.unihub.classroom.clazz.service.IClassRoomService;
-import com.unihub.classroom.material.client.S3FeignClient;
-import com.unihub.classroom.material.dto.request.DeleteFileRequest;
 import com.unihub.classroom.material.dto.request.MaterialDto;
-import com.unihub.classroom.material.dto.request.UploadFileRequest;
 import com.unihub.classroom.material.dto.response.MaterialResponseDto;
 import com.unihub.classroom.material.mapper.MaterialMapper;
 import com.unihub.classroom.material.model.Material;
@@ -20,12 +16,12 @@ import com.unihub.classroom.material.service.IMaterialService;
 import com.unihub.classroom.material.template.MaterialMaker;
 import com.unihub.classroom.material.template.concrete.AnnouncementMaker;
 import com.unihub.classroom.material.template.concrete.AssignmentMaker;
+import com.unihub.classroom.utils.FileUtils;
+import com.unihub.classroom.utils.HttpHeadersUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -42,24 +38,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MaterialServiceImpl implements IMaterialService {
 
-    private final StreamBridge streamBridge;
-
-    private final S3FeignClient s3FeignClient;
+    private final FileUtils fileUtils;
 
     private final MaterialMapper materialMapper;
 
     private final AssignmentMapper assignmentMapper;
 
-    private final IClassRoomService classRoomService;
+    private final HttpHeadersUtils httpHeadersUtils;
 
     private final IAssignmentService assignmentService;
 
     private final MaterialRepository materialRepository;
 
     private final ClassRoomRepository classRoomRepository;
-
-    @Value("${aws.bucket}")
-    private String bucketLink;
 
     @Override
     @Transactional
@@ -89,7 +80,8 @@ public class MaterialServiceImpl implements IMaterialService {
         ClassRoom classroom=fetchClassRoom(request,cid);
         classroom.addMaterial(material);
         if(materialFiles!=null&&!materialFiles.isEmpty()){
-            uploadFiles(materialFiles,classroom,material);
+            //TODO UPLOAD THE FILES IN VECTOR DB AT AI MS
+            fileUtils.uploadFiles(materialFiles,classroom, material, Material::getMaterialUrls);
         }
         return materialRepository.save(material);
     }
@@ -111,7 +103,7 @@ public class MaterialServiceImpl implements IMaterialService {
         Material material=fetchMaterial(mid,request);
         ClassRoom classRoom=material.getClassroom();
         if (material.getMaterialUrls() != null) {
-            material.getMaterialUrls().forEach(this::deleteFile);
+            material.getMaterialUrls().forEach(fileUtils::deleteFile);
         }
         classRoom.removeMaterial(material);
         materialRepository.delete(material);
@@ -126,22 +118,21 @@ public class MaterialServiceImpl implements IMaterialService {
     private MaterialResponseDto editMaterial(Material material,MaterialDto materialDto, List<MultipartFile> files, List<String> ToDeleteFiles) throws IOException {
         editMaterial(materialDto,material);
         if(files!=null&&!files.isEmpty()){
-            uploadFiles(files,material.getClassroom(),material);
+            fileUtils.uploadFiles(files,material.getClassroom(), material, Material::getMaterialUrls);
         }
         if(ToDeleteFiles!=null&&!ToDeleteFiles.isEmpty()){
-            ToDeleteFiles.forEach(this::deleteFile);
+            ToDeleteFiles.forEach(fileUtils::deleteFile);
             material.getMaterialUrls().removeAll(ToDeleteFiles);
         }
         return materialMapper.toDto(materialRepository.save(material));
     }
-
 
     @Override
     @Transactional
     public MaterialResponseDto getMaterial(UUID mid, HttpServletRequest request) {
         return materialMapper.toDto(
                 materialRepository
-                        .findMaterial(mid, classRoomService.fetchEmailFromHeader(request))
+                        .findMaterial(mid, httpHeadersUtils.fetchEmailFromHeader(request))
                         .orElseThrow(()->new EntityNotFoundException("Material not found with id: "+mid)
                         )
         );
@@ -151,7 +142,7 @@ public class MaterialServiceImpl implements IMaterialService {
     @Transactional
     public List<MaterialResponseDto> getAllMaterials(UUID id, HttpServletRequest request, int pageNum){
         return materialRepository
-                .findMaterials(classRoomService.fetchEmailFromHeader(request), id,generatePageable(pageNum))
+                .findMaterials(httpHeadersUtils.fetchEmailFromHeader(request), id,generatePageable(pageNum))
                 .stream()
                 .map(materialMapper::toDto).toList();
     }
@@ -161,58 +152,20 @@ public class MaterialServiceImpl implements IMaterialService {
     @Transactional
     public List<MaterialResponseDto> getAllAssignments(UUID id, HttpServletRequest request, int pageNum){
         return materialRepository
-                .findAssignments(classRoomService.fetchEmailFromHeader(request), id,MaterialType.ASSIGNMENT,generatePageable(pageNum))
+                .findAssignments(httpHeadersUtils.fetchEmailFromHeader(request), id,MaterialType.ASSIGNMENT,generatePageable(pageNum))
                 .stream()
                 .map(materialMapper::toDto).toList();
     }
 
-
-
-    private void uploadFiles(List<MultipartFile> materialFiles,ClassRoom classRoom,Material material) throws IOException {
-        for (MultipartFile file : materialFiles) {
-            String key=generateKey(file,classRoom);
-            material.getMaterialUrls().add(bucketLink+key);
-            UploadFileRequest uploadFileRequest= UploadFileRequest.builder()
-                    .fileContent(file.getBytes())
-                    .key(key)
-                    .contentType(file.getContentType())
-                    .build();
-            uploadFile(uploadFileRequest);
-        }
-    }
-
-
     private ClassRoom fetchClassRoom(HttpServletRequest request,UUID id){
         return classRoomRepository
-                .findByCreatedByAndId(classRoomService.fetchEmailFromHeader(request),id )
+                .findByCreatedByAndId(httpHeadersUtils.fetchEmailFromHeader(request),id )
                 .orElseThrow(()->new EntityNotFoundException("Classroom not found with id: "+id));
     }
 
-    private String generateKey(MultipartFile file,ClassRoom classRoom){
-        String extension = getExtension(file.getOriginalFilename());
-        return   classRoom.getCode() + "/" + file.getOriginalFilename() + "." + extension;
-    }
-
-    private String getExtension(String filename) {
-        if (filename == null || !filename.contains(".")) {
-            return "bin";
-        }
-        return filename.substring(filename.lastIndexOf('.') + 1);
-    }
-
-    private void uploadFile(UploadFileRequest uploadFileRequest){
-        s3FeignClient.uploadFile(uploadFileRequest);
-    }
-
     private Material fetchMaterial(UUID mid,HttpServletRequest request){
-        return materialRepository.findByMidAndCreatedBy(mid, classRoomService.fetchEmailFromHeader(request))
+        return materialRepository.findByMidAndCreatedBy(mid, httpHeadersUtils.fetchEmailFromHeader(request))
                 .orElseThrow(()->new EntityNotFoundException("Material not found with id: "+mid));
-    }
-
-    private void deleteFile(String key) {
-        if (key != null) {
-            streamBridge.send("deleteFile-out-0", DeleteFileRequest.builder().key(key.replace(bucketLink,"")).build());
-        }
     }
 
     private void editMaterial(MaterialDto materialDto,Material material){

@@ -12,6 +12,7 @@ import com.unihub.classroom.clazz.repository.ClassRoomRepository;
 import com.unihub.classroom.clazz.repository.MemberRepository;
 import com.unihub.classroom.clazz.service.IClassRoomService;
 import com.unihub.classroom.clazz.service.state.ClassRoomContext;
+import com.unihub.classroom.utils.HttpHeadersUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -37,14 +38,16 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
 
     private final ClassRoomRepository classRoomRepository;
 
+    private final HttpHeadersUtils httpHeadersUtils;
+
     @Override
     public ClassRoomResponse createClassRoom(CreateClassroomDto createClassroomDto, HttpServletRequest request) {
         ClassRoom classRoom = classRoomMapper.toEntity(createClassroomDto);
         classRoom.setImageNum(getImageNum());
         classRoom.setCode(generateCode());
         classRoom.setArchived(false);
-        classRoom.setUniversityId(fetchUidFromHeader(request));
-        classRoom.setCollegeId(fetchCidFromHeader(request));
+        classRoom.setUniversityId(httpHeadersUtils.fetchUidFromHeader(request));
+        classRoom.setCollegeId(httpHeadersUtils.fetchCidFromHeader(request));
         classRoomRepository.save(classRoom);
         return classRoomMapper.toDto(classRoom);
     }
@@ -61,7 +64,7 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
     @Override
     @Transactional
     public MemberDto joinClassRoom(String code, HttpServletRequest request) {
-        String email = fetchEmailFromHeader(request);
+        String email = httpHeadersUtils.fetchEmailFromHeader(request);
         ClassRoom classRoom = fetchClassRoom(code,request);
         if (isMemberExist(email,classRoom)||isOwner(email,classRoom)){
             throw new IllegalArgumentException("Member already exists");
@@ -76,10 +79,10 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
     @Transactional
     public void leaveClassRoom(UUID id, HttpServletRequest request) {
         ClassRoom classRoom = fetchClassRoom(id);
-        if (!isOwner(fetchEmailFromHeader(request), classRoom)) {
+        if (!isOwner(httpHeadersUtils.fetchEmailFromHeader(request), classRoom)) {
             Member member = classRoom.getMembers()
                     .stream()
-                    .filter(m -> m.getEmail().equals(fetchEmailFromHeader(request))).findFirst()
+                    .filter(m -> m.getEmail().equals(httpHeadersUtils.fetchEmailFromHeader(request))).findFirst()
                     .orElseThrow(() -> new EntityNotFoundException("Member not found"));
             classRoom.removeMember(member);
         } else {
@@ -91,7 +94,7 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
     @Transactional
     public List<MemberDto> fetchMembers(UUID id, HttpServletRequest request, int pageNum){
 
-        return memberRepository.findMembersByClassroomId(id,fetchEmailFromHeader(request),generatePageable(pageNum))
+        return memberRepository.findMembersByClassroomId(id,httpHeadersUtils.fetchEmailFromHeader(request),generatePageable(pageNum))
                 .stream()
                 .map(memberMapper::toDto).toList();
     }
@@ -101,7 +104,7 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
     public OwnerDto fetchOwner(UUID id, HttpServletRequest request) {
         return OwnerDto.builder()
                 .email(
-                        classRoomRepository.findOwnerEmail(id,fetchEmailFromHeader(request))
+                        classRoomRepository.findOwnerEmail(id,httpHeadersUtils.fetchEmailFromHeader(request))
                         .orElseThrow(()->new EntityNotFoundException("Owner not found with id: "+id))
                 )
                 .build();
@@ -109,27 +112,27 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
 
     @Override
     public List<ClassRoomResponse> fetchEnrolledClassRooms(HttpServletRequest request) {
-        return memberRepository.findActiveClassRoomsByEmail(fetchEmailFromHeader(request)).stream().map(classRoomMapper::toDto).toList();
+        return memberRepository.findActiveClassRoomsByEmail(httpHeadersUtils.fetchEmailFromHeader(request)).stream().map(classRoomMapper::toDto).toList();
     }
 
     @Override
     public List<ClassRoomResponse> getArchivedClassRooms(HttpServletRequest request){
-        return memberRepository.findArchivedClassRoomsByEmail(fetchEmailFromHeader(request)).stream().map(classRoomMapper::toDto).toList();
+        return memberRepository.findArchivedClassRoomsByEmail(httpHeadersUtils.fetchEmailFromHeader(request)).stream().map(classRoomMapper::toDto).toList();
     }
 
     @Override
     public List<ClassRoomResponse> fetchArchivedClassRooms(HttpServletRequest request) {
-        return classRoomRepository.findByCreatedByAndArchived(fetchEmailFromHeader(request),true).stream().map(classRoomMapper::toDto).toList();
+        return classRoomRepository.findByCreatedByAndArchived(httpHeadersUtils.fetchEmailFromHeader(request),true).stream().map(classRoomMapper::toDto).toList();
     }
 
     @Override
     public List<ClassRoomResponse> fetchMyClassRooms(HttpServletRequest request){
-        return classRoomRepository.findByCreatedBy(fetchEmailFromHeader(request)).stream().map(classRoomMapper::toDto).toList();
+        return classRoomRepository.findByCreatedBy(httpHeadersUtils.fetchEmailFromHeader(request)).stream().map(classRoomMapper::toDto).toList();
     }
 
     @Override
-    public List<ClassRoomResponse> fetchActiveClassRooms(String email, HttpServletRequest request){
-        return classRoomRepository.findByCreatedByAndArchived(email,false).stream().map(classRoomMapper::toDto).toList();
+    public List<ClassRoomResponse> fetchActiveClassRooms(HttpServletRequest request){
+        return classRoomRepository.findByCreatedByAndArchived(httpHeadersUtils.fetchEmailFromHeader(request), false).stream().map(classRoomMapper::toDto).toList();
     }
 
 
@@ -147,29 +150,19 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
         return classRoomContext;
     }
 
-    private UUID fetchUidFromHeader(HttpServletRequest request){
-        return UUID.fromString(request.getHeader("X-User-University-Id"));
-    }
 
-    private UUID fetchCidFromHeader(HttpServletRequest request){
-        return UUID.fromString(request.getHeader("X-User-College-Id"));
-    }
-
-    public String fetchEmailFromHeader(HttpServletRequest request){
-        return request.getHeader("X-User-Email");
-    }
 
     private ClassRoom fetchClassRoom(UUID id,HttpServletRequest request){
         return classRoomRepository.findByIdAndCollegeIdAndUniversityIdAndCreatedBy(id
-                ,fetchCidFromHeader(request)
-                ,fetchUidFromHeader(request)
-                ,fetchEmailFromHeader(request)).orElseThrow(()->new EntityNotFoundException("Classroom not found with id: "+id));
+                ,httpHeadersUtils.fetchCidFromHeader(request)
+                ,httpHeadersUtils.fetchUidFromHeader(request)
+                ,httpHeadersUtils.fetchEmailFromHeader(request)).orElseThrow(()->new EntityNotFoundException("Classroom not found with id: "+id));
     }
 
     private ClassRoom fetchClassRoom(String code,HttpServletRequest request){
         return classRoomRepository.findByCodeAndCollegeIdAndUniversityId(code
-                ,fetchCidFromHeader(request)
-                ,fetchUidFromHeader(request)
+                ,httpHeadersUtils.fetchCidFromHeader(request)
+                ,httpHeadersUtils.fetchUidFromHeader(request)
         ).orElseThrow(()->new EntityNotFoundException("Classroom not found with code: "+code));
     }
 

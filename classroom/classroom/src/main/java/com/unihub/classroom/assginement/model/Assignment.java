@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -14,6 +16,11 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(
+        indexes = {
+                @Index(name = "idx_assignment_material_id", columnList = "material_id")
+        }
+)
 public class Assignment extends BaseEntity {
 
     @Id
@@ -28,4 +35,20 @@ public class Assignment extends BaseEntity {
     private LocalDateTime dueDate;
 
     private Integer points;
+
+
+    @Builder.Default
+    @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Submission> submissions=new ArrayList<>();
+
+
+    public void addSubmission(Submission submission) {
+        submissions.add(submission);
+        submission.setAssignment(this);
+    }
+
+    public void removeSubmission(Submission submission) {
+        submissions.remove(submission);
+        submission.setAssignment(null);
+    }
 }

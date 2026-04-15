@@ -31,7 +31,7 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "text")
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     private String mediaUrl;

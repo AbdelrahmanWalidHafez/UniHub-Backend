@@ -23,7 +23,7 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
             OR cmt.createdBy= :email
         )
     """)
-    Optional<Comment> findByCidAndUser(UUID cid,String email);
+    Optional<Comment> findByCidAndUser( @Param("cid") UUID cid,@Param("email") String email);
 
 
     @Query("""

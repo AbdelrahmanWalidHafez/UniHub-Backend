@@ -74,7 +74,7 @@ public class ClassRoomController {
 
     @GetMapping("/instructor/get-active-classes")
     public ResponseEntity<ClassRoomsDto> fetchActiveClasses(HttpServletRequest request){
-        return ResponseEntity.ok(ClassRoomsDto.builder().classRooms(classRoomService.fetchActiveClassRooms(classRoomService.fetchEmailFromHeader(request),request)).build());
+        return ResponseEntity.ok(ClassRoomsDto.builder().classRooms(classRoomService.fetchActiveClassRooms(request)).build());
     }
 
 }

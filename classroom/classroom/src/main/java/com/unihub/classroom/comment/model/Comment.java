@@ -14,6 +14,12 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        indexes = {
+                @Index(name = "idx_comment_material_id", columnList = "material_id"),
+                @Index(name = "idx_comment_created_by", columnList = "created_by"),
+        }
+)
 public class Comment extends BaseEntity {
 
     @Id

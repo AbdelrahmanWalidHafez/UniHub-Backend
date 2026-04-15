@@ -20,13 +20,9 @@ import java.util.UUID;
         indexes = {
 
                 @Index(
-                        name = "idx_classroom_tenant_id",
-                        columnList = "id, college_id, university_id"
-                ),
+                        name = "idx_classroom_tenant_id", columnList = "id, college_id, university_id"),
                 @Index(
-                        name = "idx_classroom_code",
-                        columnList = "code"
-                ),
+                        name = "idx_classroom_code", columnList = "code"),
         }
 )
 public class ClassRoom extends BaseEntity {

@@ -1,6 +1,5 @@
 package com.unihub.classroom.comment.service.impl;
 
-import com.unihub.classroom.clazz.service.IClassRoomService;
 import com.unihub.classroom.comment.dto.request.CreateCommentRequest;
 import com.unihub.classroom.comment.dto.response.CommentDto;
 import com.unihub.classroom.comment.dto.response.CommentsDto;
@@ -10,6 +9,7 @@ import com.unihub.classroom.comment.repository.CommentRepository;
 import com.unihub.classroom.comment.service.ICommentService;
 import com.unihub.classroom.material.model.Material;
 import com.unihub.classroom.material.repository.MaterialRepository;
+import com.unihub.classroom.utils.HttpHeadersUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class CommentServiceImpl implements ICommentService {
 
     private final CommentMapper commentMapper;
 
-    private final IClassRoomService classRoomService;
+    private final HttpHeadersUtils httpHeadersUtils;
 
     private final CommentRepository commentRepository;
 
@@ -67,7 +67,7 @@ public class CommentServiceImpl implements ICommentService {
     public CommentsDto getComments(UUID mid, HttpServletRequest request, int pageNum){
         return CommentsDto.builder()
                 .comments(commentRepository
-                        .findCommentsByMaterial(mid,classRoomService.fetchEmailFromHeader(request),generatePageable(pageNum))
+                        .findCommentsByMaterial(mid,httpHeadersUtils.fetchEmailFromHeader(request),generatePageable(pageNum))
                         .stream()
                         .map(commentMapper::toDto)
                         .toList()
@@ -77,13 +77,13 @@ public class CommentServiceImpl implements ICommentService {
 
 
     private Material fetchMaterial(UUID materialId, HttpServletRequest request){
-        return materialRepository.findMaterial(materialId, classRoomService.fetchEmailFromHeader(request))
+        return materialRepository.findMaterial(materialId, httpHeadersUtils.fetchEmailFromHeader(request))
                 .orElseThrow(()->new EntityNotFoundException("Material not found with id: "+materialId));
     }
 
     private Comment fetchComment(UUID cid, HttpServletRequest request){
         return  commentRepository
-                .findByCidAndUser(cid,classRoomService.fetchEmailFromHeader(request))
+                .findByCidAndUser(cid,httpHeadersUtils.fetchEmailFromHeader(request))
                 .orElseThrow(()->new EntityNotFoundException("no comment found with id:"+cid));
     }
 
