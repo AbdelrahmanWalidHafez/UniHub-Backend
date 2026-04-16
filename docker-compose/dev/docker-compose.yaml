@@ -34,7 +34,7 @@ services:
       - unihub
 
   config-server:
-    image: unihub/config:s4
+    image: unihub/config:s6
     container_name: config-server
     ports:
       - "8080:8080"
@@ -50,7 +50,7 @@ services:
       - unihub
 
   eureka-server:
-    image: unihub/eureka:s4
+    image: unihub/eureka:s6
     container_name: eureka-server
     depends_on:
       config-server:
@@ -67,7 +67,7 @@ services:
       - unihub
 
   gateway-server:
-    image: unihub/gateway:s4
+    image: unihub/gateway:s6
     container_name: gateway-server
     ports:
       - "8082:8082"
@@ -215,7 +215,7 @@ services:
       - unihub
 
   auth-server:
-    image: unihub/auth:s4
+    image: unihub/auth:s6
     container_name: auth-server
     ports:
       - "8083:8083"
@@ -238,7 +238,7 @@ services:
       - unihub
 
   subscription-server:
-    image: unihub/subscription:s4
+    image: unihub/subscription:s6
     container_name: subscription-server
     depends_on:
       eureka-server:
@@ -260,7 +260,7 @@ services:
       - unihub
 
   university-server:
-    image: unihub/universitymanagement:s4
+    image: unihub/universitymanagement:s6
     container_name: university-server
     depends_on:
       eureka-server:
@@ -282,7 +282,7 @@ services:
       - unihub
 
   s3-server:
-    image: unihub/s3:s4
+    image: unihub/s3:s6
     container_name: s3-server
     depends_on:
       eureka-server:
@@ -301,7 +301,7 @@ services:
     networks:
       - unihub
   mail-server:
-    image: unihub/mail:s4 
+    image: unihub/mail:s6 
     container_name: mail-server
     depends_on:
       eureka-server:
@@ -320,7 +320,7 @@ services:
     networks:
       - unihub
   usage-server:
-    image: unihub/usage:s4  
+    image: unihub/usage:s6  
     container_name: usage-server
     depends_on:
       eureka-server:
@@ -338,7 +338,7 @@ services:
       - unihub
 
   announcement-server:
-    image: unihub/announcement:s4
+    image: unihub/announcement:s6
     container_name: announcement-server
     depends_on:
      eureka-server:
@@ -360,7 +360,7 @@ services:
       - unihub
 
   ai-server:
-    image: unihub/ai:s5
+    image: unihub/ai:s6
     container_name: ai-server
     depends_on:
      eureka-server:
