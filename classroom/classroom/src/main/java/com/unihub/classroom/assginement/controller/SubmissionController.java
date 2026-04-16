@@ -1,9 +1,11 @@
 package com.unihub.classroom.assginement.controller;
 
+import com.unihub.classroom.assginement.dto.request.SetGradeRequest;
 import com.unihub.classroom.assginement.dto.response.SubmissionResponseDto;
 import com.unihub.classroom.assginement.dto.response.SubmissionResponsesDto;
 import com.unihub.classroom.assginement.service.ISubmissionService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -59,6 +61,11 @@ public class SubmissionController {
     @GetMapping("/instructor/get-submission/{sid}")
     public ResponseEntity<SubmissionResponseDto> getInstructorSubmission(@PathVariable UUID sid, HttpServletRequest request){
         return ResponseEntity.ok(submissionService.getInstructorSubmission(sid, request));
+    }
+
+    @PatchMapping("/instructor/set-grade/{sid}")
+    public ResponseEntity<SubmissionResponseDto> gradeSubmission(@PathVariable UUID sid, HttpServletRequest request, @RequestBody @Valid SetGradeRequest grade){
+        return ResponseEntity.ok(submissionService.gradeSubmission(sid, request, grade.getGrade()));
     }
 
 }

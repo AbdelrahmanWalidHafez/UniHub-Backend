@@ -2,6 +2,7 @@ package com.unihub.classroom.assginement.service;
 
 
 import com.unihub.classroom.assginement.dto.response.SubmissionResponseDto;
+import com.unihub.classroom.assginement.dto.response.SubmissionResponsesDto;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,5 +24,5 @@ public interface ISubmissionService {
 
     SubmissionResponseDto getInstructorSubmission(UUID sid, HttpServletRequest request);
 
-    //TODO ADD INSTRUCTOR ASSIGN POINTS
+    SubmissionResponseDto gradeSubmission(UUID sid, HttpServletRequest request,Integer grade);
 }

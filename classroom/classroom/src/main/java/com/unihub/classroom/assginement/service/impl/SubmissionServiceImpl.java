@@ -105,6 +105,15 @@ public class SubmissionServiceImpl implements ISubmissionService {
         return submissionMapper.toDto(fetchInstructorSubmission(sid,request));
     }
 
+    @Override
+    public SubmissionResponseDto gradeSubmission(UUID sid, HttpServletRequest request,Integer grade) {
+        Submission submission=fetchInstructorSubmission(sid,request);
+        if(submission.getAssignment().getPoints()<grade){
+            throw new IllegalArgumentException("Grade cannot be higher than the assignment points");
+        }
+        submission.setGrade(grade);
+        return submissionMapper.toDto(submissionRepository.save(submission));
+    }
 
 
     private Assignment fetchAssignment(UUID assignmentID, HttpServletRequest request){
