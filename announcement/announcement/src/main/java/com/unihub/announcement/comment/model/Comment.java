@@ -22,7 +22,7 @@ public class Comment extends BaseEntity {
     private UUID cid;
 
 
-    @Column(nullable = false)
+    @Column(nullable = false,columnDefinition = "TEXT")
     private String content;
 
     @Column(nullable = false)

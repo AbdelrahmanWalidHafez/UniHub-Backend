@@ -62,7 +62,7 @@ public class AuthController {
 
     @GetMapping("/user-info")
     public ResponseEntity<UserDto>getUserInfo(Authentication authentication) {
-        return ResponseEntity.ok(userDetailsService.getUserInfo(authentication));
+        return ResponseEntity.ok(userDetailsService.getUserInfo(authentication.getName()));
     }
 
 

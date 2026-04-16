@@ -128,7 +128,7 @@
 				<version>3.5.1</version>
 				<configuration>
 					<to>
-						<image>unihub/${project.artifactId}:s5</image>
+						<image>unihub/${project.artifactId}:s6</image>
 					</to>
 				</configuration>
 			</plugin>

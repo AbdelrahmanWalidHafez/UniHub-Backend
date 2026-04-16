@@ -42,8 +42,8 @@ public class ProjectUserDetailsService implements UserDetailsService {
         return userRepository.existsByEmail(email);
     }
 
-    public UserDto getUserInfo(Authentication authentication) {
-        return userMapper.toDto(fetchUser(authentication.getName()));
+    public UserDto getUserInfo(String email) {
+        return userMapper.toDto(fetchUser(email));
     }
 
     private User fetchUser(String email) {

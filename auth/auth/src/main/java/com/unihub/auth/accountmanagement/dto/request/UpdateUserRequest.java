@@ -45,6 +45,6 @@ public class UpdateUserRequest {
     private Gender gender;
 
     @JsonProperty("college_id")
-    @NotNull(message = "CID is required")
+
     private UUID cid;
 }
