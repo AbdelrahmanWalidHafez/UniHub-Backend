@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: ${APPLICATION_NAME}
+  profiles:
+    active: git
+  cloud:
+    config:
+      server:
+        git:
+          uri: ${GIT_URI}
+          default-label: main
+          timeout: 5
+          clone-on-start: true
+          force-pull: true
+          username: ${GITHUB_USERNAME}
+          password: ${GITHUB_PASSWORD}
+    bus:
+      enabled: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+encrypt:
+  key: ${ENCRYPT_KEY}
+
+server:
+  port: ${SERVER_PORT}
