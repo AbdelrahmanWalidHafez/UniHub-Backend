@@ -31,6 +31,10 @@ public class MaterialMetaData {
     @NotNull(message = "Classroom id must not be empty")
     private UUID classroomId;
 
+    @JsonProperty("material_id")
+    @NotNull(message = "Material id must not be empty")
+    private UUID materialId;
+
     @NotNull(message = "Class title is required")
     @Size(min = 2, max = 50, message = "Class title must be between 2 and 50 characters")
     @Pattern(

@@ -7,12 +7,14 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.filter.Filter;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -34,6 +36,17 @@ public class VectorStoreServiceImpl implements IVectorStoreService {
         }catch (Exception e){
             log.error("Error while loading document: {}",e.getMessage());
         }
+    }
+
+    @Override
+    public void deleteDoc(UUID materialId) {
+        Filter.Expression filter = new Filter.Expression(
+                Filter.ExpressionType.EQ,
+                new Filter.Key("materialId"),
+                new Filter.Value(materialId.toString())
+        );
+
+        vectorStore.delete(filter);
     }
 
     private List<Document> fetchDocs(Resource doc) {
