@@ -48,6 +48,4 @@ public class VectorStoreServiceImpl implements IVectorStoreService {
                 .split(docs);
     }
 
-
-
 }
