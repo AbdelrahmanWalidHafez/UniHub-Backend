@@ -11,6 +11,7 @@ spring:
         repository:
           jdbc:
             initialize-schema: always
+  vector
 api:
   key: ${API_KEY}
 logging:
