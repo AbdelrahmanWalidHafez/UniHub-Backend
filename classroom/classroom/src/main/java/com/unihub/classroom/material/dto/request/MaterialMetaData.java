@@ -29,4 +29,6 @@ public class MaterialMetaData {
 
     private UUID collegeId;
 
+    private UUID universityId;
+
 }

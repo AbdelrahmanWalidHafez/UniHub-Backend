@@ -1,5 +1,6 @@
 package com.unihub.classroom.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unihub.classroom.clazz.model.ClassRoom;
 import com.unihub.classroom.material.client.AiFeignClient;
 import com.unihub.classroom.material.client.S3FeignClient;
@@ -24,6 +25,8 @@ public class FileUtils {
 
     @Value("${aws.bucket}")
     private String bucketLink;
+
+    private final ObjectMapper objectMapper;
 
     private final StreamBridge streamBridge;
 
@@ -88,16 +91,18 @@ public class FileUtils {
     private void uploadFile(MultipartFile file, String key,ClassRoom classRoom,Material material) throws IOException {
         uploadFile(file, key);
         aiFeignClient.upload(file,
-                MaterialMetaData.builder()
-                        .classroomId(classRoom.getId())
-                        .classSubTitle(classRoom.getClassSubTitle())
-                        .classTitle(classRoom.getClassTitle())
-                        .collegeId(classRoom.getCollegeId())
-                        .materialId(material.getMid())
-                        .headLine(material.getHeadLine())
-                        .description(material.getDescription())
-                        .materialType(material.getMaterialType())
-                        .build());
+                objectMapper.writeValueAsString(
+                        MaterialMetaData.builder()
+                                .classroomId(classRoom.getId())
+                                .classSubTitle(classRoom.getClassSubTitle())
+                                .classTitle(classRoom.getClassTitle())
+                                .collegeId(classRoom.getCollegeId())
+                                .universityId(classRoom.getUniversityId())
+                                .materialId(material.getMid())
+                                .headLine(material.getHeadLine())
+                                .description(material.getDescription())
+                                .materialType(material.getMaterialType())
+                                .build()));
     }
     private void uploadFile(MultipartFile file, String key) throws IOException {
         s3FeignClient.uploadFile(UploadFileRequest.builder()

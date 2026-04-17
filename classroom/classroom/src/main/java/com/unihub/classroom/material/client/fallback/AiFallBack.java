@@ -8,17 +8,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.UUID;
+
 @Slf4j
 @Component
 public class AiFallBack implements AiFeignClient {
     @Override
-    public ResponseEntity<Void> upload(MultipartFile file, MaterialMetaData materialMetaData) {
+    public ResponseEntity<Void> upload(MultipartFile file, String materialMetaData) {
         log.error("Feign client fallback triggered: S3 service is unavailable. Request: {}", materialMetaData);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
     }
 
     @Override
-    public ResponseEntity<Void> delete(String id) {
+    public ResponseEntity<Void> delete(UUID id) {
         log.error("Feign client fallback triggered: S3 service is unavailable. Request: {}", id);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
     }

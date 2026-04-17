@@ -2,7 +2,6 @@ package com.unihub.classroom.material.client;
 
 
 import com.unihub.classroom.material.client.fallback.AiFallBack;
-import com.unihub.classroom.material.dto.request.MaterialMetaData;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +15,10 @@ import java.util.UUID;
 
 @FeignClient(name = "ai", fallback = AiFallBack.class)
 public interface AiFeignClient {
-    @PostMapping(value = "/ingest", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<Void> upload(@RequestPart("file") MultipartFile file,@RequestPart("metadata") MaterialMetaData materialMetaData);
 
-    @DeleteMapping("/delete/{id}")
+    @PostMapping(value = "/api/v1/material/ingest", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<Void> upload(@RequestPart("file") MultipartFile file,@RequestPart("metadata") String materialMetaData);
+
+    @DeleteMapping("/api/v1/material/delete/{id}")
     ResponseEntity<Void> delete(@PathVariable("id") UUID id);
 }

@@ -8,6 +8,7 @@ import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.filter.Filter;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class VectorStoreServiceImpl implements IVectorStoreService {
 
     @Async
     @Override
-    public void loadDoc(Resource doc, Map<String,Object> metaData) {
+    public void loadDoc(ByteArrayResource doc, Map<String,Object> metaData) {
         try {
             List<Document> docs = fetchDocs(doc);
             List<Document> textSplitterDocs = splitDocs(docs);
