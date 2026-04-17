@@ -61,7 +61,7 @@ public class SubmissionServiceImpl implements ISubmissionService {
          checkDueDate(submission.getAssignment());
         submission.setEdited(true);
         if(files!=null&&!files.isEmpty()){
-            fileUtils.uploadFiles(files,submission.getAssignment().getMaterial().getClassroom(), submission, Submission::getSubmissionUrls);
+            fileUtils.uploadFiles(files,submission.getAssignment().getMaterial().getClassroom(), submission, Submission::getSubmissionUrls,submission.getAssignment().getMaterial());
         }
         if(toDeleteFiles!=null&&!toDeleteFiles.isEmpty()){
             toDeleteFiles.forEach(fileUtils::deleteFile);
