@@ -7,6 +7,7 @@ import com.unihub.classroom.assginement.model.Assignment;
 import com.unihub.classroom.assginement.service.IAssignmentService;
 import com.unihub.classroom.clazz.model.ClassRoom;
 import com.unihub.classroom.clazz.repository.ClassRoomRepository;
+import com.unihub.classroom.material.client.AiFeignClient;
 import com.unihub.classroom.material.dto.request.MaterialDto;
 import com.unihub.classroom.material.dto.response.MaterialResponseDto;
 import com.unihub.classroom.material.mapper.MaterialMapper;
@@ -40,6 +41,8 @@ import java.util.UUID;
 public class MaterialServiceImpl implements IMaterialService {
 
     private final FileUtils fileUtils;
+
+    private final AiFeignClient aiFeignClient;
 
     private final MaterialMapper materialMapper;
 
@@ -108,6 +111,7 @@ public class MaterialServiceImpl implements IMaterialService {
             material.getMaterialUrls().forEach(fileUtils::deleteFile);
         }
         classRoom.removeMaterial(material);
+        aiFeignClient.delete(material.getMid());
         materialRepository.delete(material);
     }
 

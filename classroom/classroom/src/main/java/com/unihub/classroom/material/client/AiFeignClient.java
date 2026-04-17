@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.UUID;
+
 @FeignClient(name = "ai", fallback = AiFallBack.class)
 public interface AiFeignClient {
     @PostMapping(value = "/ingest", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<Void> upload(@RequestPart("file") MultipartFile file,@RequestPart("metadata") MaterialMetaData materialMetaData);
 
     @DeleteMapping("/delete/{id}")
-    ResponseEntity<Void> delete(@PathVariable("id") String id);
+    ResponseEntity<Void> delete(@PathVariable("id") UUID id);
 }
