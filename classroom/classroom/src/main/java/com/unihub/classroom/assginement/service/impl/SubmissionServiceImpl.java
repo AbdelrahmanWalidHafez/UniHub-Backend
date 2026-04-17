@@ -49,8 +49,7 @@ public class SubmissionServiceImpl implements ISubmissionService {
         submission.setGrade(-1);
         assignment.addSubmission(submission);
         if(submissionFiles!=null&&!submissionFiles.isEmpty()){
-            //TODO UPLOAD THE FILES IN VECTOR DB AT AI MS;
-            fileUtils.uploadFiles(submissionFiles,assignment.getMaterial().getClassroom(), submission, Submission::getSubmissionUrls);
+            fileUtils.uploadFiles(submissionFiles,assignment.getMaterial().getClassroom(), submission, Submission::getSubmissionUrls,assignment.getMaterial());
         }
         return submissionMapper.toDto(submissionRepository.save(submission));
     }

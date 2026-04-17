@@ -1,9 +1,12 @@
 package com.unihub.classroom.utils;
 
 import com.unihub.classroom.clazz.model.ClassRoom;
+import com.unihub.classroom.material.client.AiFeignClient;
 import com.unihub.classroom.material.client.S3FeignClient;
 import com.unihub.classroom.material.dto.request.DeleteFileRequest;
+import com.unihub.classroom.material.dto.request.MaterialMetaData;
 import com.unihub.classroom.material.dto.request.UploadFileRequest;
+import com.unihub.classroom.material.model.Material;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -23,6 +26,8 @@ public class FileUtils {
     private String bucketLink;
 
     private final StreamBridge streamBridge;
+
+    private final AiFeignClient aiFeignClient;
 
     private final S3FeignClient s3FeignClient;
 
@@ -48,17 +53,17 @@ public class FileUtils {
      * @see com.unihub.classroom.assginement.model.Submission
      * @see Function
      */
-    public <T> void uploadFiles(List<MultipartFile> files, ClassRoom classRoom, T target, Function<T, List<String>> urlGetter) throws IOException {
+    public <T> void uploadFiles(List<MultipartFile> files, ClassRoom classRoom, T target, Function<T, List<String>> urlGetter, Material material) throws IOException {
         List<String> urls = urlGetter.apply(target);
         for (MultipartFile file : files) {
             String key = generateKey(file, classRoom);
             urls.add(bucketLink + key);
-            UploadFileRequest request = UploadFileRequest.builder()
-                    .fileContent(file.getBytes())
-                    .key(key)
-                    .contentType(file.getContentType())
-                    .build();
-            uploadFile(request);
+            if (target instanceof Material) {
+                uploadFile(file, key, classRoom, material);
+            }
+            else{
+                uploadFile(file, key);
+            }
         }
     }
 
@@ -80,8 +85,25 @@ public class FileUtils {
         return filename.substring(filename.lastIndexOf('.') + 1);
     }
 
-    private void uploadFile(UploadFileRequest uploadFileRequest){
-        s3FeignClient.uploadFile(uploadFileRequest);
+    private void uploadFile(MultipartFile file, String key,ClassRoom classRoom,Material material) throws IOException {
+        uploadFile(file, key);
+        aiFeignClient.upload(file,
+                MaterialMetaData.builder()
+                        .classroomId(classRoom.getId())
+                        .classSubTitle(classRoom.getClassSubTitle())
+                        .classTitle(classRoom.getClassTitle())
+                        .collegeId(classRoom.getCollegeId())
+                        .materialId(material.getMid())
+                        .headLine(material.getHeadLine())
+                        .description(material.getDescription())
+                        .materialType(material.getMaterialType())
+                        .build());
     }
-
+    private void uploadFile(MultipartFile file, String key) throws IOException {
+        s3FeignClient.uploadFile(UploadFileRequest.builder()
+                .fileContent(file.getBytes())
+                .key(key)
+                .contentType(file.getContentType())
+                .build());
+    }
 }

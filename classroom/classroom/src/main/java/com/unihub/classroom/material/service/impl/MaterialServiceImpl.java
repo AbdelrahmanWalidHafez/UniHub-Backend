@@ -79,12 +79,13 @@ public class MaterialServiceImpl implements IMaterialService {
 
     public  Material generateMaterial(Material material, List<MultipartFile> materialFiles, UUID cid, HttpServletRequest request) throws IOException {
         ClassRoom classroom=fetchClassRoom(request,cid);
+
         classroom.addMaterial(material);
+        Material savedMaterial=materialRepository.save(material);
         if(materialFiles!=null&&!materialFiles.isEmpty()){
-            //TODO UPLOAD THE FILES IN VECTOR DB AT AI MS
-            fileUtils.uploadFiles(materialFiles,classroom, material, Material::getMaterialUrls);
+            fileUtils.uploadFiles(materialFiles,classroom, material, Material::getMaterialUrls,material);
         }
-        return materialRepository.save(material);
+        return savedMaterial;
     }
 
     @Override
@@ -119,7 +120,7 @@ public class MaterialServiceImpl implements IMaterialService {
     private MaterialResponseDto editMaterial(Material material,MaterialDto materialDto, List<MultipartFile> files, List<String> ToDeleteFiles) throws IOException {
         editMaterial(materialDto,material);
         if(files!=null&&!files.isEmpty()){
-            fileUtils.uploadFiles(files,material.getClassroom(), material, Material::getMaterialUrls);
+            fileUtils.uploadFiles(files,material.getClassroom(), material, Material::getMaterialUrls,material);
         }
         if(ToDeleteFiles!=null&&!ToDeleteFiles.isEmpty()){
             ToDeleteFiles.forEach(fileUtils::deleteFile);
