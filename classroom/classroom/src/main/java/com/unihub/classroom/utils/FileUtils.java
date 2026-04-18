@@ -9,6 +9,7 @@ import com.unihub.classroom.material.dto.request.MaterialMetaData;
 import com.unihub.classroom.material.dto.request.UploadFileRequest;
 import com.unihub.classroom.material.model.Material;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FileUtils {
@@ -90,6 +92,12 @@ public class FileUtils {
 
     private void uploadFile(MultipartFile file, String key,ClassRoom classRoom,Material material) throws IOException {
         uploadFile(file, key);
+        String contentType = file.getContentType();
+        assert contentType != null;
+        if (contentType.startsWith("image/") || contentType.startsWith("video/")) {
+            log.warn("Skipping vectorization for non-text file: {}", contentType);
+            return;
+        }
         aiFeignClient.upload(file,
                 objectMapper.writeValueAsString(
                         MaterialMetaData.builder()
