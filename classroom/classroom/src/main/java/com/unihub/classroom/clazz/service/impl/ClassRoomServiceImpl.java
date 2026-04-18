@@ -136,8 +136,8 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
     }
 
     @Override
-    public List<ClassRoomResponse> fetchAllClassRoomsForUser(String email) {
-        return memberRepository.findClassRoomsForUser(email).stream().map(classRoomMapper::toDto).toList();
+    public List<UUID> fetchAllClassRoomsForUser(String email) {
+        return memberRepository.findClassRoomsForUser(email);
     }
 
 

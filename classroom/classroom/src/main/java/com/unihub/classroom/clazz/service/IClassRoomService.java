@@ -33,6 +33,6 @@ public interface IClassRoomService {
 
     List<ClassRoomResponse> fetchActiveClassRooms( HttpServletRequest request);
 
-    List<ClassRoomResponse> fetchAllClassRoomsForUser(String email);
+    List<UUID> fetchAllClassRoomsForUser(String email);
 
 }

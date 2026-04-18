@@ -56,10 +56,10 @@ public interface MemberRepository extends JpaRepository <Member, UUID>{
     );
 
     @Query("""
-    SELECT DISTINCT c
+    SELECT DISTINCT c.id
     FROM ClassRoom c
     LEFT JOIN Member m ON m.classroom.id = c.id
     WHERE  c.createdBy = :email OR m.email = :email
 """)
-    List<ClassRoom> findClassRoomsForUser(@Param("email") String email);
+    List<UUID> findClassRoomsForUser(@Param("email") String email);
 }
