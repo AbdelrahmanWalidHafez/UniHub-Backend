@@ -1,6 +1,7 @@
 package com.unihub.ai.tool;
 
 import com.unihub.ai.client.AuthFeignClient;
+import com.unihub.ai.client.ClassRoomFeignClient;
 import com.unihub.ai.client.UniversityFeignClient;
 import com.unihub.ai.client.dto.CollegeDto;
 import com.unihub.ai.client.dto.UniversityResponse;
@@ -13,6 +14,7 @@ import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -23,10 +25,11 @@ public class UserTools {
     @Value("${api.key}")
     private String apiKey;
 
-    private final UniversityFeignClient universityFeignClient;
-
     private final AuthFeignClient authFeignClient;
 
+    private final ClassRoomFeignClient classRoomFeignClient;
+
+    private final UniversityFeignClient universityFeignClient;
 
     @Tool(name = "getUserInfo"
             ,description = """ 
@@ -52,6 +55,17 @@ public class UserTools {
             """)
     CollegeDto getUserCollege(@ToolParam(description = "The current user's college id") UUID id,@ToolParam(description = "The current user's university id") UUID tid){
         return  universityFeignClient.getCollege(id,tid).getBody();
+    }
+
+    @Tool(name = "getUserClassRoomsIds",description = """
+               Returns all classroom IDs that the user belongs to.
+              This includes classrooms where the user is either:
+               - the instructor (owner)
+               - or an enrolled student/member
+             Use this to filter search results or restrict access to user-specific data.
+            """)
+    List<UUID> getUserClassRoomsIds(@ToolParam(description = "The current user's email") String email){
+        return classRoomFeignClient.getClasses(email).getBody();
     }
 
 
