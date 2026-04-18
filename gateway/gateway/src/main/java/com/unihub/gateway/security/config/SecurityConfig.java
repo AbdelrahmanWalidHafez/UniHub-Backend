@@ -63,7 +63,9 @@ public class SecurityConfig {
             exchange.pathMatchers("/unihub/announcement/api/v1/posts/secretary/**").hasRole("SECRETARY");
             exchange.pathMatchers("/unihub/announcement/api/v1/posts/public/**").hasAnyRole("SECRETARY","INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/announcement/api/v1/likes/**").hasAnyRole("SECRETARY","INSTRUCTOR","STUDENT");
+           //ai
             exchange.pathMatchers("/unihub/ai/api/v1/chat/**").hasAnyRole("INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/ai/api/v1/material/**").denyAll();
             //classroom
             exchange.pathMatchers("/unihub/classroom/api/v1/classroom/instructor/**").hasRole("INSTRUCTOR");
             exchange.pathMatchers("/unihub/classroom/api/v1/classroom/join").hasAnyRole("INSTRUCTOR","STUDENT");
