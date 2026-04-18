@@ -135,6 +135,11 @@ public class ClassRoomServiceImpl  implements IClassRoomService {
         return classRoomRepository.findByCreatedByAndArchived(httpHeadersUtils.fetchEmailFromHeader(request), false).stream().map(classRoomMapper::toDto).toList();
     }
 
+    @Override
+    public List<ClassRoomResponse> fetchAllClassRoomsForUser(String email) {
+        return memberRepository.findClassRoomsForUser(email).stream().map(classRoomMapper::toDto).toList();
+    }
+
 
     private int getImageNum(){
         return new Random().nextInt(10)+1;
