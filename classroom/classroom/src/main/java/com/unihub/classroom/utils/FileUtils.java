@@ -112,6 +112,7 @@ public class FileUtils {
                                 .materialType(material.getMaterialType())
                                 .build()));
     }
+
     private void uploadFile(MultipartFile file, String key) throws IOException {
         s3FeignClient.uploadFile(UploadFileRequest.builder()
                 .fileContent(file.getBytes())

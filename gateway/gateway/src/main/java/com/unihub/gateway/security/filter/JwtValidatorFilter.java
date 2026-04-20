@@ -41,6 +41,7 @@ public class JwtValidatorFilter implements WebFilter {
     private String authHeader;
 
     private static final List<String> PUBLIC_PATHS = List.of(
+            "/actuator",
             "/unihub/subscription/api/v1/public/request-subscription",
             "/unihub/subscription/api/v1/subscription-plans/all",
             "/unihub/subscription/api/v1/inquiries/public"
