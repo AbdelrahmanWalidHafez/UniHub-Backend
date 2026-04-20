@@ -31,6 +31,8 @@ public interface IClassRoomService {
 
     List<ClassRoomResponse> fetchMyClassRooms(HttpServletRequest request);
 
-    public List<ClassRoomResponse> fetchActiveClassRooms( HttpServletRequest request);
+    List<ClassRoomResponse> fetchActiveClassRooms( HttpServletRequest request);
+
+    List<UUID> fetchAllClassRoomsForUser(String email);
 
 }

@@ -94,6 +94,14 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-starter-vector-store-qdrant</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-advisors-vector-store</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
@@ -126,7 +134,7 @@
 				<version>3.5.1</version>
 				<configuration>
 					<to>
-						<image>unihub/${project.artifactId}:s6</image>
+						<image>unihub/${project.artifactId}:s7</image>
 					</to>
 				</configuration>
 			</plugin>

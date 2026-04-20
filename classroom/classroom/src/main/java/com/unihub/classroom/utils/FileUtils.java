@@ -1,10 +1,15 @@
 package com.unihub.classroom.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unihub.classroom.clazz.model.ClassRoom;
+import com.unihub.classroom.material.client.AiFeignClient;
 import com.unihub.classroom.material.client.S3FeignClient;
 import com.unihub.classroom.material.dto.request.DeleteFileRequest;
+import com.unihub.classroom.material.dto.request.MaterialMetaData;
 import com.unihub.classroom.material.dto.request.UploadFileRequest;
+import com.unihub.classroom.material.model.Material;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Service;
@@ -14,6 +19,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FileUtils {
@@ -22,7 +28,11 @@ public class FileUtils {
     @Value("${aws.bucket}")
     private String bucketLink;
 
+    private final ObjectMapper objectMapper;
+
     private final StreamBridge streamBridge;
+
+    private final AiFeignClient aiFeignClient;
 
     private final S3FeignClient s3FeignClient;
 
@@ -48,17 +58,17 @@ public class FileUtils {
      * @see com.unihub.classroom.assginement.model.Submission
      * @see Function
      */
-    public <T> void uploadFiles(List<MultipartFile> files, ClassRoom classRoom, T target, Function<T, List<String>> urlGetter) throws IOException {
+    public <T> void uploadFiles(List<MultipartFile> files, ClassRoom classRoom, T target, Function<T, List<String>> urlGetter, Material material) throws IOException {
         List<String> urls = urlGetter.apply(target);
         for (MultipartFile file : files) {
             String key = generateKey(file, classRoom);
             urls.add(bucketLink + key);
-            UploadFileRequest request = UploadFileRequest.builder()
-                    .fileContent(file.getBytes())
-                    .key(key)
-                    .contentType(file.getContentType())
-                    .build();
-            uploadFile(request);
+            if (target instanceof Material) {
+                uploadFile(file, key, classRoom, material);
+            }
+            else{
+                uploadFile(file, key);
+            }
         }
     }
 
@@ -80,8 +90,34 @@ public class FileUtils {
         return filename.substring(filename.lastIndexOf('.') + 1);
     }
 
-    private void uploadFile(UploadFileRequest uploadFileRequest){
-        s3FeignClient.uploadFile(uploadFileRequest);
+    private void uploadFile(MultipartFile file, String key,ClassRoom classRoom,Material material) throws IOException {
+        uploadFile(file, key);
+        String contentType = file.getContentType();
+        assert contentType != null;
+        if (contentType.startsWith("image/") || contentType.startsWith("video/")) {
+            log.warn("Skipping vectorization for non-text file: {}", contentType);
+            return;
+        }
+        aiFeignClient.upload(file,
+                objectMapper.writeValueAsString(
+                        MaterialMetaData.builder()
+                                .classroomId(classRoom.getId())
+                                .classSubTitle(classRoom.getClassSubTitle())
+                                .classTitle(classRoom.getClassTitle())
+                                .collegeId(classRoom.getCollegeId())
+                                .universityId(classRoom.getUniversityId())
+                                .materialId(material.getMid())
+                                .headLine(material.getHeadLine())
+                                .description(material.getDescription())
+                                .materialType(material.getMaterialType())
+                                .build()));
     }
 
+    private void uploadFile(MultipartFile file, String key) throws IOException {
+        s3FeignClient.uploadFile(UploadFileRequest.builder()
+                .fileContent(file.getBytes())
+                .key(key)
+                .contentType(file.getContentType())
+                .build());
+    }
 }

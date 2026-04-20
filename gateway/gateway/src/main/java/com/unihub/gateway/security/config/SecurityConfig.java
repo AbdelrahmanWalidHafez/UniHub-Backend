@@ -27,19 +27,21 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         http.authorizeExchange(exchange -> {
+            exchange.pathMatchers("/actuator/**").permitAll();
             //subscription microservice
             exchange.pathMatchers("/unihub/subscription/api/v1/public/request-subscription").permitAll();
             exchange.pathMatchers("/unihub/subscription/api/v1/customer-service/**").hasRole("CUSTOMER_SERVICE");
             exchange.pathMatchers("/unihub/subscription/api/v1/system-admin/**").hasRole("SYSTEM_ADMIN");
             exchange.pathMatchers("/unihub/subscription/api/v1/admin/**").hasAnyRole("SYSTEM_ADMIN","CUSTOMER_SERVICE");
             exchange.pathMatchers("/unihub/subscription/api/v1/subscription-plans/customer-service/**").hasRole("CUSTOMER_SERVICE");
+            exchange.pathMatchers("/unihub/subscription/api/v1/subscription-plans/admin/**").hasAnyRole("SYSTEM_ADMIN","CUSTOMER_SERVICE");
             exchange.pathMatchers("/unihub/subscription/api/v1/subscription-plans/system-admin/**").hasRole("SYSTEM_ADMIN");
             exchange.pathMatchers("/unihub/subscription/api/v1/subscription-plans/all").permitAll();
             exchange.pathMatchers("/unihub/subscription/api/v1/inquiries/public/**").permitAll();
             exchange.pathMatchers("/unihub/subscription/api/v1/inquiries/customer-service/**").hasRole("CUSTOMER_SERVICE");
             //university management microservice
             exchange.pathMatchers("/unihub/universitymanagement/api/v1/customer-service/**").hasRole("CUSTOMER_SERVICE");
-            exchange.pathMatchers("/unihub/universitymanagement/api/v1/colleges/system-admin")
+            exchange.pathMatchers("/unihub/universitymanagement/api/v1/colleges/system-admin/**")
                     .access((mono, context) -> mono
                             .map(auth -> new AuthorizationDecision(
                                     hasRequiredAuthorities(auth, "ROLE_SYSTEM_ADMIN", "IS_ACTIVE")
@@ -63,7 +65,11 @@ public class SecurityConfig {
             exchange.pathMatchers("/unihub/announcement/api/v1/posts/secretary/**").hasRole("SECRETARY");
             exchange.pathMatchers("/unihub/announcement/api/v1/posts/public/**").hasAnyRole("SECRETARY","INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/announcement/api/v1/likes/**").hasAnyRole("SECRETARY","INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/announcement/api/v1/comments/public/**").hasAnyRole("SECRETARY","INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/announcement/api/v1/comments/secretary/**").hasAnyRole("SECRETARY");
+           //ai
             exchange.pathMatchers("/unihub/ai/api/v1/chat/**").hasAnyRole("INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/ai/api/v1/material/**").denyAll();
             //classroom
             exchange.pathMatchers("/unihub/classroom/api/v1/classroom/instructor/**").hasRole("INSTRUCTOR");
             exchange.pathMatchers("/unihub/classroom/api/v1/classroom/join").hasAnyRole("INSTRUCTOR","STUDENT");
@@ -74,10 +80,14 @@ public class SecurityConfig {
             exchange.pathMatchers("/unihub/classroom/api/v1/classroom/get-archived-classes").hasAnyRole("INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/classroom/api/v1/material/instructor/**").hasRole("INSTRUCTOR");
             exchange.pathMatchers("/unihub/classroom/api/v1/material/get-material/**").hasAnyRole("INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/classroom/api/v1/material/get-all-materials/**").hasAnyRole("INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/classroom/api/v1/material/get-all-assignments/**").hasAnyRole("INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/classroom/api/v1/material/get-assignments/**").hasAnyRole("INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/classroom/api/v1/comment/**").hasAnyRole("INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/classroom/api/v1/submissions/student/**").hasRole("STUDENT");
             exchange.pathMatchers("/unihub/classroom/api/v1/submissions/instructor/**").hasRole("INSTRUCTOR");
-            exchange.anyExchange().authenticated();
+            exchange.pathMatchers("/unihub/classroom/api/v1/internal**").denyAll();
+            exchange.anyExchange().denyAll();
         });
         http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(corsSpec -> corsSpec.configurationSource(corsConfigurationSource()))

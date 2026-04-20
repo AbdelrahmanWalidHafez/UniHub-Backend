@@ -49,8 +49,7 @@ public class SubmissionServiceImpl implements ISubmissionService {
         submission.setGrade(-1);
         assignment.addSubmission(submission);
         if(submissionFiles!=null&&!submissionFiles.isEmpty()){
-            //TODO UPLOAD THE FILES IN VECTOR DB AT AI MS;
-            fileUtils.uploadFiles(submissionFiles,assignment.getMaterial().getClassroom(), submission, Submission::getSubmissionUrls);
+            fileUtils.uploadFiles(submissionFiles,assignment.getMaterial().getClassroom(), submission, Submission::getSubmissionUrls,assignment.getMaterial());
         }
         return submissionMapper.toDto(submissionRepository.save(submission));
     }
@@ -62,7 +61,7 @@ public class SubmissionServiceImpl implements ISubmissionService {
          checkDueDate(submission.getAssignment());
         submission.setEdited(true);
         if(files!=null&&!files.isEmpty()){
-            fileUtils.uploadFiles(files,submission.getAssignment().getMaterial().getClassroom(), submission, Submission::getSubmissionUrls);
+            fileUtils.uploadFiles(files,submission.getAssignment().getMaterial().getClassroom(), submission, Submission::getSubmissionUrls,submission.getAssignment().getMaterial());
         }
         if(toDeleteFiles!=null&&!toDeleteFiles.isEmpty()){
             toDeleteFiles.forEach(fileUtils::deleteFile);

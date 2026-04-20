@@ -324,8 +324,8 @@ public class TokenProviderImpl implements ITokenProvider {
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
         cookie.setPath("/api/v1/auth");
-        cookie.setMaxAge((int)token.getExpiresIn());
-        cookie.setAttribute("SameSite", "Strict");
+        cookie.setMaxAge((int)(token.getExpiresIn() / 1000));
+        cookie.setAttribute("SameSite", "Lax");
         response.addCookie(cookie);
     }
 

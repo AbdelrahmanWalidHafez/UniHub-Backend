@@ -1,7 +1,6 @@
 package com.unihub.ai.tool;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.unihub.ai.tool.concerns.TimeToolsConcerns;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -12,17 +11,14 @@ import java.time.ZoneId;
 @Component
 public class TimeTools {
 
-    private static final Logger logger= LoggerFactory.getLogger(TimeTools.class);
 
-    @Tool(name = "getCurrentLocalTime",description = "get the current time in the user's time zone")
+    @Tool(name = TimeToolsConcerns.TIME_TOOL_NAME,description = TimeToolsConcerns.TIME_TOOL_DESCRIPTION)
     String getCurrentLocalTime(){
-        logger.info("getCurrentLocalTime");
         return LocalTime.now().toString();
     }
 
-    @Tool(name = "getCurrentTime",description = "get the current time in the specified time zone")
-    String getCurrentTime(@ToolParam(description = "value representing the time zone") String timeZone){
-        logger.info("returning the time zone:"+timeZone);
+    @Tool(name = TimeToolsConcerns.ZONE_TIME_TOOL_NAME,description = TimeToolsConcerns.ZONE_TIME_TOOL_DESCRIPTION)
+    String getCurrentTime(@ToolParam(description = TimeToolsConcerns.TIME_ZONE_PARAM) String timeZone){
         return LocalTime.now(ZoneId.of(timeZone)).toString();
     }
 }

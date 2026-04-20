@@ -1,5 +1,6 @@
 package com.unihub.ai.config;
 
+import com.unihub.ai.tool.DocumentSearchTool;
 import com.unihub.ai.tool.TimeTools;
 import com.unihub.ai.tool.UserTools;
 import org.springframework.ai.chat.client.ChatClient;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
-//TODO Add Rag and vector store in the future
 @Configuration
 public class ChatMemoryClientConfig {
 
@@ -22,7 +22,12 @@ public class ChatMemoryClientConfig {
     Resource systemPrompt;
 
     @Bean
-    public ChatClient chatClient(ChatClient.Builder builder, ChatMemory chatMemory, UserTools userTools, TimeTools timeTools){
+    public ChatClient chatClient(
+            ChatClient.Builder builder
+            , ChatMemory chatMemory
+            , UserTools userTools
+            , TimeTools timeTools
+            , DocumentSearchTool documentSearchTool){
 
         return builder
                 .defaultSystem(systemPrompt)
@@ -32,8 +37,8 @@ public class ChatMemoryClientConfig {
                         .temperature(.9)
                         .topP(.9)
                         .build())
-                .defaultTools(userTools,timeTools)
-                .defaultAdvisors(simpleLoggerAdvisor(),messageChatMemoryAdvisor(chatMemory)).build();
+                .defaultTools(userTools, timeTools, documentSearchTool)
+                .defaultAdvisors(simpleLoggerAdvisor(), messageChatMemoryAdvisor(chatMemory)).build();
     }
 
     @Bean

@@ -10,6 +10,7 @@ import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionModel;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionOptions;
 import org.springframework.ai.openai.api.OpenAiAudioApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -29,6 +30,9 @@ import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
 @RequestMapping("/api/v1/chat")
 @RequiredArgsConstructor
 public class ChatController {
+
+    @Value("classpath:/prompts/materialPromptTemplate.st")
+    Resource systemPrompt;
 
     private final ChatClient chatClient;
 
@@ -83,5 +87,23 @@ public class ChatController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping(value = "/explain/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> explain(
+            @RequestHeader("X-User-Email") String email,
+            @PathVariable("id") String materialId) {
+
+        return chatClient.prompt()
+                .system(promptSystemSpec -> promptSystemSpec
+                        .text(systemPrompt)
+                        .param("userEmail", email)
+                        .param("materialId", materialId))
+                .options(ToolCallingChatOptions.builder()
+                        .internalToolExecutionEnabled(true)
+                        .build())
+                .user("explain this material")
+                .advisors(advisorSpec -> advisorSpec.param(CONVERSATION_ID, email))
+                .stream()
+                .content();
+    }
 
 }

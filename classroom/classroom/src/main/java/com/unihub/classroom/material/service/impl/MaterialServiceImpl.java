@@ -7,6 +7,7 @@ import com.unihub.classroom.assginement.model.Assignment;
 import com.unihub.classroom.assginement.service.IAssignmentService;
 import com.unihub.classroom.clazz.model.ClassRoom;
 import com.unihub.classroom.clazz.repository.ClassRoomRepository;
+import com.unihub.classroom.material.client.AiFeignClient;
 import com.unihub.classroom.material.dto.request.MaterialDto;
 import com.unihub.classroom.material.dto.response.MaterialResponseDto;
 import com.unihub.classroom.material.mapper.MaterialMapper;
@@ -40,6 +41,8 @@ import java.util.UUID;
 public class MaterialServiceImpl implements IMaterialService {
 
     private final FileUtils fileUtils;
+
+    private final AiFeignClient aiFeignClient;
 
     private final MaterialMapper materialMapper;
 
@@ -79,12 +82,13 @@ public class MaterialServiceImpl implements IMaterialService {
 
     public  Material generateMaterial(Material material, List<MultipartFile> materialFiles, UUID cid, HttpServletRequest request) throws IOException {
         ClassRoom classroom=fetchClassRoom(request,cid);
+
         classroom.addMaterial(material);
+        Material savedMaterial=materialRepository.save(material);
         if(materialFiles!=null&&!materialFiles.isEmpty()){
-            //TODO UPLOAD THE FILES IN VECTOR DB AT AI MS
-            fileUtils.uploadFiles(materialFiles,classroom, material, Material::getMaterialUrls);
+            fileUtils.uploadFiles(materialFiles,classroom, material, Material::getMaterialUrls,material);
         }
-        return materialRepository.save(material);
+        return savedMaterial;
     }
 
     @Override
@@ -107,6 +111,7 @@ public class MaterialServiceImpl implements IMaterialService {
             material.getMaterialUrls().forEach(fileUtils::deleteFile);
         }
         classRoom.removeMaterial(material);
+        aiFeignClient.delete(material.getMid());
         materialRepository.delete(material);
     }
 
@@ -119,7 +124,7 @@ public class MaterialServiceImpl implements IMaterialService {
     private MaterialResponseDto editMaterial(Material material,MaterialDto materialDto, List<MultipartFile> files, List<String> ToDeleteFiles) throws IOException {
         editMaterial(materialDto,material);
         if(files!=null&&!files.isEmpty()){
-            fileUtils.uploadFiles(files,material.getClassroom(), material, Material::getMaterialUrls);
+            fileUtils.uploadFiles(files,material.getClassroom(), material, Material::getMaterialUrls,material);
         }
         if(ToDeleteFiles!=null&&!ToDeleteFiles.isEmpty()){
             ToDeleteFiles.forEach(fileUtils::deleteFile);
