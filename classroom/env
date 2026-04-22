@@ -1,0 +1,6 @@
+#App
+APPLICATION_NAME=classroom
+#KAFKA
+KAFKA=
+#AWS
+BUCKET_LINK=
