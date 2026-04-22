@@ -78,8 +78,10 @@ public class SecurityConfig {
             exchange.pathMatchers("/unihub/classroom/api/v1/classroom/get-owner/**").hasAnyRole("INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/classroom/api/v1/classroom/get-enrolled-classes").hasAnyRole("INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/classroom/api/v1/classroom/get-archived-classes").hasAnyRole("INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/classroom/api/v1/classroom/fetch-archived-classes").hasAnyRole("INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/classroom/api/v1/material/instructor/**").hasRole("INSTRUCTOR");
             exchange.pathMatchers("/unihub/classroom/api/v1/material/get-material/**").hasAnyRole("INSTRUCTOR","STUDENT");
+            exchange.pathMatchers("/unihub/classroom/api/v1/material/get-assignment/**").hasAnyRole("INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/classroom/api/v1/material/get-all-materials/**").hasAnyRole("INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/classroom/api/v1/material/get-all-assignments/**").hasAnyRole("INSTRUCTOR","STUDENT");
             exchange.pathMatchers("/unihub/classroom/api/v1/material/get-assignments/**").hasAnyRole("INSTRUCTOR","STUDENT");

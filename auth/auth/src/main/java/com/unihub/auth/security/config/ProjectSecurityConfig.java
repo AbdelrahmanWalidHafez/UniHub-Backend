@@ -46,6 +46,7 @@ public class ProjectSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/login",
                                 "/api/v1/auth/login-mobile",
                                 "/api/v1/auth/refresh",
