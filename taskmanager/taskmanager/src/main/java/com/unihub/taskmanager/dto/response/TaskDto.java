@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-//todo use @jsonproperty to rename variable in the json response
+
 public class TaskDto {
 
     private UUID id;

@@ -9,8 +9,12 @@ import com.unihub.taskmanager.service.ITaskService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -38,6 +42,27 @@ public class TaskServiceImpl implements ITaskService {
         taskRepository.delete(task);
     }
 
+    @Override
+    public void deleteTasks(List<UUID> ids, HttpServletRequest request){
+        List<Task> tasks=taskRepository.findAllByIdInAndCreatedBy(ids,fetchEmailFromHeader(request));
+        taskRepository.deleteAllInBatch(tasks);
+    }
+
+    @Override
+    public List<TaskDto> getTasks(HttpServletRequest request,int pageNum){
+        return taskRepository
+                .findByCreateBy(fetchEmailFromHeader(request),generatePageable(pageNum))
+                .stream()
+                .map(taskMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public TaskDto editTask(UUID id,CreateTaskRequest taskRequest,HttpServletRequest request){
+        Task task=fetchTask(id,fetchEmailFromHeader(request));
+        editTask(task,taskRequest);
+        return taskMapper.toDto(taskRepository.save(task));
+    }
 
     private String fetchEmailFromHeader(HttpServletRequest request){
         return request.getHeader("X-User-Email");
@@ -48,4 +73,14 @@ public class TaskServiceImpl implements ITaskService {
                 .orElseThrow(()-> new EntityNotFoundException("No Task found with id "+id));
     }
 
+    private Pageable generatePageable(int pageNum){
+        return PageRequest.of(pageNum-1,10, Sort.by("createdAt").descending());
+    }
+
+    private void editTask(Task task ,CreateTaskRequest taskRequest){
+        task.setTitle( taskRequest.getTitle());
+        task.setPriority(taskRequest.getPriority());
+        task.setDescription(taskRequest.getDescription());
+        task.setDueDate(taskRequest.getDueDate());
+    }
 }

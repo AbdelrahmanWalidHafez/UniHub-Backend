@@ -4,6 +4,7 @@ import com.unihub.taskmanager.dto.request.CreateTaskRequest;
 import com.unihub.taskmanager.dto.response.TaskDto;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ITaskService {
@@ -13,5 +14,11 @@ public interface ITaskService {
     TaskDto getTask(UUID id, HttpServletRequest request);
 
     void deleteTask(UUID id, HttpServletRequest request);
+
+    void deleteTasks(List<UUID> ids, HttpServletRequest request);
+
+    List<TaskDto> getTasks(HttpServletRequest request,int pageNum);
+
+    TaskDto editTask(UUID id,CreateTaskRequest taskRequest,HttpServletRequest request);
 
 }
