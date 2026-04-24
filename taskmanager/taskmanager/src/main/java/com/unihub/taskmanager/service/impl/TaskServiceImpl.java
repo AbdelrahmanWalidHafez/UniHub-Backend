@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -47,6 +48,7 @@ public class TaskServiceImpl implements ITaskService {
     }
 
     @Override
+    @Transactional
     public void deleteTasks(List<UUID> ids, HttpServletRequest request){
         List<Task> tasks=taskRepository.findAllByIdInAndCreatedBy(ids,fetchEmailFromHeader(request));
         taskRepository.deleteAllInBatch(tasks);
