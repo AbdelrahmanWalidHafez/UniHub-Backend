@@ -2,6 +2,7 @@ package com.unihub.taskmanager.service;
 
 import com.unihub.taskmanager.dto.request.CreateTaskRequest;
 import com.unihub.taskmanager.dto.response.TaskDto;
+import com.unihub.taskmanager.model.Status;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
@@ -21,4 +22,5 @@ public interface ITaskService {
 
     TaskDto editTask(UUID id,CreateTaskRequest taskRequest,HttpServletRequest request);
 
+    TaskDto setTaskStatus(UUID id, HttpServletRequest request, Status status);
 }

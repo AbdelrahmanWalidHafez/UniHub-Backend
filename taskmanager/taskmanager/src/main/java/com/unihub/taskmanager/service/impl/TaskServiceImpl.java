@@ -3,9 +3,11 @@ package com.unihub.taskmanager.service.impl;
 import com.unihub.taskmanager.dto.request.CreateTaskRequest;
 import com.unihub.taskmanager.dto.response.TaskDto;
 import com.unihub.taskmanager.mapper.TaskMapper;
+import com.unihub.taskmanager.model.Status;
 import com.unihub.taskmanager.model.Task;
 import com.unihub.taskmanager.repository.TaskRepository;
 import com.unihub.taskmanager.service.ITaskService;
+import com.unihub.taskmanager.service.state.context.TaskStateContext;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,8 @@ public class TaskServiceImpl implements ITaskService {
     private final TaskMapper taskMapper;
 
     private final TaskRepository taskRepository;
+
+    private final TaskStateContext context;
 
     @Override
     public TaskDto createTask(CreateTaskRequest createTaskRequest){
@@ -55,6 +59,12 @@ public class TaskServiceImpl implements ITaskService {
                 .stream()
                 .map(taskMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    public TaskDto setTaskStatus(UUID id, HttpServletRequest request, Status status){
+        Task task=fetchTask(id,fetchEmailFromHeader(request));
+        return  taskMapper.toDto(taskRepository.save(context.handleRequest(task,status)));
     }
 
     @Override

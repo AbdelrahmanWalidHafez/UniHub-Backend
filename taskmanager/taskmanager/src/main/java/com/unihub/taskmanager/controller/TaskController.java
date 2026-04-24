@@ -3,6 +3,7 @@ package com.unihub.taskmanager.controller;
 import com.unihub.taskmanager.dto.request.CreateTaskRequest;
 import com.unihub.taskmanager.dto.response.TaskDto;
 import com.unihub.taskmanager.dto.response.TasksDto;
+import com.unihub.taskmanager.model.Status;
 import com.unihub.taskmanager.service.ITaskService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -57,6 +58,11 @@ public class TaskController {
             ,@Valid @RequestBody CreateTaskRequest createTaskRequest
             ,HttpServletRequest request){
         return ResponseEntity.ok(taskService.editTask(id,createTaskRequest,request));
+    }
+
+    @PatchMapping("/set-task-state/{id}")
+    public ResponseEntity<TaskDto> setTaskStatus(@PathVariable("id") UUID id, HttpServletRequest request, @Valid @RequestBody Status status){
+        return ResponseEntity.ok(taskService.setTaskStatus(id,request,status));
     }
 
 }
