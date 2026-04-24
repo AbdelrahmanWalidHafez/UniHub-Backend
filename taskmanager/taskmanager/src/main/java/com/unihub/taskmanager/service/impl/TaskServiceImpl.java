@@ -55,7 +55,7 @@ public class TaskServiceImpl implements ITaskService {
     @Override
     public List<TaskDto> getTasks(HttpServletRequest request,int pageNum){
         return taskRepository
-                .findByCreateBy(fetchEmailFromHeader(request),generatePageable(pageNum))
+                .findByCreatedBy(fetchEmailFromHeader(request),generatePageable(pageNum))
                 .stream()
                 .map(taskMapper::toDto)
                 .toList();

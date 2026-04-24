@@ -16,5 +16,5 @@ public interface TaskRepository extends JpaRepository <Task, UUID> {
 
     List<Task> findAllByIdInAndCreatedBy(List<UUID> ids, String email);
 
-    List<Task> findByCreateBy(String email, Pageable pageable);
+    List<Task> findByCreatedBy(String email, Pageable pageable);
 }

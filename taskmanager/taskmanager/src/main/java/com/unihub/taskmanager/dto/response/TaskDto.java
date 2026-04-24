@@ -1,5 +1,6 @@
 package com.unihub.taskmanager.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unihub.taskmanager.model.Priority;
 import com.unihub.taskmanager.model.Status;
 import lombok.*;
@@ -24,18 +25,25 @@ public class TaskDto {
 
     private Priority priority;
 
+    @JsonProperty("due_date")
     private LocalDateTime dueDate;
 
+    @JsonProperty("started_at")
     private LocalDateTime startedAt;
 
+    @JsonProperty("finished_at")
     private LocalDateTime finishedAt;
 
+    @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
+    @JsonProperty("updated_at")
     private LocalDateTime updatedAt;
 
+    @JsonProperty("created_by")
     private String createdBy;
 
+    @JsonProperty("updated_by")
     private String updatedBy;
 
 }
