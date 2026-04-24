@@ -8,7 +8,6 @@ import com.unihub.taskmanager.service.ITaskService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -36,13 +35,13 @@ public class TaskController {
     }
 
     @DeleteMapping("/delete-task/{id}")
-    public ResponseEntity deleteTask(@PathVariable("id") UUID id, HttpServletRequest request){
+    public ResponseEntity<?> deleteTask(@PathVariable("id") UUID id, HttpServletRequest request){
         taskService.deleteTask(id,request);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/delete-in-batch")
-    public ResponseEntity deleteTasks(@Valid @RequestBody List<UUID> ids, HttpServletRequest request){
+    public ResponseEntity<?> deleteTasks(@Valid @RequestBody List<UUID> ids, HttpServletRequest request){
         taskService.deleteTasks(ids,request);
         return ResponseEntity.noContent().build();
     }
