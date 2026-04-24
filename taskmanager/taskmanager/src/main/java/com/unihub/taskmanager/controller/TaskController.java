@@ -2,18 +2,20 @@ package com.unihub.taskmanager.controller;
 
 import com.unihub.taskmanager.dto.request.CreateTaskRequest;
 import com.unihub.taskmanager.dto.response.TaskDto;
+import com.unihub.taskmanager.dto.response.TasksDto;
 import com.unihub.taskmanager.service.ITaskService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
-//TODO-> get tasks,delete task in batch,start,end task,edit task
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -36,6 +38,25 @@ public class TaskController {
     public ResponseEntity deleteTask(@PathVariable("id") UUID id, HttpServletRequest request){
         taskService.deleteTask(id,request);
         return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/delete-in-batch")
+    public ResponseEntity deleteTasks(@Valid @RequestBody List<UUID> ids, HttpServletRequest request){
+        taskService.deleteTasks(ids,request);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    @GetMapping("/get-tasks")
+    public ResponseEntity<TasksDto> getTasks(HttpServletRequest request, @RequestParam(value = "page_num",defaultValue = "1")int pageNum){
+        return ResponseEntity.ok(TasksDto.builder().tasks(taskService.getTasks(request,pageNum)).build());
+    }
+
+    @PutMapping("/edit-task/{id}")
+    public ResponseEntity<TaskDto> editTask(@PathVariable("id") UUID id
+            ,@Valid @RequestBody CreateTaskRequest createTaskRequest
+            ,HttpServletRequest request){
+        return ResponseEntity.ok(taskService.editTask(id,createTaskRequest,request));
     }
 
 }
