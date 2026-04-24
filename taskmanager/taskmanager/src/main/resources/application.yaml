@@ -1,6 +1,8 @@
 spring:
   application:
     name: ${APPLICATION_NAME}
+  config:
+    import: optional:configserver:http://config-server:8080
 resilience4j:
   circuitbreaker:
     configs:
