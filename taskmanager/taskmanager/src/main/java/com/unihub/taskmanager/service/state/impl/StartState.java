@@ -15,4 +15,11 @@ public class StartState  implements TaskState {
         task.setFinishedAt(null);
         return  task;
     }
+
+    private void checkState(Task task) {
+        Status status = task.getStatus();
+        if (status == Status.INPROGRESS) {
+            throw new IllegalArgumentException("Task is already INPROGRESS");
+        }
+    }
 }

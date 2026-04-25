@@ -35,8 +35,10 @@ public class Task extends BaseEntity {
 
     @Column(nullable = false)
     private LocalDateTime dueDate;
+
     @Column(insertable = false)
     private LocalDateTime startedAt;
+
     @Column(insertable = false)
     private LocalDateTime finishedAt;
 

@@ -13,4 +13,11 @@ public class IdleState implements TaskState {
         task.setFinishedAt(null);
         return  task;
     }
+
+    private void checkState(Task task) {
+        Status status = task.getStatus();
+        if (status == Status.TODO) {
+            throw new IllegalArgumentException("Task is already TODO");
+        }
+    }
 }
