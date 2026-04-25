@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class TaskMapper {
     public Task toEntity(CreateTaskRequest request){
-
         Task task= new Task();
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setPriority(request.getPriority());
+        task.setDueDate(request.getDueDate());
         task.setStatus(Status.TODO);
         return task;
     }
