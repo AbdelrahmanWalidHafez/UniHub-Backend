@@ -147,19 +147,6 @@ public class GlobalExceptionController  {
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponseDto> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, HttpServletRequest request) {
-        ErrorResponseDto errorResponseDTO = ErrorResponseDto.builder()
-                .timeStamp(LocalDateTime.now())
-                .httpStatusCode(HttpStatus.BAD_REQUEST)
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .path(request.getRequestURI())
-                .message(ex.getMessage())
-                .errors(List.of(ex.getLocalizedMessage()))
-                .build();
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
-    }
-
     private boolean isDuplicateKey(DataIntegrityViolationException ex) {
         Throwable cause = ex.getCause();
         while (cause != null) {
