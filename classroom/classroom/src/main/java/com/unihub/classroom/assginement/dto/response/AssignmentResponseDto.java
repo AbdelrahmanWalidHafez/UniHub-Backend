@@ -1,0 +1,40 @@
+package com.unihub.classroom.assginement.dto.response;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.unihub.classroom.material.dto.response.MaterialResponseDto;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class AssignmentResponseDto {
+
+    @JsonProperty("assignment_id")
+    private UUID aid;
+
+    MaterialResponseDto material;
+
+    Integer points;
+
+    @JsonProperty("due_date")
+    private LocalDateTime dueDate;
+
+    @JsonProperty("created_at")
+    private LocalDateTime createdAt;
+
+    @JsonProperty("updated_at")
+    private LocalDateTime updatedAt;
+
+    @JsonProperty("created_by")
+    private String createdBy;
+
+    @JsonProperty("updated_by")
+    private String updatedBy;
+
+
+}

@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: ${APPLICATION_NAME}
+  config:
+    import: optional:configserver:http://config-server:8080
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+    vectorstore:
+      qdrant:
+        initialize-schema: true
+        host: ${QDRANT_HOST}
+        port: ${QDRANT_PORT}
+        collection-name: ${QDRANT_COLLECTION_NAME}
+api:
+  key: ${API_KEY}
+logging:
+  level:
+    org:
+      springframework:
+        ai:
+          chat:
+            client:
+              advisor: DEBUG
+        web:
+          client: DEBUG
+        http:
+          client: DEBUG

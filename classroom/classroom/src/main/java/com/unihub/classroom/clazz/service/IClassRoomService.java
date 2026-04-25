@@ -1,0 +1,38 @@
+package com.unihub.classroom.clazz.service;
+
+import com.unihub.classroom.clazz.dto.request.CreateClassroomDto;
+import com.unihub.classroom.clazz.dto.response.ClassRoomResponse;
+import com.unihub.classroom.clazz.dto.response.MemberDto;
+import com.unihub.classroom.clazz.dto.response.OwnerDto;
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface IClassRoomService {
+
+    ClassRoomResponse createClassRoom(CreateClassroomDto createClassroomDto, HttpServletRequest request);
+
+    ClassRoomResponse archiveClassRoom(UUID id,HttpServletRequest request);
+
+    MemberDto joinClassRoom(String code, HttpServletRequest request);
+
+    void leaveClassRoom(UUID id, HttpServletRequest request);
+
+    List<MemberDto> fetchMembers(UUID id, HttpServletRequest request, int pageNum);
+
+    OwnerDto fetchOwner(UUID id, HttpServletRequest request);
+
+    List<ClassRoomResponse> fetchEnrolledClassRooms(HttpServletRequest request);
+
+    List<ClassRoomResponse> getArchivedClassRooms(HttpServletRequest request);
+
+    List<ClassRoomResponse> fetchArchivedClassRooms(HttpServletRequest request);
+
+    List<ClassRoomResponse> fetchMyClassRooms(HttpServletRequest request);
+
+    List<ClassRoomResponse> fetchActiveClassRooms( HttpServletRequest request);
+
+    List<UUID> fetchAllClassRoomsForUser(String email);
+
+}
