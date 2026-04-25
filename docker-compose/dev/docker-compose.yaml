@@ -34,7 +34,7 @@ services:
       - unihub
 
   config-server:
-    image: unihub/config:s6
+    image: unihub/config:s8
     container_name: config-server
     ports:
       - "8080:8080"
@@ -50,7 +50,7 @@ services:
       - unihub
 
   eureka-server:
-    image: unihub/eureka:s6
+    image: unihub/eureka:s8
     container_name: eureka-server
     depends_on:
       config-server:
@@ -67,7 +67,7 @@ services:
       - unihub
 
   gateway-server:
-    image: unihub/gateway:s6
+    image: unihub/gateway:s8
     container_name: gateway-server
     ports:
       - "8082:8082"
@@ -228,9 +228,27 @@ services:
       - classroom_db_data:/var/lib/postgresql/data
     networks:
       - unihub
+  taskmanager-db:
+    image: postgres:16
+    container_name: taskmanager_db
+    environment:
+      POSTGRES_DB: taskmanager_db
+      POSTGRES_USER: taskmanager_user
+      POSTGRES_PASSWORD: taskmanager_pass
+    ports:
+      - "5438:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskmanager_user -d taskmanager_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - taskmanager_db_data:/var/lib/postgresql/data
+    networks:
+      - unihub
 
   auth-server:
-    image: unihub/auth:s6
+    image: unihub/auth:s8
     container_name: auth-server
     ports:
       - "8083:8083"
@@ -253,7 +271,7 @@ services:
       - unihub
 
   subscription-server:
-    image: unihub/subscription:s6
+    image: unihub/subscription:s8
     container_name: subscription-server
     depends_on:
       eureka-server:
@@ -275,7 +293,7 @@ services:
       - unihub
 
   university-server:
-    image: unihub/universitymanagement:s6
+    image: unihub/universitymanagement:s8
     container_name: university-server
     depends_on:
       eureka-server:
@@ -297,7 +315,7 @@ services:
       - unihub
 
   s3-server:
-    image: unihub/s3:s6
+    image: unihub/s3:s8
     container_name: s3-server
     depends_on:
       eureka-server:
@@ -316,7 +334,7 @@ services:
     networks:
       - unihub
   mail-server:
-    image: unihub/mail:s6 
+    image: unihub/mail:s8 
     container_name: mail-server
     depends_on:
       eureka-server:
@@ -335,7 +353,7 @@ services:
     networks:
       - unihub
   usage-server:
-    image: unihub/usage:s6  
+    image: unihub/usage:s8  
     container_name: usage-server
     depends_on:
       eureka-server:
@@ -353,7 +371,7 @@ services:
       - unihub
 
   announcement-server:
-    image: unihub/announcement:s6
+    image: unihub/announcement:s8
     container_name: announcement-server
     depends_on:
      eureka-server:
@@ -375,7 +393,7 @@ services:
       - unihub
 
   ai-server:
-    image: unihub/ai:s6
+    image: unihub/ai:s8
     container_name: ai-server
     depends_on:
      eureka-server:
@@ -397,7 +415,7 @@ services:
       - unihub
   
   classroom-server:
-    image: unihub/classroom:s6
+    image: unihub/classroom:s8
     container_name: classroom-server
     depends_on:
      eureka-server:
@@ -415,6 +433,26 @@ services:
       start_period: 15s
     networks:
       - unihub
+  taskmanager-server:
+    image: unihub/taskmanager:s8
+    container_name: taskmanager-server
+    depends_on:
+     eureka-server:
+        condition: service_healthy
+     taskmanager-db:
+        condition: service_healthy
+    command: sh -c "sleep 5 && java -jar /app/taskmanager.jar"
+    env_file:
+      - ../../taskmanager/.env
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8092/actuator/health/readiness | grep UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - unihub
+
 networks:
   unihub:
     driver: bridge
@@ -425,6 +463,7 @@ volumes:
   university_db_data:
   announcement_db_data:
   ai_db_data:
+  taskmanager_db_data:
   redis_data:
   classroom_db_data:
   qdrant_data:
