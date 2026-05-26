@@ -19,6 +19,7 @@ public class TaskMapper {
     }
     public TaskDto toDto(Task task){
         TaskDto taskDto= new TaskDto();
+        taskDto.setTitle(task.getTitle());
         taskDto.setDescription(task.getDescription());
         taskDto.setPriority(task.getPriority());
         taskDto.setStatus(task.getStatus());
