@@ -78,6 +78,25 @@ public interface UserRepository extends JpaRepository<User, UUID> , JpaSpecifica
                            @Param("currentEmail") String currentEmail,
                            Pageable pageable);
 
+    @Query("""
+    SELECT u
+    FROM User u
+    JOIN u.universityMetadata m
+    WHERE m.tid = :tid
+    AND (:cid IS NULL OR m.cid = :cid)
+    AND (
+            LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
+         OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+         OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+         OR LOWER(CONCAT(u.firstName, ' ', u.lastName))
+                LIKE LOWER(CONCAT('%', :keyword, '%'))
+    )
+""")
+    List<User> searchUsersInternal(@Param("keyword") String keyword,
+                                   @Param("tid") UUID tid,
+                                   @Param("cid") UUID cid,
+                                   Pageable pageable);
+
     @Query("SELECT r.name, COUNT(u) FROM User u JOIN u.role r JOIN u.universityMetadata um WHERE um.tid = :tid GROUP BY r.name")
     List<Object[]> countUsersByRole(@Param("tid") UUID tid);
 

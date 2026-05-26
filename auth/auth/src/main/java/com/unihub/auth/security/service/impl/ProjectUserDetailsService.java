@@ -8,7 +8,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -50,6 +49,4 @@ public class ProjectUserDetailsService implements UserDetailsService {
         return userRepository.findByEmail(email)
                 .orElseThrow(()->new EntityNotFoundException("user not found"));
     }
-
-
 }

@@ -34,7 +34,7 @@ services:
       - unihub
 
   config-server:
-    image: unihub/config:s8
+    image: unihub/config:s9
     container_name: config-server
     ports:
       - "8080:8080"
@@ -50,8 +50,8 @@ services:
       - unihub
 
   eureka-server:
-    image: unihub/eureka:s8
-    container_name: eureka-server
+    image: unihub/eureka:s9
+    container_name: eureka
     depends_on:
       config-server:
         condition: service_healthy
@@ -67,7 +67,7 @@ services:
       - unihub
 
   gateway-server:
-    image: unihub/gateway:s8
+    image: unihub/gateway:s9
     container_name: gateway-server
     ports:
       - "8082:8082"
@@ -248,7 +248,7 @@ services:
       - unihub
 
   auth-server:
-    image: unihub/auth:s8
+    image: unihub/auth:s9
     container_name: auth-server
     ports:
       - "8083:8083"
@@ -271,7 +271,7 @@ services:
       - unihub
 
   subscription-server:
-    image: unihub/subscription:s8
+    image: unihub/subscription:s9
     container_name: subscription-server
     depends_on:
       eureka-server:
@@ -293,7 +293,7 @@ services:
       - unihub
 
   university-server:
-    image: unihub/universitymanagement:s8
+    image: unihub/universitymanagement:s9
     container_name: university-server
     depends_on:
       eureka-server:
@@ -315,7 +315,7 @@ services:
       - unihub
 
   s3-server:
-    image: unihub/s3:s8
+    image: unihub/s3:s9
     container_name: s3-server
     depends_on:
       eureka-server:
@@ -334,7 +334,7 @@ services:
     networks:
       - unihub
   mail-server:
-    image: unihub/mail:s8 
+    image: unihub/mail:s9 
     container_name: mail-server
     depends_on:
       eureka-server:
@@ -353,7 +353,7 @@ services:
     networks:
       - unihub
   usage-server:
-    image: unihub/usage:s8  
+    image: unihub/usage:s9  
     container_name: usage-server
     depends_on:
       eureka-server:
@@ -371,7 +371,7 @@ services:
       - unihub
 
   announcement-server:
-    image: unihub/announcement:s8
+    image: unihub/announcement:s9
     container_name: announcement-server
     depends_on:
      eureka-server:
@@ -393,7 +393,7 @@ services:
       - unihub
 
   ai-server:
-    image: unihub/ai:s8
+    image: unihub/ai:s9
     container_name: ai-server
     depends_on:
      eureka-server:
@@ -415,7 +415,7 @@ services:
       - unihub
   
   classroom-server:
-    image: unihub/classroom:s8
+    image: unihub/classroom:s9
     container_name: classroom-server
     depends_on:
      eureka-server:
@@ -434,7 +434,7 @@ services:
     networks:
       - unihub
   taskmanager-server:
-    image: unihub/taskmanager:s8
+    image: unihub/taskmanager:s9
     container_name: taskmanager-server
     depends_on:
      eureka-server:
@@ -446,6 +446,45 @@ services:
       - ../../taskmanager/.env
     healthcheck:
       test: ["CMD-SHELL", "curl --fail --silent localhost:8092/actuator/health/readiness | grep UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - unihub
+
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: chat_user
+      MONGO_INITDB_ROOT_PASSWORD: chat_pass
+      MONGO_INITDB_DATABASE: chat_db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.runCommand({ping:1}).ok' | grep 1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - unihub
+
+  chat-server:
+    image: unihub/chat:s9
+    container_name: chat-server
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    command: sh -c "sleep 5 && java -jar /app/chat.jar"
+    env_file:
+      - ../../chat/.env
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8093/actuator/health/readiness | grep UP || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -467,3 +506,4 @@ volumes:
   redis_data:
   classroom_db_data:
   qdrant_data:
+  mongodb_data:

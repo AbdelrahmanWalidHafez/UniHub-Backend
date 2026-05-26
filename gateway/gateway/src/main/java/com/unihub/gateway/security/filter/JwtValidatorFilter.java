@@ -44,7 +44,8 @@ public class JwtValidatorFilter implements WebFilter {
             "/actuator",
             "/unihub/subscription/api/v1/public/request-subscription",
             "/unihub/subscription/api/v1/subscription-plans/all",
-            "/unihub/subscription/api/v1/inquiries/public"
+            "/unihub/subscription/api/v1/inquiries/public",
+            "/unihub/chat/ws"
     );
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {

@@ -90,7 +90,10 @@ public class SecurityConfig {
             exchange.pathMatchers("/unihub/classroom/api/v1/submissions/instructor/**").hasRole("INSTRUCTOR");
             exchange.pathMatchers("/unihub/classroom/api/v1/internal**").denyAll();
             //task manager
-            exchange.pathMatchers("/unihub/taskmanager/api/v1/tasks/**").hasAnyRole("INSTRUCTOR","STUDENT","SYSTEM_ADMIN","SECRETARY");
+            exchange.pathMatchers("/unihub/taskmanager/api/v1/tasks/**").hasAnyRole("INSTRUCTOR","STUDENT");
+            //chat
+            exchange.pathMatchers("/unihub/chat/api/v1/**").hasAnyRole("INSTRUCTOR","STUDENT","SECRETARY");
+            exchange.pathMatchers("/unihub/chat/ws/**").permitAll();
             exchange.anyExchange().denyAll();
         });
         http.csrf(ServerHttpSecurity.CsrfSpec::disable)

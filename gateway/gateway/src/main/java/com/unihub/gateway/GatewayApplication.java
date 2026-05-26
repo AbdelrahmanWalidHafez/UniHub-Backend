@@ -63,6 +63,11 @@ public class GatewayApplication {
 								.rewritePath("/unihub/taskmanager/(?<segment>.*)","/${segment}")
 								.requestRateLimiter(config ->config.setRateLimiter(redisRateLimiter()).setKeyResolver(routeKeyResolver()) ))
 						.uri("lb://TASKMANAGER"))
+				.route(p->p.path("/unihub/chat/**")
+						.filters(f->f
+								.rewritePath("/unihub/chat/(?<segment>.*)","/${segment}")
+								.requestRateLimiter(config ->config.setRateLimiter(redisRateLimiter()).setKeyResolver(routeKeyResolver()) ))
+						.uri("lb://CHAT"))
 				.build();
 	}
 
