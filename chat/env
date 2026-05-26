@@ -1,0 +1,5 @@
+APPLICATION_NAME=chat
+#aws
+BUCKET_LINK=
+#auth api key
+API_KEY=
