@@ -5,6 +5,8 @@ import com.unihub.auth.internal.dto.response.DashBoardAggregatesDto;
 import com.unihub.auth.internal.dto.response.SystemAdminResponse;
 import com.unihub.auth.internal.mapper.SystemAdminMapper;
 import com.unihub.auth.internal.service.IInternalService;
+import com.unihub.auth.security.dto.response.UserDto;
+import com.unihub.auth.security.mapper.UserMapper;
 import com.unihub.auth.security.model.Gender;
 import com.unihub.auth.security.model.Role;
 import com.unihub.auth.security.model.UniversityMetadata;
@@ -16,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.data.domain.PageRequest;
 
 import java.security.SecureRandom;
 import java.time.LocalDate;
@@ -37,6 +41,8 @@ public class InternalServiceImpl implements IInternalService {
     private final PasswordEncoder passwordEncoder;
 
     private final SystemAdminMapper systemAdminMapper;
+
+    private final UserMapper userMapper;
 
     @Override
     @Transactional
@@ -85,6 +91,15 @@ public class InternalServiceImpl implements IInternalService {
                 usersByGender,
                 usersPerCollege
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserDto> searchUsers(String keyword, UUID tid, UUID cid) {
+        return userRepository.searchUsersInternal(keyword, tid, cid, PageRequest.of(0, 20))
+                .stream()
+                .map(userMapper::toDto)
+                .toList();
     }
 
     private User createUser(SystemAdminRequest request) {

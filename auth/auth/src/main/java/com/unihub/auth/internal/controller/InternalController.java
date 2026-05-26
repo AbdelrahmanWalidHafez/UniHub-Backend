@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -42,7 +43,14 @@ public class InternalController {
     }
 
     @GetMapping("/user-info")
-    public ResponseEntity<UserDto> getUserInfo(@RequestHeader("X-User-Email")String email){
+    public ResponseEntity<UserDto> getUserInfo(@RequestHeader("X-User-Email") String email){
         return ResponseEntity.ok(userDetailsService.getUserInfo(email));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<UserDto>> searchUsers(@RequestParam("q") String keyword,
+                                                     @RequestParam("tid") UUID tid,
+                                                     @RequestParam(value = "cid", required = false) UUID cid){
+        return ResponseEntity.ok(internalService.searchUsers(keyword, tid, cid));
     }
 }
